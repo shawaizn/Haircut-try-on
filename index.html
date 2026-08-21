@@ -176,9 +176,9 @@ body { display: flex; flex-direction: column; height: 100dvh; }
   <div id="settings-panel">
     <button id="settings-close-btn">✕</button>
     <h3>Settings</h3>
-    <div class="label">fal.ai API Key</div>
+    <div class="label">Google Cloud API Key</div>
     <div class="row">
-      <input id="api-key-input" type="password" placeholder="key-…" />
+      <input id="api-key-input" type="password" placeholder="AIza…" />
       <button id="show-key-btn">Show</button>
     </div>
     <div class="row">
@@ -217,7 +217,7 @@ var STYLES = [
 
 // ── STATE ──────────────────────────────────────────────────────
 var state = { length: null, styles: [], photo: null, results: [] };
-var apiKey = localStorage.getItem('razor_fal_key') || '';
+var apiKey = localStorage.getItem('razor_gcloud_key') || '';
 var cameraStream = null;
 var cameraFacing = 'environment';
 var fsItems = [], fsIdx = 0;
@@ -296,7 +296,7 @@ function capture() {
     var reader = new FileReader();
     reader.onloadend = function() {
       var dataUri = reader.result;
-      state.photo = { dataUri: dataUri, blob: blob };
+      state.photo = { dataUri: dataUri, base64: dataUri.split(',')[1], mime: 'image/jpeg' };
       closeCamera();
       $('thumb-img').src = dataUri;
       $('cam-open-btn').style.display = 'none';
@@ -346,15 +346,22 @@ function callOpenAI(style, onSuccess, onError) {
     'Do NOT alter the face shape, eyes, nose, mouth, jaw, ears, eyebrows, skin tone, beard, expression, pose, clothing, or background — they must be pixel-perfect identical to the source photo. ' +
     'The only change allowed: style the hair into a ' + state.length + ' "' + style.name + '". ' +
     'Photorealistic. Same person, same lighting, same everything — only the hair changes.';
-  fetch('https://fal.run/fal-ai/flux-pro/kontext', {
+  fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image:generateContent?key=' + encodeURIComponent(apiKey), {
     method: 'POST',
-    headers: { 'Authorization': 'Key ' + apiKey, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ image_url: state.photo.dataUri, prompt: prompt, num_images: 1, output_format: 'jpeg' })
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      contents: [{ parts: [
+        { inlineData: { mimeType: state.photo.mime, data: state.photo.base64 } },
+        { text: prompt }
+      ]}],
+      generationConfig: { responseModalities: ['IMAGE'] }
+    })
   }).then(function(res) { return res.json(); })
   .then(function(data) {
-    if (data.detail) { onError(data.detail); return; }
-    var url = data.images && data.images[0] && data.images[0].url;
-    if (url) { onSuccess(url); }
+    if (data.error) { onError(data.error.message); return; }
+    var part = data.candidates && data.candidates[0] && data.candidates[0].content &&
+      data.candidates[0].content.parts && data.candidates[0].content.parts.find(function(p) { return p.inlineData && p.inlineData.data; });
+    if (part) { onSuccess('data:' + part.inlineData.mimeType + ';base64,' + part.inlineData.data); }
     else { onError('No image returned'); }
   }).catch(onError);
 }
@@ -429,7 +436,7 @@ $('save-key-btn').onclick = function() {
   var key = $('api-key-input').value.trim();
   if (!key) return;
   apiKey = key;
-  localStorage.setItem('razor_fal_key', key);
+  localStorage.setItem('razor_gcloud_key', key);
   $('key-status').textContent = '✓ Saved';
   setTimeout(function() { $('key-status').textContent = ''; closeSettings(); }, 1000);
 };

@@ -16,17 +16,17 @@
 }
 :root {
   --red:        #c8151a;
-  --red-tint:   rgba(200,21,26,.08);
-  --red-border: rgba(200,21,26,.5);
-  --bg:         #09080a;
-  --s1:         rgba(255,255,255,.03);
-  --s2:         rgba(255,255,255,.06);
-  --s3:         rgba(255,255,255,.1);
-  --border:     rgba(255,255,255,.08);
-  --border-s:   rgba(255,255,255,.05);
+  --red-tint:   rgba(200,21,26,.1);
+  --red-border: rgba(200,21,26,.55);
+  --bg:         #0a0809;
+  --s1:         rgba(255,255,255,.055);
+  --s2:         rgba(255,255,255,.09);
+  --s3:         rgba(255,255,255,.14);
+  --border:     rgba(255,255,255,.11);
+  --border-s:   rgba(255,255,255,.06);
   --text:       #edeae7;
-  --text2:      #6b6868;
-  --text3:      #3a3838;
+  --text2:      #7a7676;
+  --text3:      #3e3c3c;
   --r:          14px;
   --rs:         10px;
 }
@@ -38,13 +38,21 @@ html, body {
   user-select: none; -webkit-user-select: none;
   touch-action: manipulation;
 }
+/* depth background — radial so blur has something to work against */
+body::after {
+  content: '';
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 30%, rgba(200,21,26,.07) 0%, transparent 70%),
+    radial-gradient(ellipse 100% 80% at 20% 80%, rgba(255,255,255,.025) 0%, transparent 60%);
+}
 /* grain texture */
 body::before {
   content: '';
   position: fixed; inset: 0; z-index: 9998; pointer-events: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   background-size: 180px 180px;
-  opacity: .032;
+  opacity: .055;
 }
 
 /* ── PAGE TRACK ─────────────────────────────────────────────── */
@@ -54,6 +62,7 @@ body::before {
   height: 100dvh;
   transition: transform .42s cubic-bezier(.4,0,.2,1);
   will-change: transform;
+  position: relative; z-index: 1;
 }
 .page {
   flex: 0 0 100vw; width: 100vw; height: 100dvh;
@@ -68,6 +77,8 @@ body::before {
   padding: 0 20px;
   padding-top: max(14px, env(safe-area-inset-top));
   height: calc(70px + max(0px, env(safe-area-inset-top)));
+  background: rgba(10,8,9,.72);
+  backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
   border-bottom: 1px solid var(--border);
 }
 /* Three-column header: [side] [strip] [side] */

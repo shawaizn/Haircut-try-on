@@ -446,7 +446,7 @@ code { background: var(--card); padding: 1px 7px; border-radius: 4px; font-size:
   </div>
 </div>
 
-<script type="module">
+<script>
 /* ══════════════════════════════════════════════════════
    AI PROVIDERS
 ══════════════════════════════════════════════════════ */
@@ -686,63 +686,14 @@ function renderResults() {
   setTimeout(() => sec.scrollIntoView({ behavior:'smooth', block:'start' }), 100);
 }
 
-/* ── camera ── */
+/* ── camera helpers ── */
 function openCamera() {
-  const modal = $('camera-modal'); modal.classList.add('open');
-  const video = $('viewfinder');
-  camera.start(video).catch(err => { closeCamera(); alert(`Camera error: ${err.message}`); });
+  $('camera-modal').classList.add('open');
+  camera.start($('viewfinder')).catch(err => {
+    camera.stop(); $('camera-modal').classList.remove('open');
+    alert(`Camera error: ${err.message}`);
+  });
 }
-function closeCamera() {
-  camera.stop(); $('camera-modal').classList.remove('open');
-}
-$('cam-close').addEventListener('click', closeCamera);
-$('flip-btn').addEventListener('click', () => { camera.flip(); camera.start($('viewfinder')).catch(()=>{}); });
-$('shutter-btn').addEventListener('click', async () => {
-  try {
-    state.photo = await camera.capture($('viewfinder'));
-    closeCamera();
-    renderPhotoArea();
-    syncUI();
-  } catch(err) { alert(err.message); }
-});
-
-/* ── generate ── */
-$('generate-btn').addEventListener('click', async () => {
-  const styleObjs = state.styles.map(id => cfg.styles.find(s=>s.id===id)).filter(Boolean);
-  const total = styleObjs.length;
-  state.results = [];
-
-  // open loading modal
-  $('loading-modal').classList.add('open');
-
-  const setProgress = (i) => {
-    const pct = total ? Math.round(i/total*100) : 0;
-    const C = 2*Math.PI*52;
-    $('ring-fg').setAttribute('stroke-dashoffset', C*(1-pct/100));
-    $('ring-pct').textContent = `${pct}%`;
-    $('gen-label').innerHTML = i < total ? `Creating <strong>${esc(styleObjs[i]?.name??'')}</strong>` : 'Finishing…';
-    $('gen-chips').innerHTML = styleObjs.map((s,j) => `
-      <span class="chip${j<i?' done':j===i?' active':''}">
-        ${j<i?'✓ ':''}${esc(s.name)}
-      </span>`).join('');
-  };
-
-  for (let i=0; i<styleObjs.length; i++) {
-    setProgress(i);
-    const style = styleObjs[i];
-    try {
-      const dataUri = await provider.generateHairstyle(state.photo.base64, state.photo.mime, style.name, style.hint||style.name, state.hairLength);
-      state.results.push({ style, dataUri });
-    } catch(err) {
-      state.results.push({ style, dataUri: errPlaceholder(style.name, err.message) });
-    }
-  }
-  setProgress(total);
-  await new Promise(r=>setTimeout(r,350));
-  $('loading-modal').classList.remove('open');
-  renderResults();
-  syncUI();
-});
 
 /* ── fullscreen ── */
 let fsItems = [];
@@ -760,60 +711,106 @@ function showFsSlide(idx) {
   $('fs-prev').classList.toggle('hidden', idx <= 0);
   $('fs-next').classList.toggle('hidden', idx >= fsItems.length-1);
 }
-$('fs-close').addEventListener('click', () => $('fullscreen-modal').classList.remove('open'));
-$('fs-prev').addEventListener('click', () => showFsSlide(state.fsIdx-1));
-$('fs-next').addEventListener('click', () => showFsSlide(state.fsIdx+1));
-
-/* ── restart ── */
-$('restart-btn').addEventListener('click', () => {
-  state.hairLength = null; state.styles = []; state.photo = null; state.results = [];
-  buildLengthRow(); buildStyleGrid(); renderPhotoArea(); renderResults(); syncUI();
-  $('main').scrollTo({ top:0, behavior:'smooth' });
-});
-
-/* ── settings ── */
-function openSettings() { $('key-input').value = cfg?.geminiApiKey||localStorage.getItem(LS_KEY)||''; $('settings-overlay').classList.add('open'); }
-function closeSettings() { $('settings-overlay').classList.remove('open'); }
-$('settings-btn').addEventListener('click', openSettings);
-$('settings-close').addEventListener('click', closeSettings);
-$('settings-overlay').addEventListener('click', e => { if (e.target===$('settings-overlay')) closeSettings(); });
-$('show-key').addEventListener('click', () => {
-  const ki = $('key-input'), show = ki.type==='password'; ki.type = show?'text':'password'; $('show-key').textContent = show?'Hide':'Show';
-});
-$('save-key').addEventListener('click', () => {
-  const key = $('key-input').value.trim();
-  if (!key) { shake($('key-input')); return; }
-  localStorage.setItem(LS_KEY, key);
-  if (cfg) cfg.geminiApiKey = key;
-  else cfg = { aiProvider:'gemini', geminiApiKey:key, shopName:'The Razor', maxStyles:3, styles:[], hairLengths:[] };
-  try {
-    provider = makeProvider(cfg);
-    $('provider-badge').textContent = cfg.aiProvider[0].toUpperCase()+cfg.aiProvider.slice(1);
-    $('s-status').textContent = '✓ Saved'; $('s-status').style.color='var(--ok)';
-    setTimeout(() => { $('s-status').textContent=''; closeSettings(); }, 1100);
-  } catch(err) { $('s-status').textContent=`Error: ${err.message}`; $('s-status').style.color='#e05252'; }
-});
-
 /* ── helpers ── */
 function errPlaceholder(name, msg) {
   const s=`<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400"><rect width="400" height="400" fill="#1c1c1c"/><text x="200" y="185" text-anchor="middle" font-family="sans-serif" font-size="18" fill="#c9a227">${esc(name)}</text><text x="200" y="218" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#666">Generation failed</text><text x="200" y="244" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#444">${esc(msg.slice(0,55))}</text></svg>`;
   return `data:image/svg+xml;base64,${btoa(s)}`;
 }
 
-/* ── swipe fullscreen ── */
-let touchX = 0;
-$('fullscreen-modal').addEventListener('touchstart', e => { touchX = e.touches[0].clientX; }, {passive:true});
-$('fullscreen-modal').addEventListener('touchend', e => {
-  const dx = e.changedTouches[0].clientX - touchX;
-  if (Math.abs(dx) < 50) return;
-  if (dx < 0 && state.fsIdx < fsItems.length-1) showFsSlide(state.fsIdx+1);
-  if (dx > 0 && state.fsIdx > 0) showFsSlide(state.fsIdx-1);
-});
+function openSettings() { $('key-input').value = cfg?.geminiApiKey||localStorage.getItem(LS_KEY)||''; $('settings-overlay').classList.add('open'); }
+function closeSettings() { $('settings-overlay').classList.remove('open'); }
 
-/* ── boot ── */
-renderPhotoArea();
-syncUI();
-boot();
+/* ── wire everything up after DOM is ready ── */
+document.addEventListener('DOMContentLoaded', () => {
+
+  /* fullscreen */
+  $('fs-close').addEventListener('click', () => $('fullscreen-modal').classList.remove('open'));
+  $('fs-prev').addEventListener('click', () => showFsSlide(state.fsIdx-1));
+  $('fs-next').addEventListener('click', () => showFsSlide(state.fsIdx+1));
+
+  /* swipe in fullscreen */
+  let touchX = 0;
+  $('fullscreen-modal').addEventListener('touchstart', e => { touchX = e.touches[0].clientX; }, {passive:true});
+  $('fullscreen-modal').addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - touchX;
+    if (Math.abs(dx) < 50) return;
+    if (dx < 0 && state.fsIdx < fsItems.length-1) showFsSlide(state.fsIdx+1);
+    if (dx > 0 && state.fsIdx > 0) showFsSlide(state.fsIdx-1);
+  });
+
+  /* camera */
+  $('cam-close').addEventListener('click', () => { camera.stop(); $('camera-modal').classList.remove('open'); });
+  $('flip-btn').addEventListener('click', () => { camera.flip(); camera.start($('viewfinder')).catch(()=>{}); });
+  $('shutter-btn').addEventListener('click', async () => {
+    try {
+      state.photo = await camera.capture($('viewfinder'));
+      camera.stop(); $('camera-modal').classList.remove('open');
+      renderPhotoArea(); syncUI();
+    } catch(err) { alert(err.message); }
+  });
+
+  /* generate */
+  $('generate-btn').addEventListener('click', async () => {
+    const styleObjs = state.styles.map(id => cfg.styles.find(s=>s.id===id)).filter(Boolean);
+    const total = styleObjs.length;
+    state.results = [];
+    $('loading-modal').classList.add('open');
+    const C = 2*Math.PI*52;
+    const setProgress = i => {
+      const pct = total ? Math.round(i/total*100) : 0;
+      $('ring-fg').setAttribute('stroke-dashoffset', C*(1-pct/100));
+      $('ring-pct').textContent = `${pct}%`;
+      $('gen-label').innerHTML = i < total ? `Creating <strong>${esc(styleObjs[i]?.name??'')}</strong>` : 'Finishing…';
+      $('gen-chips').innerHTML = styleObjs.map((s,j) => `<span class="chip${j<i?' done':j===i?' active':''}">${j<i?'✓ ':''}${esc(s.name)}</span>`).join('');
+    };
+    for (let i=0; i<styleObjs.length; i++) {
+      setProgress(i);
+      const style = styleObjs[i];
+      try {
+        const dataUri = await provider.generateHairstyle(state.photo.base64, state.photo.mime, style.name, style.hint||style.name, state.hairLength);
+        state.results.push({ style, dataUri });
+      } catch(err) {
+        state.results.push({ style, dataUri: errPlaceholder(style.name, err.message) });
+      }
+    }
+    setProgress(total);
+    await new Promise(r=>setTimeout(r,350));
+    $('loading-modal').classList.remove('open');
+    renderResults(); syncUI();
+  });
+
+  /* restart */
+  $('restart-btn').addEventListener('click', () => {
+    state.hairLength = null; state.styles = []; state.photo = null; state.results = [];
+    buildLengthRow(); buildStyleGrid(); renderPhotoArea(); renderResults(); syncUI();
+    $('main').scrollTo({ top:0, behavior:'smooth' });
+  });
+
+  /* settings */
+  $('settings-btn').addEventListener('click', openSettings);
+  $('settings-close').addEventListener('click', closeSettings);
+  $('settings-overlay').addEventListener('click', e => { if (e.target===$('settings-overlay')) closeSettings(); });
+  $('show-key').addEventListener('click', () => {
+    const ki = $('key-input'), show = ki.type==='password'; ki.type = show?'text':'password'; $('show-key').textContent = show?'Hide':'Show';
+  });
+  $('save-key').addEventListener('click', () => {
+    const key = $('key-input').value.trim();
+    if (!key) { shake($('key-input')); return; }
+    localStorage.setItem(LS_KEY, key);
+    if (cfg) cfg.geminiApiKey = key;
+    try {
+      provider = makeProvider(cfg);
+      $('provider-badge').textContent = cfg.aiProvider[0].toUpperCase()+cfg.aiProvider.slice(1);
+      $('s-status').textContent = '✓ Saved'; $('s-status').style.color='var(--ok)';
+      setTimeout(() => { $('s-status').textContent=''; closeSettings(); }, 1100);
+    } catch(err) { $('s-status').textContent=`Error: ${err.message}`; $('s-status').style.color='#e05252'; }
+  });
+
+  /* boot */
+  renderPhotoArea();
+  syncUI();
+  boot();
+});
 </script>
 </body>
 </html>

@@ -5,166 +5,406 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <title>The Razor</title>
+  <title>Razor's Edge</title>
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-html, body { height: 100%; background: #0a0a0a; color: #f0f0f0; font-family: -apple-system, BlinkMacSystemFont, sans-serif; overflow: hidden; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
+*,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
-/* layout */
+:root {
+  --red:        #c8151a;
+  --red-glow:   rgba(200,21,26,.30);
+  --red-tint:   rgba(200,21,26,.09);
+  --red-border: rgba(200,21,26,.50);
+  --bg:         #080808;
+  --s1:         #111111;
+  --s2:         #191919;
+  --s3:         #212121;
+  --border:     #282828;
+  --text:       #f0ede8;
+  --text2:      #78746f;
+  --text3:      #3d3a37;
+  --r:          12px;
+  --rs:         9px;
+}
+
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
 body { display: flex; flex-direction: column; height: 100dvh; }
-#header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; padding-top: max(16px, env(safe-area-inset-top)); background: #141414; border-bottom: 1px solid #2a2a2a; flex-shrink: 0; }
-#header h1 { font-size: 20px; font-weight: 700; }
-#scroll { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 20px; display: flex; flex-direction: column; gap: 24px; }
-#footer { padding: 14px 20px; padding-bottom: max(14px, env(safe-area-inset-bottom)); background: #141414; border-top: 1px solid #2a2a2a; flex-shrink: 0; }
 
-/* section */
-.label { font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #666; margin-bottom: 10px; }
+/* ── HEADER ─────────────────────────────────────────────────── */
+#hdr {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 22px;
+  padding-top: max(18px, env(safe-area-inset-top));
+  height: calc(62px + max(0px, env(safe-area-inset-top)));
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  z-index: 10;
+}
+#hdr-brand { display: flex; flex-direction: column; gap: 1px; }
+#hdr-name  { font-size: 18px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: var(--text); }
+#hdr-sub   { font-size: 10px; font-weight: 700; letter-spacing: 2.5px; text-transform: uppercase; color: var(--red); }
 
-/* length pills */
-#lengths { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
-.lpill { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-height: 72px; border-radius: 12px; border: 1.5px solid #2a2a2a; background: #1c1c1c; cursor: pointer; font-family: inherit; color: #f0f0f0; transition: border-color .15s; padding: 8px 4px; }
-.lpill .n { font-size: 13px; font-weight: 700; text-align: center; line-height: 1.2; }
-.lpill .d { font-size: 11px; color: #666; }
-.lpill.keep-top { grid-column: span 4; min-height: 52px; flex-direction: row; gap: 8px; }
-.lpill.keep-top .n { font-size: 15px; }
-.lpill.scissors { grid-column: span 2; }
-.lpill.on { border-color: #c9a227; background: #221e0f; }
-.lpill.on .d { color: #9a7a1a; }
+#gear-btn {
+  width: 40px; height: 40px; border-radius: 50%;
+  background: var(--s2); border: 1px solid var(--border);
+  color: var(--text2); font-size: 17px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: border-color .18s, color .18s, transform .1s;
+}
+#gear-btn:active { border-color: var(--red); color: var(--red); transform: scale(.91); }
 
-/* style grid */
-#styles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-.stile { position: relative; display: flex; align-items: center; justify-content: center; text-align: center; min-height: 64px; padding: 10px 6px; border-radius: 10px; border: 1.5px solid #2a2a2a; background: #1c1c1c; cursor: pointer; font-family: inherit; color: #f0f0f0; font-size: 13px; font-weight: 600; line-height: 1.3; transition: border-color .15s; }
-.stile.on { border-color: #c9a227; background: #221e0f; }
-.stile .ck { position: absolute; top: 5px; right: 7px; font-size: 10px; color: #c9a227; font-weight: 800; }
+/* ── SCROLL ─────────────────────────────────────────────────── */
+#scroll {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 28px 20px 130px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
 
-/* photo */
-#photo-area button { width: 100%; min-height: 100px; border-radius: 12px; border: 1.5px dashed #2a2a2a; background: #1c1c1c; color: #666; font-family: inherit; font-size: 14px; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; transition: border-color .15s; }
-#photo-area button:hover { border-color: #c9a227; }
-#photo-thumb { width: 100%; height: 160px; border-radius: 12px; overflow: hidden; position: relative; border: 1.5px solid #2a2a2a; display: none; }
-#photo-thumb img { width: 100%; height: 100%; object-fit: cover; }
-#photo-thumb button { position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,.7); color: #fff; border: none; border-radius: 8px; padding: 6px 12px; font-size: 13px; font-family: inherit; cursor: pointer; min-height: unset; width: unset; display: flex; }
+/* ── SECTION HEADER ─────────────────────────────────────────── */
+.sh { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.sh-num   { font-size: 11px; font-weight: 800; color: var(--red); letter-spacing: .5px; min-width: 20px; }
+.sh-title { font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--text2); }
+.sh-badge { margin-left: auto; font-size: 11px; font-weight: 700; color: var(--text3); letter-spacing: .5px; }
 
-/* generate button */
-#gen-btn { width: 100%; height: 60px; border-radius: 30px; border: none; background: #c9a227; color: #000; font-family: inherit; font-size: 17px; font-weight: 700; cursor: pointer; opacity: .35; transition: opacity .2s; }
-#gen-btn.ready { opacity: 1; }
+/* ── LENGTH GRID ────────────────────────────────────────────── */
+#lengths { display: grid; grid-template-columns: repeat(4, 1fr); gap: 7px; }
 
-/* settings button */
-#settings-btn { background: #1c1c1c; border: 1px solid #2a2a2a; border-radius: 50%; width: 40px; height: 40px; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.lpill {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  min-height: 66px; padding: 8px 4px;
+  border-radius: var(--rs); border: 1.5px solid var(--border);
+  background: var(--s1); cursor: pointer; font-family: inherit; color: var(--text);
+  transition: border-color .15s, background .15s, transform .1s;
+}
+.lpill:active { transform: scale(.95); }
+.lpill .ln { font-size: 13px; font-weight: 700; line-height: 1.2; text-align: center; }
+.lpill .ld { font-size: 11px; color: var(--text2); }
+.lpill.on  { border-color: var(--red); background: var(--red-tint); }
+.lpill.on .ln { color: var(--text); }
+.lpill.on .ld { color: var(--red-border); }
 
-/* results */
+.lpill.keep  { grid-column: span 4; min-height: 50px; flex-direction: row; gap: 10px; }
+.lpill.keep .ln { font-size: 14px; }
+.lpill.keep .ld { font-size: 13px; }
+.lpill.sciss { grid-column: span 2; }
+
+/* ── STYLE GRID ─────────────────────────────────────────────── */
+#styles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; }
+
+.stile {
+  position: relative;
+  display: flex; align-items: center; justify-content: center; text-align: center;
+  min-height: 60px; padding: 10px 8px;
+  border-radius: var(--rs); border: 1.5px solid var(--border);
+  background: var(--s1); cursor: pointer; font-family: inherit;
+  color: var(--text); font-size: 13px; font-weight: 600; line-height: 1.3;
+  transition: border-color .15s, background .15s, transform .1s;
+}
+.stile:active { transform: scale(.95); }
+.stile.on     { border-color: var(--red); background: var(--red-tint); }
+.stile .ck    { position: absolute; top: 5px; right: 7px; font-size: 9px; color: var(--red); font-weight: 900; }
+
+/* ── PHOTO ──────────────────────────────────────────────────── */
+#cam-open-btn {
+  width: 100%; min-height: 110px;
+  border-radius: var(--r); border: 1.5px dashed var(--border);
+  background: var(--s1); color: var(--text2);
+  font-family: inherit; font-size: 14px; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+  transition: border-color .2s, color .2s, transform .1s;
+}
+#cam-open-btn:active { transform: scale(.985); border-color: var(--red); color: var(--text); }
+#cam-open-btn .ico   { font-size: 32px; line-height: 1; }
+
+#photo-thumb {
+  display: none; border-radius: var(--r); overflow: hidden;
+  position: relative; height: 180px; border: 1.5px solid var(--border);
+}
+#thumb-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+#retake-btn {
+  position: absolute; bottom: 10px; right: 10px;
+  background: rgba(0,0,0,.72); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  color: #fff; border: 1px solid rgba(255,255,255,.14); border-radius: 20px;
+  padding: 7px 14px; font-size: 13px; font-family: inherit; font-weight: 600; cursor: pointer;
+  transition: transform .1s;
+}
+#retake-btn:active { transform: scale(.95); }
+
+/* ── RESULTS ────────────────────────────────────────────────── */
 #results { display: none; }
-#results-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+#results-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 9px; }
 @media (min-width: 600px) { #results-grid { grid-template-columns: repeat(3, 1fr); } }
-.rtile { border-radius: 10px; overflow: hidden; border: 1.5px solid #2a2a2a; aspect-ratio: 3/4; display: flex; flex-direction: column; cursor: pointer; background: #1c1c1c; }
-.rtile img { flex: 1; width: 100%; object-fit: cover; min-height: 0; display: block; }
-.rtile span { padding: 8px; font-size: 12px; font-weight: 600; text-align: center; background: #141414; color: #888; flex-shrink: 0; }
 
-/* modals */
-.modal { display: none; position: fixed; inset: 0; z-index: 50; }
-.modal.open { display: flex; }
+.rtile {
+  border-radius: var(--rs); overflow: hidden;
+  border: 1.5px solid var(--border); aspect-ratio: 3/4;
+  display: flex; flex-direction: column;
+  cursor: pointer; background: var(--s1);
+  transition: transform .15s, border-color .2s;
+  animation: fadeUp .35s ease both;
+}
+.rtile:active { transform: scale(.97); }
+.rtile img    { flex: 1; width: 100%; object-fit: cover; min-height: 0; display: block; }
+.rtile .rl    {
+  padding: 8px 6px; font-size: 11px; font-weight: 700; text-align: center;
+  background: var(--s1); color: var(--text2);
+  letter-spacing: 1px; text-transform: uppercase; flex-shrink: 0;
+}
+.rtile.orig   { border-color: var(--border); }
 
-/* camera modal */
-#cam-modal { background: #000; flex-direction: column; }
+/* skeleton */
+.skel {
+  border-radius: var(--rs); border: 1.5px solid var(--border); aspect-ratio: 3/4;
+  display: flex; flex-direction: column; background: var(--s1);
+  animation: fadeUp .3s ease both;
+}
+.skel-img {
+  flex: 1;
+  background: linear-gradient(90deg, var(--s1) 0%, var(--s3) 40%, var(--s2) 50%, var(--s3) 60%, var(--s1) 100%);
+  background-size: 300% 100%;
+  animation: shimmer 1.6s ease infinite;
+}
+.skel-lbl {
+  height: 34px; background: var(--s2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; color: var(--text3);
+  letter-spacing: 1px; text-transform: uppercase;
+}
+
+@keyframes shimmer {
+  0%   { background-position:  120% 0; }
+  100% { background-position: -120% 0; }
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── FOOTER ─────────────────────────────────────────────────── */
+#footer {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 10;
+  padding: 14px 20px;
+  padding-bottom: max(20px, env(safe-area-inset-bottom));
+  background: linear-gradient(to top, #080808 58%, transparent);
+}
+#gen-btn {
+  width: 100%; height: 58px; border-radius: 29px; border: none;
+  background: var(--s3); color: var(--text3);
+  font-family: inherit; font-size: 16px; font-weight: 700; letter-spacing: .3px;
+  cursor: not-allowed;
+  transition: background .3s, color .3s, box-shadow .3s, transform .12s, border-color .2s;
+}
+#gen-btn.ready {
+  background: var(--red); color: #fff; cursor: pointer;
+  box-shadow: 0 0 40px var(--red-glow);
+}
+#gen-btn.ready:active { transform: scale(.98); }
+#gen-btn.going {
+  background: var(--s2); color: var(--text2); cursor: default; box-shadow: none;
+}
+#gen-btn.done {
+  background: transparent; color: var(--text2); cursor: pointer;
+  border: 1.5px solid var(--border); box-shadow: none;
+}
+#gen-btn.done:active { border-color: var(--red); color: var(--red); }
+
+/* ── CAMERA MODAL ───────────────────────────────────────────── */
+#cam-modal {
+  display: none; position: fixed; inset: 0; z-index: 50;
+  background: #000; flex-direction: column;
+}
+#cam-modal.open { display: flex; }
 #viewfinder { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-#cam-controls { position: absolute; bottom: max(40px, env(safe-area-inset-bottom)); left: 0; right: 0; display: flex; align-items: center; justify-content: space-around; padding: 0 40px; }
-.icon-btn { background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.2); border-radius: 50%; width: 50px; height: 50px; color: #fff; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-family: inherit; }
-#shutter { width: 76px; height: 76px; border-radius: 50%; border: 4px solid #fff; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-#shutter div { width: 58px; height: 58px; border-radius: 50%; background: #fff; }
+#cam-controls {
+  position: absolute; bottom: max(48px, env(safe-area-inset-bottom));
+  left: 0; right: 0;
+  display: flex; align-items: center; justify-content: space-around; padding: 0 28px;
+}
+.ci-btn {
+  width: 52px; height: 52px; border-radius: 50%;
+  background: rgba(0,0,0,.45); border: 1.5px solid rgba(255,255,255,.2);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  color: #fff; font-size: 20px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; font-family: inherit;
+  transition: transform .1s;
+}
+.ci-btn:active { transform: scale(.9); }
+#shutter {
+  width: 80px; height: 80px; border-radius: 50%;
+  border: 4px solid rgba(255,255,255,.88); background: transparent;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: transform .1s;
+}
+#shutter:active { transform: scale(.92); }
+#shutter-ring {
+  width: 62px; height: 62px; border-radius: 50%;
+  background: rgba(255,255,255,.88);
+  transition: transform .1s;
+}
+#shutter:active #shutter-ring { transform: scale(.9); }
 
-/* loading modal */
-#load-modal { background: rgba(0,0,0,.92); align-items: center; justify-content: center; flex-direction: column; text-align: center; padding: 32px; gap: 16px; }
-#load-modal h2 { font-size: 20px; }
-#load-modal p { color: #888; font-size: 15px; }
-.spinner { width: 56px; height: 56px; border: 4px solid #2a2a2a; border-top-color: #c9a227; border-radius: 50%; animation: spin .8s linear infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
+/* ── FULLSCREEN MODAL ───────────────────────────────────────── */
+#fs-modal {
+  display: none; position: fixed; inset: 0; z-index: 70;
+  background: #000; align-items: center; justify-content: center;
+}
+#fs-modal.open { display: flex; }
+#fs-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+#fs-bar {
+  position: absolute; bottom: max(22px, env(safe-area-inset-bottom)); left: 14px; right: 14px;
+  display: flex; align-items: center; justify-content: space-between;
+  background: rgba(8,8,8,.78); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(255,255,255,.07); border-radius: 28px; padding: 12px 16px;
+}
+#fs-label { font-size: 14px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
+#fs-close {
+  background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.12);
+  border-radius: 18px; color: var(--text); padding: 7px 16px;
+  font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer;
+  transition: transform .1s;
+}
+#fs-close:active { transform: scale(.95); }
+.arrow {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  background: rgba(0,0,0,.48); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  border: none; color: #fff; font-size: 30px;
+  width: 46px; height: 80px; border-radius: 8px;
+  cursor: pointer; display: flex; align-items: center; justify-content: center; font-family: inherit;
+  transition: transform .1s;
+}
+.arrow:active { transform: translateY(-50%) scale(.92); }
+#fs-prev { left: 8px; }
+#fs-next { right: 8px; }
 
-/* fullscreen modal */
-#fs-modal { background: #000; align-items: center; justify-content: center; flex-direction: column; }
-#fs-modal img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
-#fs-bar { position: absolute; bottom: max(20px, env(safe-area-inset-bottom)); left: 16px; right: 16px; display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,.65); backdrop-filter: blur(10px); border-radius: 24px; padding: 10px 14px; }
-#fs-label { font-size: 16px; font-weight: 700; }
-#fs-close { background: transparent; border: 1.5px solid #444; border-radius: 20px; color: #f0f0f0; padding: 6px 16px; font-family: inherit; font-size: 14px; cursor: pointer; }
-.arrow { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,.5); border: none; color: #fff; font-size: 36px; width: 50px; height: 72px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-family: inherit; }
-#fs-prev { left: 10px; }
-#fs-next { right: 10px; }
-
-/* settings overlay */
-#settings-overlay { display: none; position: fixed; inset: 0; z-index: 60; background: rgba(0,0,0,.6); align-items: flex-end; }
-#settings-overlay.open { display: flex; }
-#settings-panel { background: #141414; border-radius: 16px 16px 0 0; border-top: 1px solid #2a2a2a; padding: 24px; padding-bottom: max(24px, env(safe-area-inset-bottom)); width: 100%; display: flex; flex-direction: column; gap: 12px; }
-#settings-panel h3 { font-size: 17px; font-weight: 700; }
-#settings-panel input { width: 100%; padding: 14px; background: #1c1c1c; border: 1.5px solid #2a2a2a; border-radius: 10px; color: #f0f0f0; font-size: 15px; font-family: monospace; outline: none; }
-#settings-panel input:focus { border-color: #c9a227; }
-.row { display: flex; gap: 8px; }
-#save-key-btn { flex: 1; padding: 14px; background: #c9a227; color: #000; border: none; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; font-family: inherit; }
-#show-key-btn { padding: 14px 18px; background: #1c1c1c; border: 1.5px solid #2a2a2a; border-radius: 10px; color: #888; cursor: pointer; font-family: inherit; }
-#key-status { font-size: 13px; color: #4caf76; text-align: center; min-height: 18px; }
-#settings-close-btn { background: transparent; border: none; color: #888; font-size: 20px; cursor: pointer; align-self: flex-end; margin-top: -8px; }
+/* ── SETTINGS ───────────────────────────────────────────────── */
+#settings-ov {
+  display: none; position: fixed; inset: 0; z-index: 80;
+  background: rgba(0,0,0,.6); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+  align-items: flex-end;
+}
+#settings-ov.open { display: flex; }
+#settings-panel {
+  background: #131313; border-radius: 20px 20px 0 0;
+  border-top: 1px solid var(--border);
+  padding: 0 22px 22px;
+  padding-bottom: max(22px, env(safe-area-inset-bottom));
+  width: 100%; display: flex; flex-direction: column; gap: 14px;
+}
+.sp-handle { width: 36px; height: 4px; border-radius: 2px; background: var(--s3); margin: 12px auto 10px; }
+#settings-panel h3    { font-size: 17px; font-weight: 700; }
+.sp-label { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text2); }
+#api-key-input {
+  width: 100%; padding: 14px;
+  background: var(--s2); border: 1.5px solid var(--border);
+  border-radius: var(--rs); color: var(--text);
+  font-size: 15px; font-family: 'SF Mono', 'Courier New', monospace;
+  outline: none; transition: border-color .2s;
+}
+#api-key-input:focus { border-color: var(--red); }
+.sp-row { display: flex; gap: 8px; }
+#save-btn {
+  flex: 1; padding: 14px; background: var(--red); color: #fff;
+  border: none; border-radius: var(--rs); font-size: 15px; font-weight: 700;
+  cursor: pointer; font-family: inherit; transition: opacity .15s;
+}
+#save-btn:active { opacity: .82; }
+#show-btn {
+  padding: 14px 16px; background: var(--s2);
+  border: 1.5px solid var(--border); border-radius: var(--rs);
+  color: var(--text2); cursor: pointer; font-family: inherit; font-size: 14px; font-weight: 600;
+  transition: border-color .15s;
+}
+#show-btn:active { border-color: var(--red); }
+#key-ok { font-size: 13px; color: #4caf76; text-align: center; min-height: 16px; }
 </style>
 </head>
 <body>
 
-<div id="header">
-  <h1>The Razor</h1>
-  <button id="settings-btn">⚙️</button>
+<div id="hdr">
+  <div id="hdr-brand">
+    <div id="hdr-name">Razor's Edge</div>
+    <div id="hdr-sub">Hair Studios</div>
+  </div>
+  <button id="gear-btn">⚙︎</button>
 </div>
 
 <div id="scroll">
 
   <div>
-    <div class="label">Top Length</div>
+    <div class="sh">
+      <span class="sh-num">01</span>
+      <span class="sh-title">Top Length</span>
+    </div>
     <div id="lengths"></div>
   </div>
 
   <div>
-    <div class="label">Style — pick up to <span id="max-label">3</span></div>
+    <div class="sh">
+      <span class="sh-num">02</span>
+      <span class="sh-title">Style</span>
+      <span class="sh-badge" id="style-badge">Pick up to 3</span>
+    </div>
     <div id="styles"></div>
   </div>
 
   <div>
-    <div class="label">Photo</div>
-    <div id="photo-area">
-      <button id="cam-open-btn">
-        <span style="font-size:28px">📷</span>
-        <span>Tap to take photo</span>
-      </button>
-      <div id="photo-thumb">
-        <img id="thumb-img" src="" alt="Your photo" />
-        <button id="retake-btn">📷 Retake</button>
-      </div>
+    <div class="sh">
+      <span class="sh-num">03</span>
+      <span class="sh-title">Photo</span>
+    </div>
+    <button id="cam-open-btn">
+      <span class="ico">📷</span>
+      <span>Take a photo</span>
+    </button>
+    <div id="photo-thumb">
+      <img id="thumb-img" src="" alt="" />
+      <button id="retake-btn">📷 Retake</button>
     </div>
   </div>
 
   <div id="results">
-    <div class="label">Results</div>
+    <div class="sh">
+      <span class="sh-num">✦</span>
+      <span class="sh-title">Your Looks</span>
+    </div>
     <div id="results-grid"></div>
   </div>
 
 </div>
 
 <div id="footer">
-  <button id="gen-btn">✨ Generate Previews</button>
+  <button id="gen-btn">Generate Previews</button>
 </div>
 
 <!-- Camera -->
-<div class="modal" id="cam-modal">
+<div id="cam-modal">
   <video id="viewfinder" autoplay playsinline muted></video>
   <div id="cam-controls">
-    <button class="icon-btn" id="flip-btn">⟳</button>
-    <button id="shutter"><div></div></button>
-    <button class="icon-btn" id="cam-close-btn">✕</button>
+    <button class="ci-btn" id="flip-btn">⟳</button>
+    <button id="shutter"><div id="shutter-ring"></div></button>
+    <button class="ci-btn" id="cam-close-btn">✕</button>
   </div>
 </div>
 
-<!-- Loading -->
-<div class="modal" id="load-modal">
-  <div class="spinner"></div>
-  <h2>Generating your looks…</h2>
-  <p id="load-label"></p>
-</div>
-
 <!-- Fullscreen -->
-<div class="modal" id="fs-modal">
+<div id="fs-modal">
   <img id="fs-img" src="" alt="" />
   <button class="arrow" id="fs-prev">‹</button>
   <button class="arrow" id="fs-next">›</button>
@@ -175,304 +415,371 @@ body { display: flex; flex-direction: column; height: 100dvh; }
 </div>
 
 <!-- Settings -->
-<div id="settings-overlay">
+<div id="settings-ov">
   <div id="settings-panel">
-    <button id="settings-close-btn">✕</button>
+    <div class="sp-handle"></div>
     <h3>Settings</h3>
-    <div class="label">OpenAI API Key</div>
-    <div class="row">
+    <div class="sp-label">OpenAI API Key</div>
+    <div class="sp-row">
       <input id="api-key-input" type="password" placeholder="sk-…" />
-      <button id="show-key-btn">Show</button>
+      <button id="show-btn">Show</button>
     </div>
-    <div class="row">
-      <button id="save-key-btn">Save Key</button>
+    <div class="sp-row">
+      <button id="save-btn">Save Key</button>
     </div>
-    <div id="key-status"></div>
+    <div id="key-ok"></div>
   </div>
 </div>
 
 <script>
-// ── CONFIG (edit styles here) ──────────────────────────────────
-var SHOP    = 'The Razor';
+// ── CONFIG ────────────────────────────────────────────────────
 var MAX     = 3;
 var LENGTHS = [
-  { id: 'keep',   name: 'Keep Top', desc: 'Sides only' },
-  { id: 'g1',     name: 'Grade 1',  desc: '3mm'        },
-  { id: 'g2',     name: 'Grade 2',  desc: '6mm'        },
-  { id: 'g3',     name: 'Grade 3',  desc: '10mm'       },
-  { id: 'g4',     name: 'Grade 4',  desc: '13mm'       },
-  { id: 'g5',     name: 'Grade 5',  desc: '16mm'       },
-  { id: 'g6',     name: 'Grade 6',  desc: '19mm'       },
-  { id: 'g7',     name: 'Grade 7',  desc: '22mm'       },
-  { id: 'g8',     name: 'Grade 8',  desc: '25mm'       },
-  { id: 'medium', name: 'Medium',   desc: 'Scissors'   },
-  { id: 'long',   name: 'Long',     desc: 'Scissors'   },
+  { id:'keep',   name:'Keep Top', desc:'Sides only' },
+  { id:'g1',     name:'Grade 1',  desc:'3mm'        },
+  { id:'g2',     name:'Grade 2',  desc:'6mm'        },
+  { id:'g3',     name:'Grade 3',  desc:'10mm'       },
+  { id:'g4',     name:'Grade 4',  desc:'13mm'       },
+  { id:'g5',     name:'Grade 5',  desc:'16mm'       },
+  { id:'g6',     name:'Grade 6',  desc:'19mm'       },
+  { id:'g7',     name:'Grade 7',  desc:'22mm'       },
+  { id:'g8',     name:'Grade 8',  desc:'25mm'       },
+  { id:'medium', name:'Medium',   desc:'Scissors'   },
+  { id:'long',   name:'Long',     desc:'Scissors'   },
 ];
 var STYLES = [
-  { id: 'skin-fade',     name: 'Skin Fade'     },
-  { id: 'low-taper',     name: 'Low Taper'     },
-  { id: 'mid-fade',      name: 'Mid Fade'      },
-  { id: 'high-fade',     name: 'High Fade'     },
-  { id: 'drop-fade',     name: 'Drop Fade'     },
-  { id: 'slick-back',    name: 'Slick Back'    },
-  { id: 'pompadour',     name: 'Pompadour'     },
-  { id: 'quiff',         name: 'Quiff'         },
-  { id: 'textured-crop', name: 'Textured Crop' },
-  { id: 'french-crop',   name: 'French Crop'   },
-  { id: 'undercut',      name: 'Undercut'      },
-  { id: 'buzz-cut',      name: 'Buzz Cut'      },
-  { id: 'wolf-cut',      name: 'Wolf Cut'      },
-  { id: 'man-bun',       name: 'Man Bun'       },
-  { id: 'caesar-cut',    name: 'Caesar Cut'    }
+  { id:'skin-fade',     name:'Skin Fade'     },
+  { id:'low-taper',     name:'Low Taper'     },
+  { id:'mid-fade',      name:'Mid Fade'      },
+  { id:'high-fade',     name:'High Fade'     },
+  { id:'drop-fade',     name:'Drop Fade'     },
+  { id:'slick-back',    name:'Slick Back'    },
+  { id:'pompadour',     name:'Pompadour'     },
+  { id:'quiff',         name:'Quiff'         },
+  { id:'textured-crop', name:'Textured Crop' },
+  { id:'french-crop',   name:'French Crop'   },
+  { id:'undercut',      name:'Undercut'      },
+  { id:'buzz-cut',      name:'Buzz Cut'      },
+  { id:'wolf-cut',      name:'Wolf Cut'      },
+  { id:'man-bun',       name:'Man Bun'       },
+  { id:'caesar-cut',    name:'Caesar Cut'    },
 ];
 
-// ── STATE ──────────────────────────────────────────────────────
-var state = { length: null, styles: [], photo: null, results: [] };
-var apiKey = localStorage.getItem('razor_openai_key') || '';
-var cameraStream = null;
-var cameraFacing = 'environment';
-var fsItems = [], fsIdx = 0;
+// ── STATE ─────────────────────────────────────────────────────
+var state      = { length: null, styles: [], photo: null };
+var apiKey     = localStorage.getItem('re_openai_key') || '';
+var camStream  = null;
+var camFacing  = 'environment';
+var generating = false;
+var fsItems    = [];
+var fsIdx      = 0;
 
-// ── HELPERS ────────────────────────────────────────────────────
+// ── HELPERS ───────────────────────────────────────────────────
 function $(id) { return document.getElementById(id); }
 
-// ── BUILD LENGTH PILLS ─────────────────────────────────────────
+// ── BUILD LENGTHS ─────────────────────────────────────────────
 function buildLengths() {
   var el = $('lengths');
   el.innerHTML = '';
   LENGTHS.forEach(function(l) {
-    var btn = document.createElement('button');
-    var extra = l.id === 'keep' ? ' keep-top' : (l.id === 'medium' || l.id === 'long') ? ' scissors' : '';
-    btn.className = 'lpill' + extra + (state.length === l.id ? ' on' : '');
-    btn.innerHTML = '<span class="n">' + l.name + '</span><span class="d">' + l.desc + '</span>';
-    btn.onclick = function() { state.length = l.id; buildLengths(); updateBtn(); };
-    el.appendChild(btn);
+    var b = document.createElement('button');
+    var cls = 'lpill';
+    if (l.id === 'keep')   cls += ' keep';
+    if (l.id === 'medium' || l.id === 'long') cls += ' sciss';
+    if (state.length === l.id) cls += ' on';
+    b.className = cls;
+    b.innerHTML = '<span class="ln">' + l.name + '</span><span class="ld">' + l.desc + '</span>';
+    b.onclick = function() { state.length = l.id; buildLengths(); syncBtn(); };
+    el.appendChild(b);
   });
 }
 
-// ── BUILD STYLE GRID ───────────────────────────────────────────
+// ── BUILD STYLES ──────────────────────────────────────────────
 function buildStyles() {
   var el = $('styles');
   el.innerHTML = '';
   STYLES.forEach(function(s) {
     var on = state.styles.indexOf(s.id) >= 0;
-    var btn = document.createElement('button');
-    btn.className = 'stile' + (on ? ' on' : '');
-    btn.innerHTML = (on ? '<span class="ck">✓</span>' : '') + s.name;
-    btn.onclick = function() {
-      var idx = state.styles.indexOf(s.id);
-      if (idx >= 0) { state.styles.splice(idx, 1); }
-      else if (state.styles.length < MAX) { state.styles.push(s.id); }
-      buildStyles(); updateBtn();
+    var b  = document.createElement('button');
+    b.className = 'stile' + (on ? ' on' : '');
+    b.innerHTML = (on ? '<span class="ck">✓</span>' : '') + s.name;
+    b.onclick = function() {
+      var i = state.styles.indexOf(s.id);
+      if (i >= 0) state.styles.splice(i, 1);
+      else if (state.styles.length < MAX) state.styles.push(s.id);
+      buildStyles();
+      syncBtn();
     };
-    el.appendChild(btn);
+    el.appendChild(b);
   });
+  var n = state.styles.length;
+  $('style-badge').textContent = n > 0 ? n + ' / ' + MAX + ' selected' : 'Pick up to ' + MAX;
 }
 
-// ── GENERATE BUTTON STATE ──────────────────────────────────────
-function updateBtn() {
+// ── SYNC FOOTER BUTTON ────────────────────────────────────────
+function syncBtn() {
+  if (generating) return;
+  var btn   = $('gen-btn');
   var ready = state.length && state.styles.length > 0 && state.photo;
-  $('gen-btn').className = ready ? 'ready' : '';
+  btn.className   = ready ? 'ready' : '';
+  btn.textContent = ready ? '✦  Generate Previews' : 'Generate Previews';
+  btn.onclick     = ready ? generate : null;
+  btn.style.cursor = ready ? 'pointer' : 'not-allowed';
 }
 
-// ── CAMERA ─────────────────────────────────────────────────────
+// ── CAMERA ───────────────────────────────────────────────────
 function openCamera() {
   $('cam-modal').classList.add('open');
   navigator.mediaDevices.getUserMedia({
-    video: { facingMode: { ideal: cameraFacing }, width: { ideal: 1920 }, height: { ideal: 1080 } },
+    video: { facingMode: { ideal: camFacing }, width: { ideal: 1920 }, height: { ideal: 1080 } },
     audio: false
-  }).then(function(stream) {
-    cameraStream = stream;
-    $('viewfinder').srcObject = stream;
+  }).then(function(s) {
+    camStream = s;
+    $('viewfinder').srcObject = s;
     $('viewfinder').play();
-  }).catch(function(err) {
+  }).catch(function(e) {
     closeCamera();
-    alert('Camera error: ' + err.message);
+    alert('Camera: ' + e.message);
   });
 }
 
 function closeCamera() {
-  if (cameraStream) { cameraStream.getTracks().forEach(function(t) { t.stop(); }); cameraStream = null; }
+  if (camStream) { camStream.getTracks().forEach(function(t) { t.stop(); }); camStream = null; }
   $('cam-modal').classList.remove('open');
 }
 
 function capture() {
-  var video = $('viewfinder');
-  var w = video.videoWidth || 1280, h = video.videoHeight || 720;
-  var canvas = document.createElement('canvas');
-  canvas.width = w; canvas.height = h;
-  var ctx = canvas.getContext('2d');
-  if (cameraFacing === 'user') { ctx.translate(w, 0); ctx.scale(-1, 1); }
-  ctx.drawImage(video, 0, 0, w, h);
-  canvas.toBlob(function(blob) {
+  var v = $('viewfinder');
+  var w = v.videoWidth || 1280, h = v.videoHeight || 720;
+  var c = document.createElement('canvas');
+  c.width = w; c.height = h;
+  var ctx = c.getContext('2d');
+  if (camFacing === 'user') { ctx.translate(w, 0); ctx.scale(-1, 1); }
+  ctx.drawImage(v, 0, 0, w, h);
+  c.toBlob(function(blob) {
     var reader = new FileReader();
     reader.onloadend = function() {
-      var dataUri = reader.result;
-      state.photo = { dataUri: dataUri, blob: blob };
+      state.photo = { dataUri: reader.result, blob: blob };
       closeCamera();
-      $('thumb-img').src = dataUri;
+      $('thumb-img').src = reader.result;
       $('cam-open-btn').style.display = 'none';
-      $('photo-thumb').style.display = 'block';
-      updateBtn();
+      $('photo-thumb').style.display  = 'block';
+      syncBtn();
     };
     reader.readAsDataURL(blob);
   }, 'image/jpeg', 0.92);
 }
 
-// ── GENERATE ───────────────────────────────────────────────────
+// ── GENERATE ─────────────────────────────────────────────────
 function generate() {
-  if (!state.length || state.styles.length === 0 || !state.photo) return;
+  if (generating || !state.length || !state.styles.length || !state.photo) return;
   if (!apiKey) { openSettings(); return; }
 
   var styleObjs = state.styles.map(function(id) {
     return STYLES.find(function(s) { return s.id === id; });
   }).filter(Boolean);
 
-  state.results = [];
-  $('load-modal').classList.add('open');
-  $('results').style.display = 'none';
+  generating = true;
+  var done = 0, total = styleObjs.length;
 
-  var done = 0;
-  function tick() {
-    done++;
-    $('load-label').textContent = done + ' of ' + styleObjs.length + ' done…';
-    if (done === styleObjs.length) {
-      $('load-modal').classList.remove('open');
-      showResults();
-    }
-  }
+  // Build grid with original + skeleton placeholders immediately
+  var grid = $('results-grid');
+  grid.innerHTML = '';
 
-  $('load-label').textContent = 'Generating ' + styleObjs.length + ' look' + (styleObjs.length > 1 ? 's' : '') + '…';
+  // Original photo
+  var orig = makeTile(state.photo.dataUri, 'Original');
+  orig.classList.add('orig');
+  grid.appendChild(orig);
 
-  styleObjs.forEach(function(style) {
-    callOpenAI(style, function(dataUri) {
-      state.results.push({ style: style, dataUri: dataUri });
-      tick();
+  // Skeletons — one per style, in selection order
+  styleObjs.forEach(function(s, i) {
+    var sk = document.createElement('div');
+    sk.className = 'skel';
+    sk.id        = 'sk' + i;
+    sk.style.animationDelay = (i * 0.06) + 's';
+    sk.innerHTML = '<div class="skel-img"></div><div class="skel-lbl">' + s.name + '</div>';
+    grid.appendChild(sk);
+  });
+
+  $('results').style.display = 'block';
+  setTimeout(function() { $('results').scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 100);
+
+  // Footer shows progress
+  var btn = $('gen-btn');
+  btn.className   = 'going';
+  btn.textContent = '0 of ' + total + ' complete';
+  btn.onclick     = null;
+
+  // Fire all requests in parallel
+  styleObjs.forEach(function(style, idx) {
+    callAPI(style, function(uri) {
+      swapSkeleton(idx, style, uri);
+      done++;
+      btn.textContent = done + ' of ' + total + ' complete';
+      if (done === total) finish();
     }, function() {
-      state.results.push({ style: style, dataUri: errorSvg(style.name) });
-      tick();
+      swapSkeleton(idx, style, errSvg(style.name));
+      done++;
+      btn.textContent = done + ' of ' + total + ' complete';
+      if (done === total) finish();
     });
   });
 }
 
-function callOpenAI(style, onSuccess, onError) {
-  var lengthObj = LENGTHS.find(function(l) { return l.id === state.length; });
-  var lengthDesc = state.length === 'keep'
-    ? 'Keep the hair on TOP of the head EXACTLY as it currently is — identical length, volume, texture and styling. Only modify the sides and back.'
-    : lengthObj && lengthObj.id.startsWith('g')
-      ? 'Set the top hair length to ' + lengthObj.name + ' (' + lengthObj.desc + ' clipper grade).'
-      : 'Set the top hair to a ' + (lengthObj ? lengthObj.name : state.length) + ' scissors length.';
+function swapSkeleton(idx, style, uri) {
+  var sk = $('sk' + idx);
+  if (!sk) return;
+  var tile = makeTile(uri, style.name);
+  sk.parentNode.replaceChild(tile, sk);
+}
+
+function makeTile(uri, label) {
+  var tile = document.createElement('div');
+  tile.className = 'rtile';
+  tile.innerHTML = '<img src="' + uri + '" loading="lazy" /><div class="rl">' + label + '</div>';
+  tile.onclick = function() {
+    // Build fsItems from all currently-completed tiles in DOM order
+    fsItems = [];
+    $('results-grid').querySelectorAll('.rtile').forEach(function(t) {
+      var img = t.querySelector('img');
+      var lbl = t.querySelector('.rl');
+      if (img && lbl) fsItems.push({ uri: img.src, label: lbl.textContent });
+    });
+    // Find this tile's position
+    var all   = Array.from($('results-grid').querySelectorAll('.rtile'));
+    var fsPos = all.indexOf(tile);
+    openFs(fsPos >= 0 ? fsPos : 0);
+  };
+  return tile;
+}
+
+function finish() {
+  generating = false;
+  var btn = $('gen-btn');
+  btn.className   = 'done';
+  btn.textContent = '↺  New Customer';
+  btn.onclick     = reset;
+}
+
+function reset() {
+  state      = { length: null, styles: [], photo: null };
+  generating = false;
+  $('results').style.display      = 'none';
+  $('results-grid').innerHTML     = '';
+  $('cam-open-btn').style.display = '';
+  $('photo-thumb').style.display  = 'none';
+  $('thumb-img').src              = '';
+  buildLengths();
+  buildStyles();
+  syncBtn();
+  $('scroll').scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── API ───────────────────────────────────────────────────────
+function callAPI(style, ok, fail) {
+  var l = LENGTHS.find(function(x) { return x.id === state.length; });
+  var topDesc = state.length === 'keep'
+    ? 'Keep the hair on top EXACTLY as it is — same length, volume and texture. Only change the sides and back.'
+    : l && l.id.startsWith('g')
+      ? 'Set the top hair length to ' + l.name + ' (' + l.desc + ' clipper).'
+      : 'Set the top hair to a ' + (l ? l.name.toLowerCase() : '') + ' scissors length.';
+
   var prompt =
-    'Hair edit only — do not change the face, skin tone, eyes, nose, mouth, jaw, ears, eyebrows, beard, expression, pose, clothing, or background. ' +
-    lengthDesc + ' ' +
-    'Apply a "' + style.name + '" style to the sides and back. Photorealistic result.';
+    'HAIR EDIT ONLY — do not alter the face, eyes, nose, mouth, jaw, ears, skin tone, beard, eyebrows, expression, pose, clothing or background. ' +
+    topDesc + ' Apply a "' + style.name + '" style. Photorealistic.';
+
   var fd = new FormData();
-  fd.append('model', 'gpt-image-2');
-  fd.append('prompt', prompt);
-  fd.append('image', state.photo.blob, 'photo.jpg');
-  fd.append('n', '1');
-  fd.append('size', '1024x1024');
+  fd.append('model',   'gpt-image-2');
+  fd.append('prompt',  prompt);
+  fd.append('image',   state.photo.blob, 'photo.jpg');
+  fd.append('n',       '1');
+  fd.append('size',    '1024x1024');
   fd.append('quality', 'medium');
+
   fetch('https://api.openai.com/v1/images/edits', {
-    method: 'POST',
+    method:  'POST',
     headers: { 'Authorization': 'Bearer ' + apiKey },
-    body: fd
-  }).then(function(res) { return res.json(); })
-  .then(function(data) {
-    if (data.error) { onError(data.error.message); return; }
-    var b64 = data.data && data.data[0] && data.data[0].b64_json;
-    if (b64) { onSuccess('data:image/png;base64,' + b64); }
-    else { onError('No image returned'); }
-  }).catch(onError);
+    body:    fd
+  }).then(function(r) { return r.json(); })
+  .then(function(d) {
+    if (d.error) { fail(d.error.message); return; }
+    var b64 = d.data && d.data[0] && d.data[0].b64_json;
+    if (b64) ok('data:image/png;base64,' + b64);
+    else fail('No image returned');
+  }).catch(fail);
 }
 
-// ── RESULTS ────────────────────────────────────────────────────
-function showResults() {
-  var grid = $('results-grid');
-  grid.innerHTML = '';
-  var items = [{ style: { name: 'Original' }, dataUri: state.photo.dataUri }].concat(state.results);
-  fsItems = items;
-
-  items.forEach(function(item, idx) {
-    var tile = document.createElement('div');
-    tile.className = 'rtile';
-    tile.innerHTML = '<img src="' + item.dataUri + '" loading="lazy" /><span>' + item.style.name + '</span>';
-    tile.onclick = function() { openFullscreen(idx); };
-    grid.appendChild(tile);
-  });
-
-  $('results').style.display = 'block';
-  setTimeout(function() { $('results').scrollIntoView({ behavior: 'smooth' }); }, 100);
-}
-
-// ── FULLSCREEN ─────────────────────────────────────────────────
-function openFullscreen(idx) {
+// ── FULLSCREEN ───────────────────────────────────────────────
+function openFs(idx) {
   fsIdx = idx;
-  updateFs();
+  renderFs();
   $('fs-modal').classList.add('open');
 }
-function updateFs() {
+function renderFs() {
   var item = fsItems[fsIdx];
-  $('fs-img').src = item.dataUri;
-  $('fs-label').textContent = item.style.name;
-  $('fs-prev').style.display = fsIdx > 0 ? 'flex' : 'none';
-  $('fs-next').style.display = fsIdx < fsItems.length - 1 ? 'flex' : 'none';
+  if (!item) return;
+  $('fs-img').src          = item.uri;
+  $('fs-label').textContent = item.label;
+  $('fs-prev').style.display = fsIdx > 0                   ? 'flex' : 'none';
+  $('fs-next').style.display = fsIdx < fsItems.length - 1  ? 'flex' : 'none';
 }
 
-// ── SETTINGS ───────────────────────────────────────────────────
-function openSettings() { $('api-key-input').value = apiKey; $('settings-overlay').classList.add('open'); }
-function closeSettings() { $('settings-overlay').classList.remove('open'); }
+// ── SETTINGS ─────────────────────────────────────────────────
+function openSettings()  { $('api-key-input').value = apiKey; $('settings-ov').classList.add('open'); }
+function closeSettings() { $('settings-ov').classList.remove('open'); }
 
-// ── SVG ERROR PLACEHOLDER ──────────────────────────────────────
-function errorSvg(name) {
-  return 'data:image/svg+xml;base64,' + btoa('<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400"><rect width="400" height="400" fill="#1c1c1c"/><text x="200" y="200" text-anchor="middle" font-family="sans-serif" font-size="16" fill="#c9a227">' + name + ' — failed</text></svg>');
+// ── ERROR PLACEHOLDER ─────────────────────────────────────────
+function errSvg(name) {
+  return 'data:image/svg+xml;base64,' + btoa(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="400" height="534">' +
+    '<rect width="400" height="534" fill="#111"/>' +
+    '<text x="200" y="267" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#444">' +
+    name + ' — generation failed</text></svg>'
+  );
 }
 
-// ── WIRE UP EVENTS ─────────────────────────────────────────────
+// ── EVENTS ───────────────────────────────────────────────────
 $('cam-open-btn').onclick  = openCamera;
 $('retake-btn').onclick    = openCamera;
 $('cam-close-btn').onclick = closeCamera;
-$('flip-btn').onclick      = function() {
-  cameraFacing = cameraFacing === 'user' ? 'environment' : 'user';
-  closeCamera(); openCamera();
-};
 $('shutter').onclick       = capture;
-$('gen-btn').onclick       = generate;
+$('flip-btn').onclick = function() {
+  camFacing = camFacing === 'user' ? 'environment' : 'user';
+  closeCamera();
+  openCamera();
+};
 
 $('fs-close').onclick = function() { $('fs-modal').classList.remove('open'); };
-$('fs-prev').onclick  = function() { fsIdx--; updateFs(); };
-$('fs-next').onclick  = function() { fsIdx++; updateFs(); };
+$('fs-prev').onclick  = function() { fsIdx--; renderFs(); };
+$('fs-next').onclick  = function() { fsIdx++; renderFs(); };
 
-$('settings-btn').onclick       = openSettings;
-$('settings-close-btn').onclick = closeSettings;
-$('settings-overlay').onclick   = function(e) { if (e.target === $('settings-overlay')) closeSettings(); };
-$('show-key-btn').onclick       = function() {
-  var inp = $('api-key-input');
-  var showing = inp.type === 'text';
+$('gear-btn').onclick    = openSettings;
+$('settings-ov').onclick = function(e) { if (e.target === $('settings-ov')) closeSettings(); };
+
+$('show-btn').onclick = function() {
+  var inp = $('api-key-input'), showing = inp.type === 'text';
   inp.type = showing ? 'password' : 'text';
-  $('show-key-btn').textContent = showing ? 'Show' : 'Hide';
+  $('show-btn').textContent = showing ? 'Show' : 'Hide';
 };
-$('save-key-btn').onclick = function() {
-  var key = $('api-key-input').value.trim();
-  if (!key) return;
-  apiKey = key;
-  localStorage.setItem('razor_openai_key', key);
-  $('key-status').textContent = '✓ Saved';
-  setTimeout(function() { $('key-status').textContent = ''; closeSettings(); }, 1000);
+$('save-btn').onclick = function() {
+  var k = $('api-key-input').value.trim();
+  if (!k) return;
+  apiKey = k;
+  localStorage.setItem('re_openai_key', k);
+  $('key-ok').textContent = '✓ Saved';
+  setTimeout(function() { $('key-ok').textContent = ''; closeSettings(); }, 900);
 };
 
-// ── SWIPE FULLSCREEN ───────────────────────────────────────────
-var swipeX = 0;
-$('fs-modal').addEventListener('touchstart', function(e) { swipeX = e.touches[0].clientX; }, { passive: true });
-$('fs-modal').addEventListener('touchend', function(e) {
-  var dx = e.changedTouches[0].clientX - swipeX;
-  if (dx < -50 && fsIdx < fsItems.length - 1) { fsIdx++; updateFs(); }
-  if (dx >  50 && fsIdx > 0)                  { fsIdx--; updateFs(); }
+// Swipe fullscreen
+var swX = 0;
+$('fs-modal').addEventListener('touchstart', function(e) { swX = e.touches[0].clientX; }, { passive: true });
+$('fs-modal').addEventListener('touchend',   function(e) {
+  var dx = e.changedTouches[0].clientX - swX;
+  if (dx < -50 && fsIdx < fsItems.length - 1) { fsIdx++; renderFs(); }
+  if (dx >  50 && fsIdx > 0)                  { fsIdx--; renderFs(); }
 });
 
-// ── INIT ───────────────────────────────────────────────────────
-document.querySelector('h1').textContent = SHOP;
-$('max-label').textContent = MAX;
+// ── INIT ─────────────────────────────────────────────────────
 buildLengths();
 buildStyles();
 if (!apiKey) openSettings();

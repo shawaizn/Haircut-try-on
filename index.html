@@ -176,9 +176,9 @@ body { display: flex; flex-direction: column; height: 100dvh; }
   <div id="settings-panel">
     <button id="settings-close-btn">✕</button>
     <h3>Settings</h3>
-    <div class="label">Gemini API Key</div>
+    <div class="label">OpenAI API Key</div>
     <div class="row">
-      <input id="api-key-input" type="password" placeholder="AIza…" />
+      <input id="api-key-input" type="password" placeholder="sk-…" />
       <button id="show-key-btn">Show</button>
     </div>
     <div class="row">
@@ -296,7 +296,7 @@ function capture() {
     var reader = new FileReader();
     reader.onloadend = function() {
       var dataUri = reader.result;
-      state.photo = { dataUri: dataUri, base64: dataUri.split(',')[1], mime: 'image/jpeg' };
+      state.photo = { dataUri: dataUri, blob: blob };
       closeCamera();
       $('thumb-img').src = dataUri;
       $('cam-open-btn').style.display = 'none';
@@ -329,7 +329,7 @@ function generate() {
     }
     var style = styleObjs[i];
     $('load-label').textContent = 'Creating: ' + style.name + ' (' + (i + 1) + ' of ' + styleObjs.length + ')';
-    callGemini(style, function(dataUri) {
+    callOpenAI(style, function(dataUri) {
       state.results.push({ style: style, dataUri: dataUri });
       i++; next();
     }, function(err) {
@@ -340,28 +340,26 @@ function generate() {
   next();
 }
 
-function callGemini(style, onSuccess, onError) {
-  var prompt = 'Edit this portrait to show a ' + state.length + ' "' + style.name + '" hairstyle. ' +
-    'Keep the face, skin tone, and expression EXACTLY the same. Change ONLY the hair. Photorealistic result.';
-  fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-preview-image-generation:generateContent?key=' + encodeURIComponent(apiKey), {
+function callOpenAI(style, onSuccess, onError) {
+  var prompt = 'Edit this portrait photo to give the person a ' + state.length + '-length "' + style.name + '" hairstyle. ' +
+    'Keep the face, skin tone, facial features, and expression EXACTLY the same. Change ONLY the hair. Photorealistic result.';
+  var fd = new FormData();
+  fd.append('model', 'gpt-image-1');
+  fd.append('prompt', prompt);
+  fd.append('image', state.photo.blob, 'photo.jpg');
+  fd.append('n', '1');
+  fd.append('size', '1024x1024');
+  fd.append('quality', 'medium');
+  fetch('https://api.openai.com/v1/images/edits', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      contents: [{ parts: [
-        { inlineData: { mimeType: state.photo.mime, data: state.photo.base64 } },
-        { text: prompt }
-      ]}],
-      generationConfig: { responseModalities: ['IMAGE'] }
-    })
+    headers: { 'Authorization': 'Bearer ' + apiKey },
+    body: fd
   }).then(function(res) { return res.json(); })
   .then(function(data) {
-    var part = data.candidates && data.candidates[0] && data.candidates[0].content &&
-      data.candidates[0].content.parts && data.candidates[0].content.parts.find(function(p) { return p.inlineData && p.inlineData.data; });
-    if (part) {
-      onSuccess('data:' + part.inlineData.mimeType + ';base64,' + part.inlineData.data);
-    } else {
-      onError('No image returned');
-    }
+    if (data.error) { onError(data.error.message); return; }
+    var b64 = data.data && data.data[0] && data.data[0].b64_json;
+    if (b64) { onSuccess('data:image/png;base64,' + b64); }
+    else { onError('No image returned'); }
   }).catch(onError);
 }
 

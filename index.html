@@ -364,7 +364,7 @@ function callOpenAI(style, onSuccess, onError) {
     lengthDesc + ' ' +
     'Apply a "' + style.name + '" style to the sides and back. Photorealistic result.';
   var fd = new FormData();
-  fd.append('model', 'gpt-image-1');
+  fd.append('model', 'gpt-image-2');
   fd.append('prompt', prompt);
   fd.append('image', state.photo.blob, 'photo.jpg');
   fd.append('n', '1');

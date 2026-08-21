@@ -332,24 +332,27 @@ function generate() {
   $('load-modal').classList.add('open');
   $('results').style.display = 'none';
 
-  var i = 0;
-  function next() {
-    if (i >= styleObjs.length) {
+  var done = 0;
+  function tick() {
+    done++;
+    $('load-label').textContent = done + ' of ' + styleObjs.length + ' done…';
+    if (done === styleObjs.length) {
       $('load-modal').classList.remove('open');
       showResults();
-      return;
     }
-    var style = styleObjs[i];
-    $('load-label').textContent = 'Creating: ' + style.name + ' (' + (i + 1) + ' of ' + styleObjs.length + ')';
+  }
+
+  $('load-label').textContent = 'Generating ' + styleObjs.length + ' look' + (styleObjs.length > 1 ? 's' : '') + '…';
+
+  styleObjs.forEach(function(style) {
     callOpenAI(style, function(dataUri) {
       state.results.push({ style: style, dataUri: dataUri });
-      i++; next();
-    }, function(err) {
+      tick();
+    }, function() {
       state.results.push({ style: style, dataUri: errorSvg(style.name) });
-      i++; next();
+      tick();
     });
-  }
-  next();
+  });
 }
 
 function callOpenAI(style, onSuccess, onError) {

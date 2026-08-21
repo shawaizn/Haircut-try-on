@@ -1,4 +1,5 @@
-const OPENAI_API_KEY = 'sk-...'; // ← paste your key here
+require('dotenv').config();
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
 const express  = require('express');
 const multer   = require('multer');

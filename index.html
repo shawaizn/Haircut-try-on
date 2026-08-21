@@ -27,6 +27,7 @@ body { display: flex; flex-direction: column; height: 100dvh; }
 .lpill .d { font-size: 11px; color: #666; }
 .lpill.keep-top { grid-column: span 4; min-height: 52px; flex-direction: row; gap: 8px; }
 .lpill.keep-top .n { font-size: 15px; }
+.lpill.scissors { grid-column: span 2; }
 .lpill.on { border-color: #c9a227; background: #221e0f; }
 .lpill.on .d { color: #9a7a1a; }
 
@@ -195,13 +196,17 @@ body { display: flex; flex-direction: column; height: 100dvh; }
 var SHOP    = 'The Razor';
 var MAX     = 3;
 var LENGTHS = [
-  { id: 'keep', name: 'Keep Top', desc: 'Sides only',  grade: null  },
-  { id: 'g1',   name: 'Grade 1',  desc: '3mm',         grade: 1     },
-  { id: 'g2',   name: 'Grade 2',  desc: '6mm',         grade: 2     },
-  { id: 'g3',   name: 'Grade 3',  desc: '10mm',        grade: 3     },
-  { id: 'g4',   name: 'Grade 4',  desc: '13mm',        grade: 4     },
-  { id: 'g6',   name: 'Grade 6',  desc: '19mm',        grade: 6     },
-  { id: 'g8',   name: 'Grade 8',  desc: '25mm',        grade: 8     },
+  { id: 'keep',   name: 'Keep Top', desc: 'Sides only' },
+  { id: 'g1',     name: 'Grade 1',  desc: '3mm'        },
+  { id: 'g2',     name: 'Grade 2',  desc: '6mm'        },
+  { id: 'g3',     name: 'Grade 3',  desc: '10mm'       },
+  { id: 'g4',     name: 'Grade 4',  desc: '13mm'       },
+  { id: 'g5',     name: 'Grade 5',  desc: '16mm'       },
+  { id: 'g6',     name: 'Grade 6',  desc: '19mm'       },
+  { id: 'g7',     name: 'Grade 7',  desc: '22mm'       },
+  { id: 'g8',     name: 'Grade 8',  desc: '25mm'       },
+  { id: 'medium', name: 'Medium',   desc: 'Scissors'   },
+  { id: 'long',   name: 'Long',     desc: 'Scissors'   },
 ];
 var STYLES = [
   { id: 'skin-fade',     name: 'Skin Fade'     },
@@ -237,7 +242,7 @@ function buildLengths() {
   el.innerHTML = '';
   LENGTHS.forEach(function(l) {
     var btn = document.createElement('button');
-    var extra = l.id === 'keep' ? ' keep-top' : '';
+    var extra = l.id === 'keep' ? ' keep-top' : (l.id === 'medium' || l.id === 'long') ? ' scissors' : '';
     btn.className = 'lpill' + extra + (state.length === l.id ? ' on' : '');
     btn.innerHTML = '<span class="n">' + l.name + '</span><span class="d">' + l.desc + '</span>';
     btn.onclick = function() { state.length = l.id; buildLengths(); updateBtn(); };
@@ -351,7 +356,9 @@ function callOpenAI(style, onSuccess, onError) {
   var lengthObj = LENGTHS.find(function(l) { return l.id === state.length; });
   var lengthDesc = state.length === 'keep'
     ? 'Keep the hair on TOP of the head EXACTLY as it currently is — identical length, volume, texture and styling. Only modify the sides and back.'
-    : 'Set the top hair length to ' + (lengthObj ? lengthObj.name + ' (' + lengthObj.desc + ')' : state.length) + '.';
+    : lengthObj && lengthObj.id.startsWith('g')
+      ? 'Set the top hair length to ' + lengthObj.name + ' (' + lengthObj.desc + ' clipper grade).'
+      : 'Set the top hair to a ' + (lengthObj ? lengthObj.name : state.length) + ' scissors length.';
   var prompt =
     'Hair edit only — do not change the face, skin tone, eyes, nose, mouth, jaw, ears, eyebrows, beard, expression, pose, clothing, or background. ' +
     lengthDesc + ' ' +

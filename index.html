@@ -149,7 +149,7 @@ html, body {
     0 0 48px rgba(200,21,26,.22),
     0 28px 56px rgba(0,0,0,.75);
 }
-/* text fallback when logo.png not found */
+/* text fallback when razors%20logo.jpg not found */
 #intro-logo-text {
   display: none;
   width: min(280px, 72vw); height: min(280px, 72vw);
@@ -175,7 +175,7 @@ html, body {
 }
 /* hide broken image icon on header logos */
 .ph-logo { color: transparent; }
-.ph-logo[src="logo.png"]:not([data-loaded]) { opacity: 0; transition: opacity .2s; }
+.ph-logo[src="razors%20logo.jpg"]:not([data-loaded]) { opacity: 0; transition: opacity .2s; }
 .ph-logo.loaded { opacity: 1; }
 
 #intro-tagline {
@@ -445,9 +445,9 @@ html, body {
 
   <div id="intro-body">
     <div id="intro-logo-wrap">
-      <img id="intro-logo" src="logo.png" alt="Razor's Edge Hair Studios"
+      <img id="intro-logo" src="razors%20logo.jpg" alt="Razor's Edge Hair Studios"
            onerror="this.style.display='none';document.getElementById('intro-logo-text').style.display='flex'" />
-      <!-- fallback shown when logo.png is missing -->
+      <!-- fallback shown when razors%20logo.jpg is missing -->
       <div id="intro-logo-text">
         <div id="ilt-name">Razor's Edge</div>
         <div id="ilt-divider"></div>
@@ -471,7 +471,7 @@ html, body {
         </svg>
       </button>
     </div>
-    <img class="ph-logo" src="logo.png" alt="Razor's Edge" />
+    <img class="ph-logo" src="razors%20logo.jpg" alt="Razor's Edge" />
     <div class="ph-right"></div>
   </div>
   <div class="prog-bar"><div class="prog-fill" style="width:33%"></div></div>
@@ -493,7 +493,7 @@ html, body {
         </svg>
       </button>
     </div>
-    <img class="ph-logo" src="logo.png" alt="Razor's Edge" />
+    <img class="ph-logo" src="razors%20logo.jpg" alt="Razor's Edge" />
     <div class="ph-right"></div>
   </div>
   <div class="prog-bar"><div class="prog-fill" style="width:67%"></div></div>
@@ -516,7 +516,7 @@ html, body {
         </svg>
       </button>
     </div>
-    <img class="ph-logo" src="logo.png" alt="Razor's Edge" />
+    <img class="ph-logo" src="razors%20logo.jpg" alt="Razor's Edge" />
     <div class="ph-right"></div>
   </div>
   <div class="prog-bar"><div class="prog-fill" style="width:100%"></div></div>
@@ -542,7 +542,7 @@ html, body {
 <div class="page" id="pg5">
   <div class="ph">
     <div class="ph-left"></div>
-    <img class="ph-logo" src="logo.png" alt="Razor's Edge" />
+    <img class="ph-logo" src="razors%20logo.jpg" alt="Razor's Edge" />
     <div class="ph-right">
       <button class="icon-btn" id="settings-btn-results" aria-label="Settings">
         <svg width="16" height="13" viewBox="0 0 16 13" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round">
@@ -930,7 +930,7 @@ buildStyles();
 syncNextBtns();
 if (!apiKey) openSettings();
 
-// Handle header logos — hide gracefully if logo.png missing
+// Handle header logos — hide gracefully if razors%20logo.jpg missing
 document.querySelectorAll('.ph-logo').forEach(function(img) {
   if (img.complete && img.naturalWidth > 0) {
     img.classList.add('loaded');

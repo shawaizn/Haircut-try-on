@@ -179,9 +179,9 @@ body { display: flex; flex-direction: column; height: 100dvh; }
   <div id="settings-panel">
     <button id="settings-close-btn">✕</button>
     <h3>Settings</h3>
-    <div class="label">fal.ai API Key</div>
+    <div class="label">OpenAI API Key</div>
     <div class="row">
-      <input id="api-key-input" type="password" placeholder="key-…" />
+      <input id="api-key-input" type="password" placeholder="sk-…" />
       <button id="show-key-btn">Show</button>
     </div>
     <div class="row">
@@ -228,7 +228,7 @@ var STYLES = [
 
 // ── STATE ──────────────────────────────────────────────────────
 var state = { length: null, styles: [], photo: null, results: [] };
-var apiKey = localStorage.getItem('razor_fal_key') || '';
+var apiKey = localStorage.getItem('razor_openai_key') || '';
 var cameraStream = null;
 var cameraFacing = 'environment';
 var fsItems = [], fsIdx = 0;
@@ -308,7 +308,7 @@ function capture() {
     var reader = new FileReader();
     reader.onloadend = function() {
       var dataUri = reader.result;
-      state.photo = { dataUri: dataUri };
+      state.photo = { dataUri: dataUri, blob: blob };
       closeCamera();
       $('thumb-img').src = dataUri;
       $('cam-open-btn').style.display = 'none';
@@ -363,15 +363,22 @@ function callOpenAI(style, onSuccess, onError) {
     'Hair edit only — do not change the face, skin tone, eyes, nose, mouth, jaw, ears, eyebrows, beard, expression, pose, clothing, or background. ' +
     lengthDesc + ' ' +
     'Apply a "' + style.name + '" style to the sides and back. Photorealistic result.';
-  fetch('https://fal.run/fal-ai/flux-pro/kontext', {
+  var fd = new FormData();
+  fd.append('model', 'gpt-image-1');
+  fd.append('prompt', prompt);
+  fd.append('image', state.photo.blob, 'photo.jpg');
+  fd.append('n', '1');
+  fd.append('size', '1024x1024');
+  fd.append('quality', 'medium');
+  fetch('https://api.openai.com/v1/images/edits', {
     method: 'POST',
-    headers: { 'Authorization': 'Key ' + apiKey, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ image_url: state.photo.dataUri, prompt: prompt, num_images: 1, output_format: 'jpeg' })
+    headers: { 'Authorization': 'Bearer ' + apiKey },
+    body: fd
   }).then(function(res) { return res.json(); })
   .then(function(data) {
-    if (data.detail) { onError(data.detail); return; }
-    var url = data.images && data.images[0] && data.images[0].url;
-    if (url) { onSuccess(url); }
+    if (data.error) { onError(data.error.message); return; }
+    var b64 = data.data && data.data[0] && data.data[0].b64_json;
+    if (b64) { onSuccess('data:image/png;base64,' + b64); }
     else { onError('No image returned'); }
   }).catch(onError);
 }
@@ -446,7 +453,7 @@ $('save-key-btn').onclick = function() {
   var key = $('api-key-input').value.trim();
   if (!key) return;
   apiKey = key;
-  localStorage.setItem('razor_fal_key', key);
+  localStorage.setItem('razor_openai_key', key);
   $('key-status').textContent = '✓ Saved';
   setTimeout(function() { $('key-status').textContent = ''; closeSettings(); }, 1000);
 };

@@ -235,10 +235,10 @@ body::before {
 /* ── Clipper grade grid ── */
 #len-clipper {
   display: flex; flex-direction: column;
-  flex: 1; min-height: 0;
-  padding-bottom: 20px;
+  flex: 2; min-height: 0;
+  padding-bottom: 16px;
   border-bottom: 1px solid var(--border-s);
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 #len-grade-grid {
   display: grid;
@@ -273,8 +273,8 @@ body::before {
 .lgrade.on .lg-mm  { color: var(--red-border); }
 
 /* ── Scissors / special options ── */
-#len-scissors { display: flex; flex-direction: column; flex: 0 0 auto; gap: 10px; }
-#len-scissors-btns { display: flex; gap: 8px; height: clamp(72px, 14vw, 110px); }
+#len-scissors { display: flex; flex-direction: column; flex: 1; min-height: 0; gap: 10px; }
+#len-scissors-btns { display: flex; gap: 8px; flex: 1; min-height: 0; }
 .lopt {
   flex: 1; display: flex; flex-direction: column; align-items: center;
   justify-content: center; gap: 4px;

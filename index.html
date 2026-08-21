@@ -149,6 +149,34 @@ html, body {
     0 0 48px rgba(200,21,26,.22),
     0 28px 56px rgba(0,0,0,.75);
 }
+/* text fallback when logo.png not found */
+#intro-logo-text {
+  display: none;
+  width: min(280px, 72vw); height: min(280px, 72vw);
+  border-radius: 50%;
+  background: var(--s1);
+  border: 2px solid var(--red);
+  flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+  box-shadow: 0 0 48px rgba(200,21,26,.18), 0 28px 56px rgba(0,0,0,.75);
+}
+#ilt-name {
+  font-size: clamp(22px, 7vw, 32px); font-weight: 900;
+  letter-spacing: 2px; text-transform: uppercase;
+  background: linear-gradient(135deg, #fff 40%, rgba(255,255,255,.55));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  text-align: center; line-height: 1.1; padding: 0 12px;
+}
+#ilt-divider {
+  width: 40px; height: 2px; background: var(--red); margin: 2px 0;
+}
+#ilt-sub {
+  font-size: clamp(10px, 3vw, 13px); font-weight: 700;
+  letter-spacing: 3px; text-transform: uppercase; color: var(--red);
+}
+/* hide broken image icon on header logos */
+.ph-logo { color: transparent; }
+.ph-logo[src="logo.png"]:not([data-loaded]) { opacity: 0; transition: opacity .2s; }
+.ph-logo.loaded { opacity: 1; }
 
 #intro-tagline {
   font-size: 17px; font-weight: 300; color: var(--text2);
@@ -417,7 +445,14 @@ html, body {
 
   <div id="intro-body">
     <div id="intro-logo-wrap">
-      <img id="intro-logo" src="logo.png" alt="Razor's Edge Hair Studios" />
+      <img id="intro-logo" src="logo.png" alt="Razor's Edge Hair Studios"
+           onerror="this.style.display='none';document.getElementById('intro-logo-text').style.display='flex'" />
+      <!-- fallback shown when logo.png is missing -->
+      <div id="intro-logo-text">
+        <div id="ilt-name">Razor's Edge</div>
+        <div id="ilt-divider"></div>
+        <div id="ilt-sub">Hair Studios</div>
+      </div>
     </div>
     <div id="intro-tagline">
       See your new look<br><strong>before the first cut.</strong>
@@ -894,6 +929,16 @@ buildLengths();
 buildStyles();
 syncNextBtns();
 if (!apiKey) openSettings();
+
+// Handle header logos — hide gracefully if logo.png missing
+document.querySelectorAll('.ph-logo').forEach(function(img) {
+  if (img.complete && img.naturalWidth > 0) {
+    img.classList.add('loaded');
+  } else {
+    img.onload  = function() { img.classList.add('loaded'); };
+    img.onerror = function() { img.style.visibility = 'hidden'; };
+  }
+});
 </script>
 </body>
 </html>

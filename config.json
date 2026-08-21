@@ -4,9 +4,9 @@
   "geminiApiKey": "",
   "maxStyles": 3,
   "hairLengths": [
-    { "id": "short",  "name": "Short",  "description": "1–3 inches on top" },
-    { "id": "medium", "name": "Medium", "description": "3–6 inches on top" },
-    { "id": "long",   "name": "Long",   "description": "6+ inches on top"  }
+    { "id": "short",  "name": "Short",  "description": "Clean & tight — cropped close" },
+    { "id": "medium", "name": "Medium", "description": "Versatile — top 3–6 inches"   },
+    { "id": "long",   "name": "Long",   "description": "Bold length — 6+ inches on top"}
   ],
   "styles": [
     { "id": "skin-fade",      "name": "Skin Fade",      "hint": "shaved to skin at sides, gradual blend" },

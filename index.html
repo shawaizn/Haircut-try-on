@@ -561,25 +561,34 @@ const state = {
 
 /* ── config / boot ── */
 async function boot() {
-  // Start with embedded defaults so the UI is always interactive
+  // Use embedded defaults immediately — UI is interactive right away
   cfg = { ...DEFAULT_CONFIG };
+  cfg.geminiApiKey = localStorage.getItem(LS_KEY) || '';
 
-  // Try to load config.json and merge over defaults (optional — fine if it fails)
-  try {
-    const r = await fetch('./config.json');
-    if (r.ok) {
-      const loaded = await r.json();
-      Object.assign(cfg, loaded);
-    }
-  } catch { /* no server / CORS — use defaults */ }
-
-  if (!cfg.geminiApiKey) cfg.geminiApiKey = localStorage.getItem(LS_KEY) || '';
-  $('shop-name').textContent = cfg.shopName || 'The Razor';
+  $('shop-name').textContent = cfg.shopName;
   buildLengthRow();
   buildStyleGrid();
 
   if (!cfg.geminiApiKey) openSettings();
   else provider = makeProvider(cfg);
+
+  // Then try loading config.json in the background (3 s timeout)
+  try {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 3000);
+    const r = await fetch('./config.json', { signal: ctrl.signal });
+    clearTimeout(t);
+    if (r.ok) {
+      const loaded = await r.json();
+      Object.assign(cfg, loaded);
+      if (!cfg.geminiApiKey) cfg.geminiApiKey = localStorage.getItem(LS_KEY) || '';
+      $('shop-name').textContent = cfg.shopName || 'The Razor';
+      buildLengthRow();
+      buildStyleGrid();
+      if (cfg.geminiApiKey) provider = makeProvider(cfg);
+      else if (!provider) openSettings();
+    }
+  } catch { /* no server / timeout — embedded defaults already in use */ }
 }
 
 /* ── length row ── */

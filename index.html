@@ -307,7 +307,7 @@ body::before {
   background: var(--s1);
   backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
   cursor: pointer; font-family: inherit;
-  color: var(--text); font-size: 13px; font-weight: 600; line-height: 1.35;
+  color: var(--text); font-size: clamp(15px, 2.2vw, 20px); font-weight: 600; line-height: 1.35;
   transition: border-color .18s, background .18s, transform .45s cubic-bezier(.34,1.56,.64,1);
 }
 .stile:active {

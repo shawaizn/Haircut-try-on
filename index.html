@@ -341,8 +341,11 @@ function generate() {
 }
 
 function callOpenAI(style, onSuccess, onError) {
-  var prompt = 'Edit this portrait photo to give the person a ' + state.length + '-length "' + style.name + '" hairstyle. ' +
-    'Keep the face, skin tone, facial features, and expression EXACTLY the same. Change ONLY the hair. Photorealistic result.';
+  var prompt =
+    'This is a hair-only edit. Change NOTHING except the hair on top of the head. ' +
+    'Do NOT alter the face shape, eyes, nose, mouth, jaw, ears, eyebrows, skin tone, beard, expression, pose, clothing, or background — they must be pixel-perfect identical to the source photo. ' +
+    'The only change allowed: style the hair into a ' + state.length + ' "' + style.name + '". ' +
+    'Photorealistic. Same person, same lighting, same everything — only the hair changes.';
   var fd = new FormData();
   fd.append('model', 'gpt-image-1');
   fd.append('prompt', prompt);

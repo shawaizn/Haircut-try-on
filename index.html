@@ -259,12 +259,12 @@ body::before {
 }
 .lgrade:active { transform: scale(.93) translateY(1px); transition: transform .1s ease; }
 .lgrade .lg-num {
-  font-size: 26px; font-weight: 700; line-height: 1;
+  font-size: clamp(32px, 5vw, 56px); font-weight: 700; line-height: 1;
   color: var(--text2);
   transition: color .18s;
 }
 .lgrade .lg-mm {
-  font-size: 10px; font-weight: 500; color: var(--text3);
+  font-size: clamp(11px, 1.6vw, 15px); font-weight: 500; color: var(--text3);
   letter-spacing: .3px;
   transition: color .18s;
 }

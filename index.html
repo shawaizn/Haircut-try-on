@@ -7,269 +7,317 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>Razor's Edge</title>
 <style>
-*,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-
+*, *::before, *::after {
+  box-sizing: border-box; margin: 0; padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
 :root {
   --red:        #c8151a;
-  --red-glow:   rgba(200,21,26,.30);
   --red-tint:   rgba(200,21,26,.09);
-  --red-border: rgba(200,21,26,.50);
+  --red-border: rgba(200,21,26,.55);
   --bg:         #080808;
-  --s1:         #111111;
-  --s2:         #191919;
-  --s3:         #212121;
-  --border:     #282828;
-  --text:       #f0ede8;
-  --text2:      #78746f;
-  --text3:      #3d3a37;
+  --s1:         #0f0f0f;
+  --s2:         #181818;
+  --s3:         #222;
+  --border:     #272727;
+  --text:       #edeae5;
+  --text2:      #6a6662;
+  --text3:      #353230;
   --r:          12px;
   --rs:         9px;
 }
-
 html, body {
-  height: 100%;
-  background: var(--bg);
-  color: var(--text);
+  height: 100%; overflow: hidden;
+  background: var(--bg); color: var(--text);
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
   -webkit-font-smoothing: antialiased;
-  overflow: hidden;
-  user-select: none;
-  -webkit-user-select: none;
+  user-select: none; -webkit-user-select: none;
   touch-action: manipulation;
 }
 
-body { display: flex; flex-direction: column; height: 100dvh; }
-
-/* ── HEADER ─────────────────────────────────────────────────── */
-#hdr {
-  flex-shrink: 0;
+/* ── PAGE TRACK ─────────────────────────────────────────────── */
+#page-track {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 22px;
-  padding-top: max(18px, env(safe-area-inset-top));
-  height: calc(62px + max(0px, env(safe-area-inset-top)));
-  background: var(--bg);
-  border-bottom: 1px solid var(--border);
-  z-index: 10;
+  width: 500vw;
+  height: 100dvh;
+  transition: transform .42s cubic-bezier(.4,0,.2,1);
+  will-change: transform;
 }
-#hdr-brand { display: flex; flex-direction: column; gap: 1px; }
-#hdr-name  { font-size: 18px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: var(--text); }
-#hdr-sub   { font-size: 10px; font-weight: 700; letter-spacing: 2.5px; text-transform: uppercase; color: var(--red); }
-
-#gear-btn {
-  width: 40px; height: 40px; border-radius: 50%;
-  background: var(--s2); border: 1px solid var(--border);
-  color: var(--text2); font-size: 17px; cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  transition: border-color .18s, color .18s, transform .1s;
-}
-#gear-btn:active { border-color: var(--red); color: var(--red); transform: scale(.91); }
-
-/* ── SETTINGS ───────────────────────────────────────────────── */
-#settings-ov {
-  display: none; position: fixed; inset: 0; z-index: 80;
-  background: rgba(0,0,0,.6); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
-  align-items: flex-end;
-}
-#settings-ov.open { display: flex; }
-#settings-panel {
-  background: #131313; border-radius: 20px 20px 0 0;
-  border-top: 1px solid var(--border);
-  padding: 0 22px 22px;
-  padding-bottom: max(22px, env(safe-area-inset-bottom));
-  width: 100%; display: flex; flex-direction: column; gap: 14px;
-}
-.sp-handle { width: 36px; height: 4px; border-radius: 2px; background: var(--s3); margin: 12px auto 10px; }
-#settings-panel h3 { font-size: 17px; font-weight: 700; }
-.sp-label {
-  font-size: 11px; font-weight: 700; letter-spacing: 1.5px;
-  text-transform: uppercase; color: var(--text2);
-}
-#api-key-input {
-  width: 100%; padding: 14px;
-  background: var(--s2); border: 1.5px solid var(--border);
-  border-radius: var(--rs); color: var(--text);
-  font-size: 15px; font-family: 'SF Mono', 'Courier New', monospace;
-  outline: none; transition: border-color .2s;
-}
-#api-key-input:focus { border-color: var(--red); }
-.sp-row { display: flex; gap: 8px; }
-#save-key-btn {
-  flex: 1; padding: 14px; background: var(--red); color: #fff;
-  border: none; border-radius: var(--rs); font-size: 15px; font-weight: 700;
-  cursor: pointer; font-family: inherit; transition: opacity .15s;
-}
-#save-key-btn:active { opacity: .82; }
-#show-key-btn {
-  padding: 14px 16px; background: var(--s2);
-  border: 1.5px solid var(--border); border-radius: var(--rs);
-  color: var(--text2); cursor: pointer; font-family: inherit; font-size: 14px; font-weight: 600;
-  transition: border-color .15s;
-}
-#show-key-btn:active { border-color: var(--red); }
-#key-status { font-size: 13px; color: #4caf76; text-align: center; min-height: 16px; }
-
-/* ── SCROLL ─────────────────────────────────────────────────── */
-#scroll {
-  flex: 1;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  padding: 28px 20px 130px;
+.page {
+  flex: 0 0 100vw;
+  width: 100vw;
+  height: 100dvh;
   display: flex;
   flex-direction: column;
-  gap: 32px;
+  overflow: hidden;
+  position: relative;
 }
 
-/* ── SECTION HEADER ─────────────────────────────────────────── */
-.sh { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
-.sh-num   { font-size: 11px; font-weight: 800; color: var(--red); letter-spacing: .5px; min-width: 20px; }
-.sh-title { font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--text2); }
-.sh-badge { margin-left: auto; font-size: 11px; font-weight: 700; color: var(--text3); letter-spacing: .5px; }
+/* ── SHARED HEADER ──────────────────────────────────────────── */
+.ph {
+  flex-shrink: 0;
+  display: flex; align-items: center;
+  padding: 0 20px;
+  padding-top: max(16px, env(safe-area-inset-top));
+  height: calc(58px + max(0px, env(safe-area-inset-top)));
+  border-bottom: 1px solid var(--border);
+}
+.ph-back {
+  width: 38px; height: 38px; border-radius: 50%;
+  background: var(--s2); border: 1px solid var(--border);
+  color: var(--text2); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: border-color .13s, color .13s, transform .08s;
+}
+.ph-back:active { border-color: var(--red); color: var(--text); transform: scale(.91); }
+.ph-title {
+  flex: 1; text-align: center;
+  font-size: 13px; font-weight: 700;
+  letter-spacing: 2.5px; text-transform: uppercase; color: var(--text2);
+}
+.ph-action {
+  width: 38px; height: 38px; border-radius: 50%;
+  background: var(--s2); border: 1px solid var(--border);
+  color: var(--text2); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: border-color .13s, color .13s, transform .08s;
+}
+.ph-action:active { border-color: var(--red); color: var(--text); transform: scale(.91); }
+.ph-spacer { width: 38px; flex-shrink: 0; }
 
-/* ── LENGTH GRID ────────────────────────────────────────────── */
-#lengths { display: grid; grid-template-columns: repeat(4, 1fr); gap: 7px; }
+.prog-bar {
+  height: 2px; background: var(--s3); flex-shrink: 0; position: relative;
+}
+.prog-fill {
+  position: absolute; inset: 0 auto 0 0;
+  background: var(--red);
+  transition: width .42s cubic-bezier(.4,0,.2,1);
+}
 
+/* ── SCROLL AREA ────────────────────────────────────────────── */
+.pscroll {
+  flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
+  padding: 28px 20px 100px;
+}
+
+/* ── FOOTER ─────────────────────────────────────────────────── */
+.pfooter {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  padding: 14px 20px;
+  padding-bottom: max(20px, env(safe-area-inset-bottom));
+  background: linear-gradient(to top, var(--bg) 64%, transparent);
+}
+.pfooter-btn {
+  width: 100%; height: 56px; border-radius: 28px;
+  border: none; font-family: inherit;
+  font-size: 15px; font-weight: 700; letter-spacing: .4px;
+  cursor: not-allowed; transition: background .22s, color .22s, opacity .1s, transform .09s;
+}
+.pfooter-btn.off   { background: var(--s3); color: var(--text3); }
+.pfooter-btn.on    { background: var(--red); color: #fff; cursor: pointer; }
+.pfooter-btn.on:active { transform: scale(.98); opacity: .9; }
+.pfooter-btn.ghost {
+  background: transparent; color: var(--text2); cursor: pointer;
+  border: 1px solid var(--border);
+}
+.pfooter-btn.ghost:active { border-color: var(--red-border); color: var(--text); }
+.pfooter-btn.muted {
+  background: var(--s2); color: var(--text2); cursor: default;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   PAGE 1 — INTRO
+══════════════════════════════════════════════════════════════ */
+#pg1 .ph { border-bottom: none; }
+#pg1-name { font-size: 17px; font-weight: 800; letter-spacing: 2.5px; text-transform: uppercase; }
+#pg1-sub  { font-size: 9px;  font-weight: 700; letter-spacing: 3px;   text-transform: uppercase; color: var(--red); margin-top: 2px; }
+
+#intro-body {
+  flex: 1; display: flex; flex-direction: column;
+  justify-content: flex-end; padding: 0 24px;
+  padding-bottom: max(100px, calc(80px + env(safe-area-inset-bottom)));
+}
+#intro-headline {
+  font-size: 38px; font-weight: 800; line-height: 1.1;
+  letter-spacing: -.5px; margin-bottom: 14px;
+}
+#intro-headline em { color: var(--red); font-style: normal; }
+#intro-sub {
+  font-size: 16px; font-weight: 400; color: var(--text2);
+  line-height: 1.55; margin-bottom: 48px;
+}
+#intro-start {
+  width: 100%; height: 56px; border-radius: 28px; border: none;
+  background: var(--red); color: #fff; font-family: inherit;
+  font-size: 16px; font-weight: 700; letter-spacing: .4px;
+  cursor: pointer; transition: opacity .12s, transform .09s;
+}
+#intro-start:active { opacity: .88; transform: scale(.98); }
+
+/* ══════════════════════════════════════════════════════════════
+   PAGE 2 — LENGTH
+══════════════════════════════════════════════════════════════ */
+#lengths { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
 .lpill {
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
-  min-height: 66px; padding: 8px 4px;
-  border-radius: var(--rs); border: 1.5px solid var(--border);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 3px; min-height: 64px; padding: 8px 4px;
+  border-radius: var(--rs); border: 1px solid var(--border);
   background: var(--s1); cursor: pointer; font-family: inherit; color: var(--text);
-  transition: border-color .15s, background .15s, transform .1s;
+  transition: border-color .12s, background .12s, transform .08s;
 }
 .lpill:active { transform: scale(.95); }
 .lpill .ln { font-size: 13px; font-weight: 700; line-height: 1.2; text-align: center; }
-.lpill .ld { font-size: 11px; color: var(--text2); }
+.lpill .ld { font-size: 10px; color: var(--text2); }
 .lpill.on  { border-color: var(--red); background: var(--red-tint); }
-.lpill.on .ln { color: var(--text); }
 .lpill.on .ld { color: var(--red-border); }
-
-.lpill.keep  { grid-column: span 4; min-height: 50px; flex-direction: row; gap: 10px; }
+.lpill.keep  { grid-column: span 4; min-height: 48px; flex-direction: row; gap: 10px; }
 .lpill.keep .ln { font-size: 14px; }
-.lpill.keep .ld { font-size: 13px; }
+.lpill.keep .ld { font-size: 12px; }
 .lpill.sciss { grid-column: span 2; }
 
-/* ── STYLE GRID ─────────────────────────────────────────────── */
-#styles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; }
-
+/* ══════════════════════════════════════════════════════════════
+   PAGE 3 — STYLE
+══════════════════════════════════════════════════════════════ */
+#styles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
 .stile {
   position: relative;
-  display: flex; align-items: center; justify-content: center; text-align: center;
-  min-height: 60px; padding: 10px 8px;
-  border-radius: var(--rs); border: 1.5px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  text-align: center; min-height: 64px; padding: 12px 8px;
+  border-radius: var(--rs); border: 1px solid var(--border);
   background: var(--s1); cursor: pointer; font-family: inherit;
-  color: var(--text); font-size: 13px; font-weight: 600; line-height: 1.3;
-  transition: border-color .15s, background .15s, transform .1s;
+  color: var(--text); font-size: 13px; font-weight: 600; line-height: 1.35;
+  transition: border-color .12s, background .12s, transform .08s;
 }
 .stile:active { transform: scale(.95); }
-.stile.on     { border-color: var(--red); background: var(--red-tint); }
-.stile .ck    { position: absolute; top: 5px; right: 7px; font-size: 9px; color: var(--red); font-weight: 900; }
+.stile.on { border-color: var(--red); background: var(--red-tint); }
+.stile.on::after {
+  content: '';
+  position: absolute; top: 7px; right: 7px;
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--red);
+}
+#style-hint {
+  text-align: center; font-size: 12px; color: var(--text2);
+  margin-top: 18px; font-weight: 500;
+}
 
-/* ── PHOTO ──────────────────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════════
+   PAGE 4 — PHOTO
+══════════════════════════════════════════════════════════════ */
 #cam-open-btn {
-  width: 100%; min-height: 110px;
-  border-radius: var(--r); border: 1.5px dashed var(--border);
+  width: 100%; min-height: 140px;
+  border-radius: var(--r); border: 1px dashed var(--border);
   background: var(--s1); color: var(--text2);
-  font-family: inherit; font-size: 14px; cursor: pointer;
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
-  transition: border-color .2s, color .2s, transform .1s;
+  font-family: inherit; font-size: 14px; font-weight: 500; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 11px;
+  transition: border-color .18s, color .15s, transform .08s;
 }
 #cam-open-btn:active { transform: scale(.985); border-color: var(--red); color: var(--text); }
-#cam-open-btn .ico   { font-size: 32px; line-height: 1; }
-
+#cam-open-btn svg { opacity: .45; transition: opacity .15s; }
+#cam-open-btn:active svg { opacity: 1; }
 #photo-thumb {
   display: none; border-radius: var(--r); overflow: hidden;
-  position: relative; height: 180px; border: 1.5px solid var(--border);
+  position: relative; height: 220px; border: 1px solid var(--border);
 }
 #thumb-img { width: 100%; height: 100%; object-fit: cover; display: block; }
 #retake-btn {
-  position: absolute; bottom: 10px; right: 10px;
-  background: rgba(0,0,0,.72); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-  color: #fff; border: 1px solid rgba(255,255,255,.14); border-radius: 20px;
-  padding: 7px 14px; font-size: 13px; font-family: inherit; font-weight: 600; cursor: pointer;
-  transition: transform .1s;
+  position: absolute; bottom: 12px; right: 12px;
+  background: rgba(0,0,0,.7); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  color: rgba(255,255,255,.9); border: 1px solid rgba(255,255,255,.12); border-radius: 18px;
+  padding: 8px 18px; font-size: 13px; font-family: inherit; font-weight: 600; cursor: pointer;
+  letter-spacing: .2px; transition: transform .08s;
 }
-#retake-btn:active { transform: scale(.95); }
+#retake-btn:active { transform: scale(.94); }
 
-/* ── RESULTS ────────────────────────────────────────────────── */
-#results { display: none; }
-#results-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 9px; }
+/* ══════════════════════════════════════════════════════════════
+   PAGE 5 — RESULTS
+══════════════════════════════════════════════════════════════ */
+#results-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
 @media (min-width: 600px) { #results-grid { grid-template-columns: repeat(3, 1fr); } }
 
 .rtile {
   border-radius: var(--rs); overflow: hidden;
-  border: 1.5px solid var(--border); aspect-ratio: 3/4;
+  border: 1px solid var(--border); aspect-ratio: 3/4;
   display: flex; flex-direction: column;
   cursor: pointer; background: var(--s1);
-  transition: transform .15s, border-color .2s;
-  animation: fadeUp .35s ease both;
+  transition: transform .12s;
+  animation: fadeUp .3s ease both;
 }
 .rtile:active { transform: scale(.97); }
-.rtile img    { flex: 1; width: 100%; object-fit: cover; min-height: 0; display: block; }
-.rtile .rl    {
-  padding: 8px 6px; font-size: 11px; font-weight: 700; text-align: center;
+.rtile img { flex: 1; width: 100%; object-fit: cover; min-height: 0; display: block; }
+.rtile .rl {
+  padding: 8px 6px; font-size: 10px; font-weight: 700; text-align: center;
   background: var(--s1); color: var(--text2);
-  letter-spacing: 1px; text-transform: uppercase; flex-shrink: 0;
+  letter-spacing: 1.5px; text-transform: uppercase; flex-shrink: 0;
 }
-.rtile.orig   { border-color: var(--border); }
-
-/* skeleton */
 .skel {
-  border-radius: var(--rs); border: 1.5px solid var(--border); aspect-ratio: 3/4;
+  border-radius: var(--rs); border: 1px solid var(--border); aspect-ratio: 3/4;
   display: flex; flex-direction: column; background: var(--s1);
-  animation: fadeUp .3s ease both;
+  animation: fadeUp .25s ease both;
 }
 .skel-img {
   flex: 1;
-  background: linear-gradient(90deg, var(--s1) 0%, var(--s3) 40%, var(--s2) 50%, var(--s3) 60%, var(--s1) 100%);
+  background: linear-gradient(90deg, var(--s1) 0%, var(--s2) 40%, var(--s3) 50%, var(--s2) 60%, var(--s1) 100%);
   background-size: 300% 100%;
-  animation: shimmer 1.6s ease infinite;
+  animation: shimmer 1.9s ease infinite;
 }
 .skel-lbl {
-  height: 34px; background: var(--s2);
+  height: 32px; background: var(--s2);
   display: flex; align-items: center; justify-content: center;
-  font-size: 11px; font-weight: 700; color: var(--text3);
-  letter-spacing: 1px; text-transform: uppercase;
+  font-size: 10px; font-weight: 700; color: var(--text3);
+  letter-spacing: 1.5px; text-transform: uppercase;
 }
-
 @keyframes shimmer {
-  0%   { background-position:  120% 0; }
-  100% { background-position: -120% 0; }
+  0%   { background-position:  130% 0; }
+  100% { background-position: -130% 0; }
 }
 @keyframes fadeUp {
-  from { opacity: 0; transform: translateY(10px); }
+  from { opacity: 0; transform: translateY(8px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* ── FOOTER ─────────────────────────────────────────────────── */
-#footer {
-  position: fixed; bottom: 0; left: 0; right: 0; z-index: 10;
-  padding: 14px 20px;
-  padding-bottom: max(20px, env(safe-area-inset-bottom));
-  background: linear-gradient(to top, #080808 58%, transparent);
+/* ══════════════════════════════════════════════════════════════
+   OVERLAYS
+══════════════════════════════════════════════════════════════ */
+#settings-ov {
+  display: none; position: fixed; inset: 0; z-index: 80;
+  background: rgba(0,0,0,.55);
+  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  align-items: flex-end;
 }
-#gen-btn {
-  width: 100%; height: 58px; border-radius: 29px; border: none;
-  background: var(--s3); color: var(--text3);
-  font-family: inherit; font-size: 16px; font-weight: 700; letter-spacing: .3px;
-  cursor: not-allowed;
-  transition: background .3s, color .3s, box-shadow .3s, transform .12s, border-color .2s;
+#settings-ov.open { display: flex; }
+#settings-panel {
+  width: 100%; background: #121212;
+  border-radius: 18px 18px 0 0; border-top: 1px solid var(--border);
+  padding: 0 24px 24px;
+  padding-bottom: max(24px, env(safe-area-inset-bottom));
+  display: flex; flex-direction: column; gap: 16px;
 }
-#gen-btn.ready {
-  background: var(--red); color: #fff; cursor: pointer;
-  box-shadow: 0 0 40px var(--red-glow);
+.sp-handle { width: 34px; height: 4px; border-radius: 2px; background: var(--s3); margin: 14px auto 6px; }
+#settings-panel h3 { font-size: 16px; font-weight: 700; }
+.sp-label { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text2); }
+#api-key-input {
+  width: 100%; padding: 14px;
+  background: var(--s2); border: 1.5px solid var(--border); border-radius: var(--rs);
+  color: var(--text); font-family: 'SF Mono', 'Courier New', monospace; font-size: 14px;
+  outline: none; transition: border-color .18s;
 }
-#gen-btn.ready:active { transform: scale(.98); }
-#gen-btn.going {
-  background: var(--s2); color: var(--text2); cursor: default; box-shadow: none;
+#api-key-input:focus { border-color: var(--red); }
+.sp-row { display: flex; gap: 8px; }
+#save-key-btn {
+  flex: 1; height: 50px; background: var(--red); color: #fff; border: none;
+  border-radius: var(--rs); font-size: 15px; font-weight: 700;
+  cursor: pointer; font-family: inherit; transition: opacity .12s;
 }
-#gen-btn.done {
-  background: transparent; color: var(--text2); cursor: pointer;
-  border: 1.5px solid var(--border); box-shadow: none;
+#save-key-btn:active { opacity: .8; }
+#show-key-btn {
+  height: 50px; padding: 0 18px; background: var(--s2);
+  border: 1.5px solid var(--border); border-radius: var(--rs);
+  color: var(--text2); cursor: pointer; font-family: inherit; font-size: 14px; font-weight: 600;
 }
-#gen-btn.done:active { border-color: var(--red); color: var(--red); }
+#show-key-btn:active { border-color: var(--red); color: var(--text); }
+#key-status { font-size: 13px; color: #4caf76; text-align: center; min-height: 14px; }
 
-/* ── CAMERA MODAL ───────────────────────────────────────────── */
 #cam-modal {
   display: none; position: fixed; inset: 0; z-index: 50;
   background: #000; flex-direction: column;
@@ -277,34 +325,32 @@ body { display: flex; flex-direction: column; height: 100dvh; }
 #cam-modal.open { display: flex; }
 #viewfinder { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 #cam-controls {
-  position: absolute; bottom: max(48px, env(safe-area-inset-bottom));
+  position: absolute; bottom: max(52px, env(safe-area-inset-bottom));
   left: 0; right: 0;
-  display: flex; align-items: center; justify-content: space-around; padding: 0 28px;
+  display: flex; align-items: center; justify-content: space-around; padding: 0 32px;
 }
 .ci-btn {
-  width: 52px; height: 52px; border-radius: 50%;
-  background: rgba(0,0,0,.45); border: 1.5px solid rgba(255,255,255,.2);
-  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-  color: #fff; font-size: 20px; cursor: pointer;
-  display: flex; align-items: center; justify-content: center; font-family: inherit;
-  transition: transform .1s;
+  width: 50px; height: 50px; border-radius: 50%;
+  background: rgba(0,0,0,.4); border: 1px solid rgba(255,255,255,.16);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  color: #fff; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: transform .1s, opacity .1s;
 }
-.ci-btn:active { transform: scale(.9); }
+.ci-btn:active { transform: scale(.9); opacity: .8; }
 #shutter {
-  width: 80px; height: 80px; border-radius: 50%;
-  border: 4px solid rgba(255,255,255,.88); background: transparent;
+  width: 78px; height: 78px; border-radius: 50%;
+  border: 3.5px solid rgba(255,255,255,.85); background: transparent;
   cursor: pointer; display: flex; align-items: center; justify-content: center;
   transition: transform .1s;
 }
-#shutter:active { transform: scale(.92); }
+#shutter:active { transform: scale(.93); }
 #shutter-ring {
-  width: 62px; height: 62px; border-radius: 50%;
-  background: rgba(255,255,255,.88);
-  transition: transform .1s;
+  width: 60px; height: 60px; border-radius: 50%;
+  background: rgba(255,255,255,.85); transition: transform .1s;
 }
 #shutter:active #shutter-ring { transform: scale(.9); }
 
-/* ── FULLSCREEN MODAL ───────────────────────────────────────── */
 #fs-modal {
   display: none; position: fixed; inset: 0; z-index: 70;
   background: #000; align-items: center; justify-content: center;
@@ -312,44 +358,161 @@ body { display: flex; flex-direction: column; height: 100dvh; }
 #fs-modal.open { display: flex; }
 #fs-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
 #fs-bar {
-  position: absolute; bottom: max(22px, env(safe-area-inset-bottom)); left: 14px; right: 14px;
+  position: absolute; bottom: max(20px, env(safe-area-inset-bottom)); left: 14px; right: 14px;
   display: flex; align-items: center; justify-content: space-between;
-  background: rgba(8,8,8,.78); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
-  border: 1px solid rgba(255,255,255,.07); border-radius: 28px; padding: 12px 16px;
+  background: rgba(8,8,8,.82); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,.06); border-radius: 26px; padding: 12px 16px;
 }
-#fs-label { font-size: 14px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
+#fs-label { font-size: 13px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text); }
 #fs-close {
-  background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.12);
-  border-radius: 18px; color: var(--text); padding: 7px 16px;
-  font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer;
-  transition: transform .1s;
+  background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.1);
+  border-radius: 16px; color: var(--text); padding: 7px 16px;
+  font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer;
+  transition: background .12s;
 }
-#fs-close:active { transform: scale(.95); }
+#fs-close:active { background: rgba(255,255,255,.16); }
 .arrow {
   position: absolute; top: 50%; transform: translateY(-50%);
-  background: rgba(0,0,0,.48); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-  border: none; color: #fff; font-size: 30px;
-  width: 46px; height: 80px; border-radius: 8px;
-  cursor: pointer; display: flex; align-items: center; justify-content: center; font-family: inherit;
-  transition: transform .1s;
+  background: rgba(0,0,0,.42); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  border: none; color: #fff;
+  width: 42px; height: 76px; border-radius: 7px;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: opacity .1s;
 }
-.arrow:active { transform: translateY(-50%) scale(.92); }
+.arrow:active { opacity: .6; transform: translateY(-50%) scale(.94); }
 #fs-prev { left: 8px; }
 #fs-next { right: 8px; }
-
 </style>
 </head>
 <body>
 
-<div id="hdr">
-  <div id="hdr-brand">
-    <div id="hdr-name">Razor's Edge</div>
-    <div id="hdr-sub">Hair Studios</div>
+<div id="page-track">
+
+<!-- ══ PAGE 1: INTRO ═══════════════════════════════════════════ -->
+<div class="page" id="pg1">
+  <div class="ph" style="border-bottom:none;">
+    <div>
+      <div id="pg1-name">Razor's Edge</div>
+      <div id="pg1-sub">Hair Studios</div>
+    </div>
+    <div style="margin-left:auto;">
+      <button class="ph-action" id="settings-btn-intro" aria-label="Settings">
+        <svg width="16" height="13" viewBox="0 0 16 13" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round">
+          <line x1="0" y1="1.5" x2="16" y2="1.5"/>
+          <line x1="0" y1="6.5" x2="16" y2="6.5"/>
+          <line x1="0" y1="11.5" x2="16" y2="11.5"/>
+          <circle cx="11" cy="1.5"  r="2.1" fill="#080808" stroke="currentColor" stroke-width="1.4"/>
+          <circle cx="5"  cy="6.5"  r="2.1" fill="#080808" stroke="currentColor" stroke-width="1.4"/>
+          <circle cx="11" cy="11.5" r="2.1" fill="#080808" stroke="currentColor" stroke-width="1.4"/>
+        </svg>
+      </button>
+    </div>
   </div>
-  <button id="gear-btn">⚙︎</button>
+  <div id="intro-body">
+    <div id="intro-headline">See your new look<br>before the <em>first cut.</em></div>
+    <div id="intro-sub">Pick a length, choose a style, take a photo — and see exactly how you'll look.</div>
+    <button id="intro-start">Get Started</button>
+  </div>
 </div>
 
-<!-- Settings -->
+<!-- ══ PAGE 2: LENGTH ══════════════════════════════════════════ -->
+<div class="page" id="pg2">
+  <div class="ph">
+    <button class="ph-back" onclick="goTo(1)" aria-label="Back">
+      <svg width="9" height="15" viewBox="0 0 9 15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M8 1L1 7.5L8 14"/>
+      </svg>
+    </button>
+    <span class="ph-title">Top Length</span>
+    <div class="ph-spacer"></div>
+  </div>
+  <div class="prog-bar"><div class="prog-fill" style="width:33%"></div></div>
+  <div class="pscroll">
+    <div id="lengths"></div>
+  </div>
+  <div class="pfooter">
+    <button class="pfooter-btn off" id="len-next" onclick="goTo(3)">Next</button>
+  </div>
+</div>
+
+<!-- ══ PAGE 3: STYLE ═══════════════════════════════════════════ -->
+<div class="page" id="pg3">
+  <div class="ph">
+    <button class="ph-back" onclick="goTo(2)" aria-label="Back">
+      <svg width="9" height="15" viewBox="0 0 9 15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M8 1L1 7.5L8 14"/>
+      </svg>
+    </button>
+    <span class="ph-title">Style</span>
+    <div class="ph-spacer"></div>
+  </div>
+  <div class="prog-bar"><div class="prog-fill" style="width:67%"></div></div>
+  <div class="pscroll">
+    <div id="styles"></div>
+    <div id="style-hint">Select up to 3</div>
+  </div>
+  <div class="pfooter">
+    <button class="pfooter-btn off" id="sty-next" onclick="goTo(4)">Next</button>
+  </div>
+</div>
+
+<!-- ══ PAGE 4: PHOTO ════════════════════════════════════════════ -->
+<div class="page" id="pg4">
+  <div class="ph">
+    <button class="ph-back" onclick="goTo(3)" aria-label="Back">
+      <svg width="9" height="15" viewBox="0 0 9 15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M8 1L1 7.5L8 14"/>
+      </svg>
+    </button>
+    <span class="ph-title">Photo</span>
+    <div class="ph-spacer"></div>
+  </div>
+  <div class="prog-bar"><div class="prog-fill" style="width:100%"></div></div>
+  <div class="pscroll">
+    <button id="cam-open-btn">
+      <svg width="28" height="24" viewBox="0 0 28 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M27 20a2 2 0 01-2 2H3a2 2 0 01-2-2V9a2 2 0 012-2h4l2.5-4h9L21 7h4a2 2 0 012 2z"/>
+        <circle cx="14" cy="14" r="4.5"/>
+      </svg>
+      <span>Take a photo</span>
+    </button>
+    <div id="photo-thumb">
+      <img id="thumb-img" src="" alt="" />
+      <button id="retake-btn">Retake</button>
+    </div>
+  </div>
+  <div class="pfooter">
+    <button class="pfooter-btn off" id="gen-btn">Generate Previews</button>
+  </div>
+</div>
+
+<!-- ══ PAGE 5: RESULTS ══════════════════════════════════════════ -->
+<div class="page" id="pg5">
+  <div class="ph">
+    <div class="ph-spacer"></div>
+    <span class="ph-title">Results</span>
+    <button class="ph-action" id="settings-btn-results" aria-label="Settings">
+      <svg width="16" height="13" viewBox="0 0 16 13" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round">
+        <line x1="0" y1="1.5" x2="16" y2="1.5"/>
+        <line x1="0" y1="6.5" x2="16" y2="6.5"/>
+        <line x1="0" y1="11.5" x2="16" y2="11.5"/>
+        <circle cx="11" cy="1.5"  r="2.1" fill="#080808" stroke="currentColor" stroke-width="1.4"/>
+        <circle cx="5"  cy="6.5"  r="2.1" fill="#080808" stroke="currentColor" stroke-width="1.4"/>
+        <circle cx="11" cy="11.5" r="2.1" fill="#080808" stroke="currentColor" stroke-width="1.4"/>
+      </svg>
+    </button>
+  </div>
+  <div class="pscroll">
+    <div id="results-grid"></div>
+  </div>
+  <div class="pfooter">
+    <button class="pfooter-btn muted" id="results-btn">Generating…</button>
+  </div>
+</div>
+
+</div><!-- /page-track -->
+
+<!-- ══ SETTINGS OVERLAY ═══════════════════════════════════════ -->
 <div id="settings-ov">
   <div id="settings-panel">
     <div class="sp-handle"></div>
@@ -366,79 +529,47 @@ body { display: flex; flex-direction: column; height: 100dvh; }
   </div>
 </div>
 
-<div id="scroll">
-
-  <div>
-    <div class="sh">
-      <span class="sh-num">01</span>
-      <span class="sh-title">Top Length</span>
-    </div>
-    <div id="lengths"></div>
-  </div>
-
-  <div>
-    <div class="sh">
-      <span class="sh-num">02</span>
-      <span class="sh-title">Style</span>
-      <span class="sh-badge" id="style-badge">Pick up to 3</span>
-    </div>
-    <div id="styles"></div>
-  </div>
-
-  <div>
-    <div class="sh">
-      <span class="sh-num">03</span>
-      <span class="sh-title">Photo</span>
-    </div>
-    <button id="cam-open-btn">
-      <span class="ico">📷</span>
-      <span>Take a photo</span>
-    </button>
-    <div id="photo-thumb">
-      <img id="thumb-img" src="" alt="" />
-      <button id="retake-btn">📷 Retake</button>
-    </div>
-  </div>
-
-  <div id="results">
-    <div class="sh">
-      <span class="sh-num">✦</span>
-      <span class="sh-title">Your Looks</span>
-    </div>
-    <div id="results-grid"></div>
-  </div>
-
-</div>
-
-<div id="footer">
-  <button id="gen-btn">Generate Previews</button>
-</div>
-
-<!-- Camera -->
+<!-- ══ CAMERA OVERLAY ═════════════════════════════════════════ -->
 <div id="cam-modal">
   <video id="viewfinder" autoplay playsinline muted></video>
   <div id="cam-controls">
-    <button class="ci-btn" id="flip-btn">⟳</button>
+    <button class="ci-btn" id="flip-btn" aria-label="Flip camera">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M17 10A7 7 0 103 10"/>
+        <path d="M3 6v4H7"/>
+      </svg>
+    </button>
     <button id="shutter"><div id="shutter-ring"></div></button>
-    <button class="ci-btn" id="cam-close-btn">✕</button>
+    <button class="ci-btn" id="cam-close-btn" aria-label="Close">
+      <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+        <line x1="1" y1="1" x2="12" y2="12"/>
+        <line x1="12" y1="1" x2="1" y2="12"/>
+      </svg>
+    </button>
   </div>
 </div>
 
-<!-- Fullscreen -->
+<!-- ══ FULLSCREEN OVERLAY ════════════════════════════════════ -->
 <div id="fs-modal">
   <img id="fs-img" src="" alt="" />
-  <button class="arrow" id="fs-prev">‹</button>
-  <button class="arrow" id="fs-next">›</button>
+  <button class="arrow" id="fs-prev" aria-label="Previous">
+    <svg width="9" height="16" viewBox="0 0 9 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M8 1L1 8l7 7"/>
+    </svg>
+  </button>
+  <button class="arrow" id="fs-next" aria-label="Next">
+    <svg width="9" height="16" viewBox="0 0 9 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M1 1l7 7-7 7"/>
+    </svg>
+  </button>
   <div id="fs-bar">
     <span id="fs-label"></span>
-    <button id="fs-close">← Back</button>
+    <button id="fs-close">Close</button>
   </div>
 </div>
 
-
 <script>
-// ── CONFIG ────────────────────────────────────────────────────
-var MAX     = 3;
+var MAX = 3;
 var LENGTHS = [
   { id:'g1',     name:'Grade 1',  desc:'3mm'        },
   { id:'g2',     name:'Grade 2',  desc:'6mm'        },
@@ -464,31 +595,34 @@ var STYLES = [
   { id:'caesar-cut',    name:'Caesar Cut'    },
 ];
 
-// ── STATE ─────────────────────────────────────────────────────
-var state      = { length: null, styles: [], photo: null };
-var apiKey     = localStorage.getItem('re_key') || '';
-var camStream  = null;
-var camFacing  = 'environment';
+var state     = { length: null, styles: [], photo: null };
+var apiKey    = localStorage.getItem('re_key') || '';
+var camStream = null;
+var camFacing = 'environment';
 var generating = false;
-var fsItems    = [];
-var fsIdx      = 0;
+var fsItems   = [];
+var fsIdx     = 0;
 
-// ── HELPERS ───────────────────────────────────────────────────
 function $(id) { return document.getElementById(id); }
+
+// ── PAGE NAV ─────────────────────────────────────────────────
+function goTo(n) {
+  $('page-track').style.transform = 'translateX(' + ((n - 1) * -100) + 'vw)';
+}
 
 // ── BUILD LENGTHS ─────────────────────────────────────────────
 function buildLengths() {
   var el = $('lengths');
   el.innerHTML = '';
   LENGTHS.forEach(function(l) {
-    var b = document.createElement('button');
     var cls = 'lpill';
-    if (l.id === 'keep')   cls += ' keep';
-    if (l.id === 'medium' || l.id === 'long') cls += ' sciss';
+    if (l.id === 'keep') cls += ' keep';
+    else if (l.id === 'medium' || l.id === 'long') cls += ' sciss';
     if (state.length === l.id) cls += ' on';
+    var b = document.createElement('button');
     b.className = cls;
     b.innerHTML = '<span class="ln">' + l.name + '</span><span class="ld">' + l.desc + '</span>';
-    b.onclick = function() { state.length = l.id; buildLengths(); syncBtn(); };
+    b.onclick = function() { state.length = l.id; buildLengths(); syncNextBtns(); };
     el.appendChild(b);
   });
 }
@@ -501,29 +635,24 @@ function buildStyles() {
     var on = state.styles.indexOf(s.id) >= 0;
     var b  = document.createElement('button');
     b.className = 'stile' + (on ? ' on' : '');
-    b.innerHTML = (on ? '<span class="ck">✓</span>' : '') + s.name;
+    b.textContent = s.name;
     b.onclick = function() {
       var i = state.styles.indexOf(s.id);
       if (i >= 0) state.styles.splice(i, 1);
       else if (state.styles.length < MAX) state.styles.push(s.id);
-      buildStyles();
-      syncBtn();
+      buildStyles(); syncNextBtns();
     };
     el.appendChild(b);
   });
   var n = state.styles.length;
-  $('style-badge').textContent = n > 0 ? n + ' / ' + MAX + ' selected' : 'Pick up to ' + MAX;
+  $('style-hint').textContent = n > 0 ? n + ' of ' + MAX + ' selected' : 'Select up to 3';
 }
 
-// ── SYNC FOOTER BUTTON ────────────────────────────────────────
-function syncBtn() {
-  if (generating) return;
-  var btn   = $('gen-btn');
-  var ready = state.length && state.styles.length > 0 && state.photo;
-  btn.className   = ready ? 'ready' : '';
-  btn.textContent = ready ? '✦  Generate Previews' : 'Generate Previews';
-  btn.onclick     = ready ? generate : null;
-  btn.style.cursor = ready ? 'pointer' : 'not-allowed';
+// ── SYNC NAV BUTTONS ─────────────────────────────────────────
+function syncNextBtns() {
+  $('len-next').className = 'pfooter-btn ' + (state.length            ? 'on' : 'off');
+  $('sty-next').className = 'pfooter-btn ' + (state.styles.length > 0 ? 'on' : 'off');
+  $('gen-btn').className  = 'pfooter-btn ' + (state.photo             ? 'on' : 'off');
 }
 
 // ── CAMERA ───────────────────────────────────────────────────
@@ -538,7 +667,7 @@ function openCamera() {
     $('viewfinder').play();
   }).catch(function(e) {
     closeCamera();
-    alert('Camera: ' + e.message);
+    alert('Camera error: ' + e.message);
   });
 }
 
@@ -563,7 +692,7 @@ function capture() {
       $('thumb-img').src = reader.result;
       $('cam-open-btn').style.display = 'none';
       $('photo-thumb').style.display  = 'block';
-      syncBtn();
+      syncNextBtns();
     };
     reader.readAsDataURL(blob);
   }, 'image/jpeg', 0.92);
@@ -573,6 +702,7 @@ function capture() {
 function generate() {
   if (generating || !state.length || !state.styles.length || !state.photo) return;
   if (!apiKey) { openSettings(); return; }
+
   var styleObjs = state.styles.map(function(id) {
     return STYLES.find(function(s) { return s.id === id; });
   }).filter(Boolean);
@@ -580,55 +710,43 @@ function generate() {
   generating = true;
   var done = 0, total = styleObjs.length;
 
-  // Build grid with original + skeleton placeholders immediately
   var grid = $('results-grid');
   grid.innerHTML = '';
-
-  // Original photo
-  var orig = makeTile(state.photo.dataUri, 'Original');
-  orig.classList.add('orig');
-  grid.appendChild(orig);
-
-  // Skeletons — one per style, in selection order
+  grid.appendChild(makeTile(state.photo.dataUri, 'Original'));
   styleObjs.forEach(function(s, i) {
     var sk = document.createElement('div');
     sk.className = 'skel';
-    sk.id        = 'sk' + i;
-    sk.style.animationDelay = (i * 0.06) + 's';
+    sk.id = 'sk' + i;
+    sk.style.animationDelay = (i * 0.05) + 's';
     sk.innerHTML = '<div class="skel-img"></div><div class="skel-lbl">' + s.name + '</div>';
     grid.appendChild(sk);
   });
 
-  $('results').style.display = 'block';
-  setTimeout(function() { $('results').scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 100);
+  var rBtn = $('results-btn');
+  rBtn.className   = 'pfooter-btn muted';
+  rBtn.textContent = 'Generating…';
+  rBtn.onclick     = null;
 
-  // Footer shows progress
-  var btn = $('gen-btn');
-  btn.className   = 'going';
-  btn.textContent = '0 of ' + total + ' complete';
-  btn.onclick     = null;
+  goTo(5);
 
-  // Fire all requests in parallel
   styleObjs.forEach(function(style, idx) {
     callAPI(style, function(uri) {
-      swapSkeleton(idx, style, uri);
+      swapSkel(idx, style, uri);
       done++;
-      btn.textContent = done + ' of ' + total + ' complete';
-      if (done === total) finish();
+      if (done < total) rBtn.textContent = done + ' of ' + total + ' done';
+      else finishGenerate();
     }, function() {
-      swapSkeleton(idx, style, errSvg(style.name));
+      swapSkel(idx, style, errSvg(style.name));
       done++;
-      btn.textContent = done + ' of ' + total + ' complete';
-      if (done === total) finish();
+      if (done < total) rBtn.textContent = done + ' of ' + total + ' done';
+      else finishGenerate();
     });
   });
 }
 
-function swapSkeleton(idx, style, uri) {
+function swapSkel(idx, style, uri) {
   var sk = $('sk' + idx);
-  if (!sk) return;
-  var tile = makeTile(uri, style.name);
-  sk.parentNode.replaceChild(tile, sk);
+  if (sk) sk.parentNode.replaceChild(makeTile(uri, style.name), sk);
 }
 
 function makeTile(uri, label) {
@@ -636,41 +754,38 @@ function makeTile(uri, label) {
   tile.className = 'rtile';
   tile.innerHTML = '<img src="' + uri + '" loading="lazy" /><div class="rl">' + label + '</div>';
   tile.onclick = function() {
-    // Build fsItems from all currently-completed tiles in DOM order
     fsItems = [];
     $('results-grid').querySelectorAll('.rtile').forEach(function(t) {
-      var img = t.querySelector('img');
-      var lbl = t.querySelector('.rl');
+      var img = t.querySelector('img'), lbl = t.querySelector('.rl');
       if (img && lbl) fsItems.push({ uri: img.src, label: lbl.textContent });
     });
-    // Find this tile's position
-    var all   = Array.from($('results-grid').querySelectorAll('.rtile'));
-    var fsPos = all.indexOf(tile);
-    openFs(fsPos >= 0 ? fsPos : 0);
+    var pos = Array.from($('results-grid').querySelectorAll('.rtile')).indexOf(tile);
+    openFs(pos >= 0 ? pos : 0);
   };
   return tile;
 }
 
-function finish() {
+function finishGenerate() {
   generating = false;
-  var btn = $('gen-btn');
-  btn.className   = 'done';
-  btn.textContent = '↺  New Customer';
-  btn.onclick     = reset;
+  var rBtn = $('results-btn');
+  rBtn.className   = 'pfooter-btn ghost';
+  rBtn.textContent = 'New Customer';
+  rBtn.onclick     = resetAll;
 }
 
-function reset() {
+function resetAll() {
   state      = { length: null, styles: [], photo: null };
   generating = false;
-  $('results').style.display      = 'none';
   $('results-grid').innerHTML     = '';
   $('cam-open-btn').style.display = '';
   $('photo-thumb').style.display  = 'none';
   $('thumb-img').src              = '';
-  buildLengths();
-  buildStyles();
-  syncBtn();
-  $('scroll').scrollTo({ top: 0, behavior: 'smooth' });
+  var rBtn = $('results-btn');
+  rBtn.className   = 'pfooter-btn muted';
+  rBtn.textContent = 'Generating…';
+  rBtn.onclick     = null;
+  buildLengths(); buildStyles(); syncNextBtns();
+  goTo(1);
 }
 
 // ── API ───────────────────────────────────────────────────────
@@ -717,65 +832,58 @@ function openSettings() {
 function closeSettings() { $('settings-ov').classList.remove('open'); }
 
 // ── FULLSCREEN ───────────────────────────────────────────────
-function openFs(idx) {
-  fsIdx = idx;
-  renderFs();
-  $('fs-modal').classList.add('open');
-}
+function openFs(idx) { fsIdx = idx; renderFs(); $('fs-modal').classList.add('open'); }
 function renderFs() {
   var item = fsItems[fsIdx];
   if (!item) return;
-  $('fs-img').src          = item.uri;
+  $('fs-img').src = item.uri;
   $('fs-label').textContent = item.label;
-  $('fs-prev').style.display = fsIdx > 0                   ? 'flex' : 'none';
-  $('fs-next').style.display = fsIdx < fsItems.length - 1  ? 'flex' : 'none';
+  $('fs-prev').style.display = fsIdx > 0                  ? 'flex' : 'none';
+  $('fs-next').style.display = fsIdx < fsItems.length - 1 ? 'flex' : 'none';
 }
 
-// ── ERROR PLACEHOLDER ─────────────────────────────────────────
 function errSvg(name) {
   return 'data:image/svg+xml;base64,' + btoa(
     '<svg xmlns="http://www.w3.org/2000/svg" width="400" height="534">' +
-    '<rect width="400" height="534" fill="#111"/>' +
-    '<text x="200" y="267" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#444">' +
-    name + ' — generation failed</text></svg>'
+    '<rect width="400" height="534" fill="#0f0f0f"/>' +
+    '<text x="200" y="267" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#353230">' +
+    name + ' — failed</text></svg>'
   );
 }
 
 // ── EVENTS ───────────────────────────────────────────────────
-$('cam-open-btn').onclick  = openCamera;
-$('retake-btn').onclick    = openCamera;
-$('cam-close-btn').onclick = closeCamera;
-$('shutter').onclick       = capture;
+$('intro-start').onclick          = function() { goTo(2); };
+$('settings-btn-intro').onclick   = openSettings;
+$('settings-btn-results').onclick = openSettings;
+$('gen-btn').onclick              = function() { if (state.photo) generate(); };
+$('cam-open-btn').onclick         = openCamera;
+$('retake-btn').onclick           = openCamera;
+$('cam-close-btn').onclick        = closeCamera;
+$('shutter').onclick              = capture;
 $('flip-btn').onclick = function() {
   camFacing = camFacing === 'user' ? 'environment' : 'user';
-  closeCamera();
-  openCamera();
+  closeCamera(); openCamera();
 };
-
 $('fs-close').onclick = function() { $('fs-modal').classList.remove('open'); };
 $('fs-prev').onclick  = function() { fsIdx--; renderFs(); };
 $('fs-next').onclick  = function() { fsIdx++; renderFs(); };
-
-$('gear-btn').onclick    = openSettings;
 $('settings-ov').onclick = function(e) { if (e.target === $('settings-ov')) closeSettings(); };
 $('show-key-btn').onclick = function() {
-  var inp = $('api-key-input'), showing = inp.type === 'text';
-  inp.type = showing ? 'password' : 'text';
-  $('show-key-btn').textContent = showing ? 'Show' : 'Hide';
+  var inp = $('api-key-input'), vis = inp.type === 'text';
+  inp.type = vis ? 'password' : 'text';
+  $('show-key-btn').textContent = vis ? 'Show' : 'Hide';
 };
 $('save-key-btn').onclick = function() {
   var k = $('api-key-input').value.trim();
   if (!k) return;
   apiKey = k;
   localStorage.setItem('re_key', k);
-  $('key-status').textContent = '✓ Saved';
-  setTimeout(function() { closeSettings(); $('key-status').textContent = ''; }, 800);
+  $('key-status').textContent = 'Saved';
+  setTimeout(function() { closeSettings(); $('key-status').textContent = ''; }, 700);
 };
-
-// Swipe fullscreen
 var swX = 0;
 $('fs-modal').addEventListener('touchstart', function(e) { swX = e.touches[0].clientX; }, { passive: true });
-$('fs-modal').addEventListener('touchend',   function(e) {
+$('fs-modal').addEventListener('touchend', function(e) {
   var dx = e.changedTouches[0].clientX - swX;
   if (dx < -50 && fsIdx < fsItems.length - 1) { fsIdx++; renderFs(); }
   if (dx >  50 && fsIdx > 0)                  { fsIdx--; renderFs(); }
@@ -784,6 +892,7 @@ $('fs-modal').addEventListener('touchend',   function(e) {
 // ── INIT ─────────────────────────────────────────────────────
 buildLengths();
 buildStyles();
+syncNextBtns();
 if (!apiKey) openSettings();
 </script>
 </body>

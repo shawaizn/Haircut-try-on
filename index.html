@@ -357,18 +357,6 @@ body::before {
 ══════════════════════════════════════════════════════════════ */
 #results-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
 @media (min-width: 600px) { #results-grid { grid-template-columns: repeat(3, 1fr); } }
-#orig-toggle {
-  display: none; position: absolute;
-  bottom: calc(max(20px, env(safe-area-inset-bottom)) + 64px);
-  left: 18px; z-index: 10;
-  background: rgba(10,8,9,.78); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--border); border-radius: 20px;
-  color: var(--text2); font-family: inherit; font-size: 11px; font-weight: 600;
-  letter-spacing: 1.5px; text-transform: uppercase;
-  padding: 8px 14px; cursor: pointer;
-  transition: color .15s, border-color .15s;
-}
-#orig-toggle:active { color: var(--text); border-color: rgba(255,255,255,.22); }
 .rtile {
   border-radius: var(--rs); overflow: hidden;
   border: 1px solid var(--border); aspect-ratio: 3/4;
@@ -674,7 +662,6 @@ body::before {
   <div class="pscroll">
     <div id="results-grid"></div>
   </div>
-  <button id="orig-toggle">Original</button>
   <div class="pfooter">
     <button class="pfooter-btn muted" id="results-btn">Generating…</button>
   </div>
@@ -931,9 +918,7 @@ function generate() {
   var done = 0, total = styleObjs.length;
   var grid = $('results-grid');
   grid.innerHTML = '';
-  var origTile = makeTile(state.photo.dataUri, 'Original');
-  origTile.id = 'orig-tile';
-  grid.appendChild(origTile);
+  grid.appendChild(makeTile(state.photo.dataUri, 'Original'));
   styleObjs.forEach(function(s, i) {
     var sk = document.createElement('div');
     sk.className = 'skel'; sk.id = 'sk' + i;
@@ -988,21 +973,12 @@ function finishGenerate() {
   rBtn.className = 'pfooter-btn ghost';
   rBtn.textContent = 'New Customer';
   rBtn.onclick = resetAll;
-  var orig = $('orig-tile');
-  if (orig) orig.style.display = 'none';
-  var tog = $('orig-toggle');
-  tog.style.display = 'block';
-  tog.onclick = function() {
-    fsItems = [{ uri: state.photo.dataUri, label: 'Original' }];
-    openFs(0);
-  };
 }
 
 function resetAll() {
   state = { length: null, styles: [], photo: null };
   generating = false;
   $('results-grid').innerHTML     = '';
-  $('orig-toggle').style.display  = 'none';
   $('cam-open-btn').style.display = '';
   $('photo-thumb').style.display  = 'none';
   $('thumb-img').src              = '';

@@ -222,75 +222,62 @@ body::before {
 ══════════════════════════════════════════════════════════════ */
 #len-wrap {
   flex: 1; min-height: 0;
-  display: flex; flex-direction: column; justify-content: center; gap: 32px;
+  display: flex; flex-direction: column; gap: 0;
 }
 
-/* ── Clipper scrubber ── */
-#len-scrubber {
-  display: flex; flex-direction: column; gap: 20px;
-  padding: 0 4px;
+/* ── Section header ── */
+.len-section-hd {
+  font-size: 10px; font-weight: 600; letter-spacing: 2.5px;
+  text-transform: uppercase; color: var(--text3);
+  margin-bottom: 10px;
 }
-#len-label-row {
-  display: flex; justify-content: space-between; align-items: flex-end;
+
+/* ── Clipper grade grid ── */
+#len-clipper {
+  display: flex; flex-direction: column; gap: 10px;
+  flex: 1; min-height: 0; justify-content: center;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--border-s);
+  margin-bottom: 24px;
 }
-#len-selected-name {
-  font-size: 22px; font-weight: 700; letter-spacing: -.3px;
+#len-grade-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: 8px; flex: 1; min-height: 0;
 }
-#len-selected-desc {
-  font-size: 13px; font-weight: 500; color: var(--text2); letter-spacing: .3px;
+.lgrade {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 4px; min-height: 0;
+  border-radius: var(--rs); border: 1px solid var(--border);
+  background: var(--s1);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  cursor: pointer; font-family: inherit;
+  transition: border-color .18s, background .18s, transform .45s cubic-bezier(.34,1.56,.64,1);
 }
-#len-track-wrap {
-  position: relative; height: 44px; display: flex; align-items: center;
+.lgrade:active { transform: scale(.93) translateY(1px); transition: transform .1s ease; }
+.lgrade .lg-num {
+  font-size: 26px; font-weight: 700; line-height: 1;
+  color: var(--text2);
+  transition: color .18s;
 }
-#len-track-line {
-  position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-50%);
-  height: 2px; background: var(--border); border-radius: 1px;
+.lgrade .lg-mm {
+  font-size: 10px; font-weight: 500; color: var(--text3);
+  letter-spacing: .3px;
+  transition: color .18s;
 }
-#len-track-fill {
-  position: absolute; left: 0; top: 50%; transform: translateY(-50%);
-  height: 2px; background: var(--red); border-radius: 1px;
-  transition: width .3s cubic-bezier(.4,0,.2,1);
-}
-#len-dots {
-  position: absolute; left: 0; right: 0;
-  display: flex; justify-content: space-between; align-items: center;
-}
-.len-dot {
-  width: 36px; height: 44px;
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer; position: relative; flex-shrink: 0;
-}
-.len-dot-inner {
-  width: 10px; height: 10px; border-radius: 50%;
-  background: var(--s3); border: 1.5px solid var(--border);
-  transition: background .2s, border-color .2s, transform .35s cubic-bezier(.34,1.56,.64,1);
-}
-.len-dot.on .len-dot-inner {
-  background: var(--red); border-color: var(--red);
-  transform: scale(1.5);
-}
-.len-dot-num {
-  position: absolute; bottom: -2px;
-  font-size: 9px; font-weight: 600; color: var(--text3);
-  letter-spacing: .5px;
-  transition: color .2s;
-}
-.len-dot.on .len-dot-num { color: var(--red-border); }
+.lgrade.on { border-color: var(--red); background: var(--red-tint); }
+.lgrade.on .lg-num { color: var(--text); }
+.lgrade.on .lg-mm  { color: var(--red-border); }
 
 /* ── Scissors / special options ── */
-#len-scissors {
-  display: flex; flex-direction: column; gap: 8px;
-}
-#len-scissors-label {
-  font-size: 10px; font-weight: 600; letter-spacing: 2px;
-  text-transform: uppercase; color: var(--text3);
-  padding: 0 2px;
-}
+#len-scissors { display: flex; flex-direction: column; gap: 10px; }
 #len-scissors-btns { display: flex; gap: 8px; }
 .lopt {
   flex: 1; display: flex; flex-direction: column; align-items: center;
-  justify-content: center; gap: 2px;
-  padding: 14px 8px; border-radius: var(--rs);
+  justify-content: center; gap: 3px;
+  padding: 16px 8px; border-radius: var(--rs);
   border: 1px solid var(--border); background: var(--s1);
   backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
   cursor: pointer; font-family: inherit; color: var(--text);
@@ -413,7 +400,7 @@ body::before {
   from { opacity: 0; transform: translateY(12px) scale(.97); }
   to   { opacity: 1; transform: translateY(0) scale(1); }
 }
-.lpill.animate-in, .stile.animate-in, .len-dot.animate-in, .lopt.animate-in {
+.lpill.animate-in, .stile.animate-in, .lgrade.animate-in, .lopt.animate-in {
   animation: enterItem .4s cubic-bezier(.34,1.3,.64,1) both;
 }
 
@@ -583,19 +570,12 @@ body::before {
   <div class="prog-bar"><div class="prog-fill" style="width:33%"></div></div>
   <div class="pscroll">
     <div id="len-wrap">
-      <div id="len-scrubber">
-        <div id="len-label-row">
-          <span id="len-selected-name">—</span>
-          <span id="len-selected-desc"></span>
-        </div>
-        <div id="len-track-wrap">
-          <div id="len-track-line"></div>
-          <div id="len-track-fill" style="width:0%"></div>
-          <div id="len-dots"></div>
-        </div>
+      <div id="len-clipper">
+        <div class="len-section-hd">Clipper grade</div>
+        <div id="len-grade-grid"></div>
       </div>
       <div id="len-scissors">
-        <div id="len-scissors-label">Scissors cut</div>
+        <div class="len-section-hd">Scissors cut</div>
         <div id="len-scissors-btns"></div>
       </div>
     </div>
@@ -798,7 +778,7 @@ function goTo(n) {
 function staggerPage(n) {
   var pg = $('pg' + n);
   if (!pg) return;
-  var items = pg.querySelectorAll('.len-dot, .lopt, .stile');
+  var items = pg.querySelectorAll('.lgrade, .lopt, .stile');
   if (!items.length) return;
   items.forEach(function(el) { el.classList.remove('animate-in'); });
   void pg.offsetWidth;
@@ -829,42 +809,20 @@ var GRADES   = LENGTHS.filter(function(l) { return l.id.startsWith('g'); });
 var SCISSORS = LENGTHS.filter(function(l) { return l.id === 'medium' || l.id === 'long' || l.id === 'keep'; });
 
 function buildLengths() {
-  /* ── scrubber dots ── */
-  var dots = $('len-dots');
-  dots.innerHTML = '';
+  /* ── clipper grade grid ── */
+  var grid = $('len-grade-grid');
+  grid.innerHTML = '';
   GRADES.forEach(function(g, i) {
-    var dot = document.createElement('button');
-    dot.className = 'len-dot' + (state.length === g.id ? ' on' : '');
-    dot.setAttribute('aria-label', g.name);
-    dot.innerHTML = '<div class="len-dot-inner"></div><span class="len-dot-num">' + (i + 1) + '</span>';
-    dot.onclick = function() {
+    var b = document.createElement('button');
+    b.className = 'lgrade' + (state.length === g.id ? ' on' : '');
+    b.innerHTML = '<span class="lg-num">' + (i + 1) + '</span><span class="lg-mm">' + g.desc + '</span>';
+    b.onclick = function() {
       haptic(); playTick();
       state.length = g.id;
       buildLengths(); syncNextBtns();
     };
-    dots.appendChild(dot);
+    grid.appendChild(b);
   });
-
-  /* ── fill line ── */
-  var activeGradeIdx = GRADES.findIndex(function(g) { return g.id === state.length; });
-  var fillPct = activeGradeIdx >= 0
-    ? (activeGradeIdx / (GRADES.length - 1)) * 100
-    : 0;
-  $('len-track-fill').style.width = fillPct + '%';
-
-  /* ── label ── */
-  var active = LENGTHS.find(function(l) { return l.id === state.length; });
-  if (active && activeGradeIdx >= 0) {
-    $('len-selected-name').textContent = active.name;
-    $('len-selected-desc').textContent = active.desc;
-    $('len-selected-name').style.color = 'var(--text)';
-  } else if (!active || activeGradeIdx < 0) {
-    /* scissors option selected — clear scrubber label */
-    $('len-selected-name').textContent = 'Clipper';
-    $('len-selected-desc').textContent = '';
-    $('len-selected-name').style.color = 'var(--text3)';
-    $('len-track-fill').style.width = '0%';
-  }
 
   /* ── scissors buttons ── */
   var btns = $('len-scissors-btns');

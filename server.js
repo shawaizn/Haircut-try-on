@@ -1,4 +1,4 @@
-require('dotenv').config();
+const OPENAI_API_KEY = 'sk-...'; // ← paste your key here
 
 const express  = require('express');
 const multer   = require('multer');
@@ -47,9 +47,9 @@ app.use(express.static(path.join(__dirname)));
 
 app.post('/api/generate', upload.single('image'), async (req, res) => {
   try {
-    const apiKey = process.env.OPENAI_API_KEY;
-    if (!apiKey) {
-      return res.status(500).json({ error: 'OpenAI API key not configured on server.' });
+    const apiKey = OPENAI_API_KEY;
+    if (!apiKey || apiKey === 'sk-...') {
+      return res.status(500).json({ error: 'OpenAI API key not set in server.js.' });
     }
 
     const { length, style } = req.body;

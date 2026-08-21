@@ -58,18 +58,30 @@ html, body {
   height: calc(70px + max(0px, env(safe-area-inset-top)));
   border-bottom: 1px solid var(--border);
 }
-/* Three-column header: [side] [logo center] [side] */
+/* Three-column header: [side] [strip] [side] */
 .ph-side {
   width: 46px; flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
 }
 .ph-center {
-  flex: 1; display: flex; align-items: center; justify-content: center;
+  flex: 1; overflow: hidden; display: flex; align-items: center;
+  /* fade logos in/out at both edges */
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 18%, #000 82%, transparent);
+  mask-image:         linear-gradient(to right, transparent, #000 18%, #000 82%, transparent);
+}
+.logo-track {
+  display: flex; align-items: center; gap: 18px;
+  animation: logoScroll 22s linear infinite;
+  will-change: transform;
 }
 .ph-logo {
-  width: 52px; height: 52px;
+  width: 46px; height: 46px; flex-shrink: 0;
   border-radius: 50%; object-fit: cover; display: block;
-  box-shadow: 0 0 0 1.5px rgba(200,21,26,.55);
+  box-shadow: 0 0 0 1.5px rgba(200,21,26,.5);
+}
+@keyframes logoScroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
 }
 
 .icon-btn {
@@ -421,7 +433,7 @@ html, body {
   <!-- minimal header — just settings access -->
   <div class="ph" style="border-bottom:none;">
     <div class="ph-side"></div>
-    <div class="ph-center"></div>
+    <div class="ph-center"><div class="logo-track"><img class="ph-logo" src="razors%20logo.jpg" alt="" /><img class="ph-logo" src="razors%20logo.jpg" alt="" /><img class="ph-logo" src="razors%20logo.jpg" alt="" /><img class="ph-logo" src="razors%20logo.jpg" alt="" /><img class="ph-logo" src="razors%20logo.jpg" alt="" /><img class="ph-logo" src="razors%20logo.jpg" alt="" /><img class="ph-logo" src="razors%20logo.jpg" alt="" /><img class="ph-logo" src="razors%20logo.jpg" alt="" /><img class="ph-logo" src="razors%20logo.jpg" alt="" /><img class="ph-logo" src="razors%20logo.jpg" alt="" /><img class="ph-logo" src="razors%20logo.jpg" alt="" /><img class="ph-logo" src="razors%20logo.jpg" alt="" /><img class="ph-logo" src="razors%20logo.jpg" alt="" /><img class="ph-logo" src="razors%20logo.jpg" alt="" /><img class="ph-logo" src="razors%20logo.jpg" alt="" /><img class="ph-logo" src="razors%20logo.jpg" alt="" /></div></div>
     <div class="ph-side">
       <button class="icon-btn" id="settings-btn-intro" aria-label="Settings">
         <svg width="16" height="13" viewBox="0 0 16 13" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round">
@@ -464,9 +476,7 @@ html, body {
         </svg>
       </button>
     </div>
-    <div class="ph-center">
-      <img class="ph-logo" src="razors%20logo.jpg" alt="Razor's Edge" />
-    </div>
+    <div class="ph-center"><div class="logo-track"><img class="ph-logo" src="razors%20logo.jpg" alt="" /><img class="ph-logo" src="razors%20logo.jpg" alt="" /><img class="ph-logo" src="razors%20logo.jpg" alt="" /><img class="ph-logo" src="razors%20logo.jpg" alt="" /><img class="ph-logo" src="razors%20logo.jpg" alt="" /><img class="ph-logo" src="razors%20logo.jpg" alt="" /><img class="ph-logo" src="razors%20logo.jpg" alt="" /><img class="ph-logo" src="razors%20logo.jpg" alt="" /><img class="ph-logo" src="razors%20logo.jpg" alt="" /><img class="ph-logo" src="razors%20logo.jpg" alt="" /><img class="ph-logo" src="razors%20logo.jpg" alt="" /><img class="ph-logo" src="razors%20logo.jpg" alt="" /><img class="ph-logo" src="razors%20logo.jpg" alt="" /><img class="ph-logo" src="razors%20logo.jpg" alt="" /><img class="ph-logo" src="razors%20logo.jpg" alt="" /><img class="ph-logo" src="razors%20logo.jpg" alt="" /></div></div>
     <div class="ph-side"></div>
   </div>
   <div class="prog-bar"><div class="prog-fill" style="width:33%"></div></div>
@@ -488,9 +498,7 @@ html, body {
         </svg>
       </button>
     </div>
-    <div class="ph-center">
-      <img class="ph-logo" src="razors%20logo.jpg" alt="Razor's Edge" />
-    </div>
+    <div class="ph-center"><div class="logo-track"><img class="ph-logo" src="razors%20logo.jpg" alt="" /><img class="ph-logo" src="razors%20logo.jpg" alt="" /><img class="ph-logo" src="razors%20logo.jpg" alt="" /><img class="ph-logo" src="razors%20logo.jpg" alt="" /><img class="ph-logo" src="razors%20logo.jpg" alt="" /><img class="ph-logo" src="razors%20logo.jpg" alt="" /><img class="ph-logo" src="razors%20logo.jpg" alt="" /><img class="ph-logo" src="razors%20logo.jpg" alt="" /><img class="ph-logo" src="razors%20logo.jpg" alt="" /><img class="ph-logo" src="razors%20logo.jpg" alt="" /><img class="ph-logo" src="razors%20logo.jpg" alt="" /><img class="ph-logo" src="razors%20logo.jpg" alt="" /><img class="ph-logo" src="razors%20logo.jpg" alt="" /><img class="ph-logo" src="razors%20logo.jpg" alt="" /><img class="ph-logo" src="razors%20logo.jpg" alt="" /><img class="ph-logo" src="razors%20logo.jpg" alt="" /></div></div>
     <div class="ph-side"></div>
   </div>
   <div class="prog-bar"><div class="prog-fill" style="width:67%"></div></div>
@@ -513,9 +521,7 @@ html, body {
         </svg>
       </button>
     </div>
-    <div class="ph-center">
-      <img class="ph-logo" src="razors%20logo.jpg" alt="Razor's Edge" />
-    </div>
+    <div class="ph-center"><div class="logo-track"><img class="ph-logo" src="razors%20logo.jpg" alt="" /><img class="ph-logo" src="razors%20logo.jpg" alt="" /><img class="ph-logo" src="razors%20logo.jpg" alt="" /><img class="ph-logo" src="razors%20logo.jpg" alt="" /><img class="ph-logo" src="razors%20logo.jpg" alt="" /><img class="ph-logo" src="razors%20logo.jpg" alt="" /><img class="ph-logo" src="razors%20logo.jpg" alt="" /><img class="ph-logo" src="razors%20logo.jpg" alt="" /><img class="ph-logo" src="razors%20logo.jpg" alt="" /><img class="ph-logo" src="razors%20logo.jpg" alt="" /><img class="ph-logo" src="razors%20logo.jpg" alt="" /><img class="ph-logo" src="razors%20logo.jpg" alt="" /><img class="ph-logo" src="razors%20logo.jpg" alt="" /><img class="ph-logo" src="razors%20logo.jpg" alt="" /><img class="ph-logo" src="razors%20logo.jpg" alt="" /><img class="ph-logo" src="razors%20logo.jpg" alt="" /></div></div>
     <div class="ph-side"></div>
   </div>
   <div class="prog-bar"><div class="prog-fill" style="width:100%"></div></div>
@@ -541,9 +547,7 @@ html, body {
 <div class="page" id="pg5">
   <div class="ph">
     <div class="ph-side"></div>
-    <div class="ph-center">
-      <img class="ph-logo" src="razors%20logo.jpg" alt="Razor's Edge" />
-    </div>
+    <div class="ph-center"><div class="logo-track"><img class="ph-logo" src="razors%20logo.jpg" alt="" /><img class="ph-logo" src="razors%20logo.jpg" alt="" /><img class="ph-logo" src="razors%20logo.jpg" alt="" /><img class="ph-logo" src="razors%20logo.jpg" alt="" /><img class="ph-logo" src="razors%20logo.jpg" alt="" /><img class="ph-logo" src="razors%20logo.jpg" alt="" /><img class="ph-logo" src="razors%20logo.jpg" alt="" /><img class="ph-logo" src="razors%20logo.jpg" alt="" /><img class="ph-logo" src="razors%20logo.jpg" alt="" /><img class="ph-logo" src="razors%20logo.jpg" alt="" /><img class="ph-logo" src="razors%20logo.jpg" alt="" /><img class="ph-logo" src="razors%20logo.jpg" alt="" /><img class="ph-logo" src="razors%20logo.jpg" alt="" /><img class="ph-logo" src="razors%20logo.jpg" alt="" /><img class="ph-logo" src="razors%20logo.jpg" alt="" /><img class="ph-logo" src="razors%20logo.jpg" alt="" /></div></div>
     <div class="ph-side">
       <button class="icon-btn" id="settings-btn-results" aria-label="Settings">
         <svg width="16" height="13" viewBox="0 0 16 13" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round">

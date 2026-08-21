@@ -103,8 +103,9 @@ html, body {
 
 /* ── SCROLL AREA ────────────────────────────────────────────── */
 .pscroll {
-  flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
-  padding: 28px 20px 110px;
+  flex: 1; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch;
+  padding: 16px 20px 90px;
+  display: flex; flex-direction: column;
 }
 
 /* ── FOOTER ─────────────────────────────────────────────────── */
@@ -201,10 +202,14 @@ html, body {
 /* ══════════════════════════════════════════════════════════════
    PAGE 2 — LENGTH
 ══════════════════════════════════════════════════════════════ */
-#lengths { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+#lengths {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(4, 1fr); gap: 6px;
+  flex: 1; min-height: 0; align-items: stretch;
+}
 .lpill {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 3px; min-height: 64px; padding: 8px 4px;
+  gap: 3px; min-height: 0; padding: 8px 4px;
   border-radius: var(--rs); border: 1px solid var(--border);
   background: var(--s1); cursor: pointer; font-family: inherit; color: var(--text);
   transition: border-color .12s, background .12s, transform .08s;
@@ -222,11 +227,16 @@ html, body {
 /* ══════════════════════════════════════════════════════════════
    PAGE 3 — STYLE
 ══════════════════════════════════════════════════════════════ */
-#styles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+#styles {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr); gap: 6px;
+  flex: 1; min-height: 0; align-items: stretch;
+}
+#style-hint { flex-shrink: 0; }
 .stile {
   position: relative;
   display: flex; align-items: center; justify-content: center;
-  text-align: center; min-height: 64px; padding: 12px 8px;
+  text-align: center; min-height: 0; padding: 12px 8px;
   border-radius: var(--rs); border: 1px solid var(--border);
   background: var(--s1); cursor: pointer; font-family: inherit;
   color: var(--text); font-size: 13px; font-weight: 600; line-height: 1.35;
@@ -247,7 +257,7 @@ html, body {
    PAGE 4 — PHOTO
 ══════════════════════════════════════════════════════════════ */
 #cam-open-btn {
-  width: 100%; min-height: 140px;
+  width: 100%; flex: 1; min-height: 0;
   border-radius: var(--r); border: 1px dashed var(--border);
   background: var(--s1); color: var(--text2);
   font-family: inherit; font-size: 14px; font-weight: 500; cursor: pointer;
@@ -259,7 +269,7 @@ html, body {
 #cam-open-btn:active svg { opacity: 1; }
 #photo-thumb {
   display: none; border-radius: var(--r); overflow: hidden;
-  position: relative; height: 220px; border: 1px solid var(--border);
+  position: relative; flex: 1; min-height: 0; border: 1px solid var(--border);
 }
 #thumb-img { width: 100%; height: 100%; object-fit: cover; display: block; }
 #retake-btn {
@@ -643,9 +653,9 @@ function fillLogoTrack() {
     /* duplicate entire set for seamless loop */
     var set = Array.from(track.children);
     set.forEach(function(el) { track.appendChild(el.cloneNode(true)); });
-    /* duration: 60px/s so speed is consistent across screen sizes */
+    /* duration: 42px/s so speed is consistent across screen sizes */
     var setW = needed * 64 - 18;
-    track.style.animationDuration = (setW / 60).toFixed(1) + 's';
+    track.style.animationDuration = (setW / 42).toFixed(1) + 's';
   });
 }
 window.addEventListener('load', fillLogoTrack);

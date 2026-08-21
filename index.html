@@ -6,6 +6,9 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>Razor's Edge</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after {
   box-sizing: border-box; margin: 0; padding: 0;
@@ -13,26 +16,35 @@
 }
 :root {
   --red:        #c8151a;
-  --red-tint:   rgba(200,21,26,.09);
-  --red-border: rgba(200,21,26,.55);
-  --bg:         #080808;
-  --s1:         #0f0f0f;
-  --s2:         #181818;
-  --s3:         #222;
-  --border:     #272727;
-  --text:       #edeae5;
-  --text2:      #6a6662;
-  --text3:      #353230;
-  --r:          12px;
-  --rs:         9px;
+  --red-tint:   rgba(200,21,26,.08);
+  --red-border: rgba(200,21,26,.5);
+  --bg:         #09080a;
+  --s1:         rgba(255,255,255,.03);
+  --s2:         rgba(255,255,255,.06);
+  --s3:         rgba(255,255,255,.1);
+  --border:     rgba(255,255,255,.08);
+  --border-s:   rgba(255,255,255,.05);
+  --text:       #edeae7;
+  --text2:      #6b6868;
+  --text3:      #3a3838;
+  --r:          14px;
+  --rs:         10px;
 }
 html, body {
   height: 100%; overflow: hidden;
   background: var(--bg); color: var(--text);
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
   -webkit-font-smoothing: antialiased;
   user-select: none; -webkit-user-select: none;
   touch-action: manipulation;
+}
+/* grain texture */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 9998; pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+  opacity: .032;
 }
 
 /* ── PAGE TRACK ─────────────────────────────────────────────── */
@@ -97,8 +109,9 @@ html, body {
 /* ── SCROLL AREA ────────────────────────────────────────────── */
 .pscroll {
   flex: 1; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch;
-  padding: 16px 20px 90px;
+  padding: 20px 24px 96px;
   display: flex; flex-direction: column;
+  touch-action: pan-y;
 }
 
 /* ── FOOTER ─────────────────────────────────────────────────── */
@@ -117,7 +130,8 @@ html, body {
 }
 .pfooter-btn.off   { background: var(--s3); color: var(--text3); }
 .pfooter-btn.on    { background: var(--red); color: #fff; cursor: pointer; }
-.pfooter-btn.on:active { transform: scale(.98); opacity: .9; }
+.pfooter-btn.on { transition: background .22s, color .22s, transform .45s cubic-bezier(.34,1.56,.64,1), opacity .1s; }
+.pfooter-btn.on:active { transform: scale(.97) translateY(1px); opacity: .9; transition: transform .1s ease, opacity .1s; }
 .pfooter-btn.ghost {
   background: transparent; color: var(--text2); cursor: pointer;
   border: 1px solid var(--border);
@@ -197,24 +211,29 @@ html, body {
 ══════════════════════════════════════════════════════════════ */
 #lengths {
   display: grid; grid-template-columns: repeat(4, 1fr);
-  grid-template-rows: repeat(4, 1fr); gap: 6px;
+  grid-template-rows: repeat(4, 1fr); gap: 8px;
   flex: 1; min-height: 0; align-items: stretch;
 }
 .lpill {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   gap: 3px; min-height: 0; padding: 8px 4px;
   border-radius: var(--rs); border: 1px solid var(--border);
-  background: var(--s1); cursor: pointer; font-family: inherit; color: var(--text);
-  transition: border-color .12s, background .12s, transform .08s;
+  background: var(--s1);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  cursor: pointer; font-family: inherit; color: var(--text);
+  transition: border-color .18s, background .18s, transform .45s cubic-bezier(.34,1.56,.64,1);
 }
-.lpill:active { transform: scale(.95); }
-.lpill .ln { font-size: 13px; font-weight: 700; line-height: 1.2; text-align: center; }
-.lpill .ld { font-size: 10px; color: var(--text2); }
+.lpill:active {
+  transform: scale(.94) translateY(1px);
+  transition: transform .1s ease;
+}
+.lpill .ln { font-size: 13px; font-weight: 600; line-height: 1.2; text-align: center; }
+.lpill .ld { font-size: 10px; font-weight: 500; color: var(--text2); letter-spacing: .3px; }
 .lpill.on  { border-color: var(--red); background: var(--red-tint); }
 .lpill.on .ld { color: var(--red-border); }
-.lpill.keep  { grid-column: span 4; min-height: 48px; flex-direction: row; gap: 10px; }
-.lpill.keep .ln { font-size: 14px; }
-.lpill.keep .ld { font-size: 12px; }
+.lpill.keep  { grid-column: span 4; min-height: 0; flex-direction: row; gap: 10px; }
+.lpill.keep .ln { font-size: 13px; }
+.lpill.keep .ld { font-size: 10px; }
 .lpill.sciss { grid-column: span 2; }
 
 /* ══════════════════════════════════════════════════════════════
@@ -222,7 +241,7 @@ html, body {
 ══════════════════════════════════════════════════════════════ */
 #styles {
   display: grid; grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: repeat(3, 1fr); gap: 6px;
+  grid-template-rows: repeat(3, 1fr); gap: 8px;
   flex: 1; min-height: 0; align-items: stretch;
 }
 #style-hint { flex-shrink: 0; }
@@ -231,11 +250,16 @@ html, body {
   display: flex; align-items: center; justify-content: center;
   text-align: center; min-height: 0; padding: 12px 8px;
   border-radius: var(--rs); border: 1px solid var(--border);
-  background: var(--s1); cursor: pointer; font-family: inherit;
+  background: var(--s1);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  cursor: pointer; font-family: inherit;
   color: var(--text); font-size: 13px; font-weight: 600; line-height: 1.35;
-  transition: border-color .12s, background .12s, transform .08s;
+  transition: border-color .18s, background .18s, transform .45s cubic-bezier(.34,1.56,.64,1);
 }
-.stile:active { transform: scale(.95); }
+.stile:active {
+  transform: scale(.94) translateY(1px);
+  transition: transform .1s ease;
+}
 .stile.on { border-color: var(--red); background: var(--red-tint); }
 .stile.on::after {
   content: ''; position: absolute; top: 7px; right: 7px;
@@ -318,6 +342,13 @@ html, body {
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(8px); }
   to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes enterItem {
+  from { opacity: 0; transform: translateY(12px) scale(.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.lpill.animate-in, .stile.animate-in {
+  animation: enterItem .4s cubic-bezier(.34,1.3,.64,1) both;
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -440,13 +471,13 @@ html, body {
     <div class="ph-center"></div>
     <div class="ph-side">
       <button class="icon-btn" id="settings-btn-intro" aria-label="Settings">
-        <svg width="16" height="13" viewBox="0 0 16 13" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round">
+        <svg width="16" height="13" viewBox="0 0 16 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
           <line x1="0" y1="1.5" x2="16" y2="1.5"/>
           <line x1="0" y1="6.5" x2="16" y2="6.5"/>
           <line x1="0" y1="11.5" x2="16" y2="11.5"/>
-          <circle cx="11" cy="1.5"  r="2.1" fill="#080808" stroke="currentColor" stroke-width="1.4"/>
-          <circle cx="5"  cy="6.5"  r="2.1" fill="#080808" stroke="currentColor" stroke-width="1.4"/>
-          <circle cx="11" cy="11.5" r="2.1" fill="#080808" stroke="currentColor" stroke-width="1.4"/>
+          <circle cx="11" cy="1.5"  r="2.1" fill="#09080a" stroke="currentColor" stroke-width="1.5"/>
+          <circle cx="5"  cy="6.5"  r="2.1" fill="#09080a" stroke="currentColor" stroke-width="1.5"/>
+          <circle cx="11" cy="11.5" r="2.1" fill="#09080a" stroke="currentColor" stroke-width="1.5"/>
         </svg>
       </button>
     </div>
@@ -475,7 +506,7 @@ html, body {
   <div class="ph">
     <div class="ph-side">
       <button class="icon-btn" onclick="goTo(1)" aria-label="Back">
-        <svg width="9" height="15" viewBox="0 0 9 15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+        <svg width="9" height="15" viewBox="0 0 9 15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
           <path d="M8 1L1 7.5L8 14"/>
         </svg>
       </button>
@@ -497,7 +528,7 @@ html, body {
   <div class="ph">
     <div class="ph-side">
       <button class="icon-btn" onclick="goTo(2)" aria-label="Back">
-        <svg width="9" height="15" viewBox="0 0 9 15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+        <svg width="9" height="15" viewBox="0 0 9 15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
           <path d="M8 1L1 7.5L8 14"/>
         </svg>
       </button>
@@ -520,7 +551,7 @@ html, body {
   <div class="ph">
     <div class="ph-side">
       <button class="icon-btn" onclick="goTo(3)" aria-label="Back">
-        <svg width="9" height="15" viewBox="0 0 9 15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+        <svg width="9" height="15" viewBox="0 0 9 15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
           <path d="M8 1L1 7.5L8 14"/>
         </svg>
       </button>
@@ -554,13 +585,13 @@ html, body {
     <div class="ph-center"><span class="ph-wordmark">Razor's Edge</span><span class="ph-wordmark-sub">Hair Studios</span></div>
     <div class="ph-side">
       <button class="icon-btn" id="settings-btn-results" aria-label="Settings">
-        <svg width="16" height="13" viewBox="0 0 16 13" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round">
+        <svg width="16" height="13" viewBox="0 0 16 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
           <line x1="0" y1="1.5" x2="16" y2="1.5"/>
           <line x1="0" y1="6.5" x2="16" y2="6.5"/>
           <line x1="0" y1="11.5" x2="16" y2="11.5"/>
-          <circle cx="11" cy="1.5"  r="2.1" fill="#080808" stroke="currentColor" stroke-width="1.4"/>
-          <circle cx="5"  cy="6.5"  r="2.1" fill="#080808" stroke="currentColor" stroke-width="1.4"/>
-          <circle cx="11" cy="11.5" r="2.1" fill="#080808" stroke="currentColor" stroke-width="1.4"/>
+          <circle cx="11" cy="1.5"  r="2.1" fill="#09080a" stroke="currentColor" stroke-width="1.5"/>
+          <circle cx="5"  cy="6.5"  r="2.1" fill="#09080a" stroke="currentColor" stroke-width="1.5"/>
+          <circle cx="11" cy="11.5" r="2.1" fill="#09080a" stroke="currentColor" stroke-width="1.5"/>
         </svg>
       </button>
     </div>
@@ -604,7 +635,7 @@ html, body {
     </button>
     <button id="shutter"><div id="shutter-ring"></div></button>
     <button class="ci-btn" id="cam-close-btn" aria-label="Close">
-      <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+      <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
         <line x1="1" y1="1" x2="12" y2="12"/>
         <line x1="12" y1="1" x2="1" y2="12"/>
       </svg>
@@ -616,12 +647,12 @@ html, body {
 <div id="fs-modal">
   <img id="fs-img" src="" alt="" />
   <button class="arrow" id="fs-prev" aria-label="Previous">
-    <svg width="9" height="16" viewBox="0 0 9 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+    <svg width="9" height="16" viewBox="0 0 9 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
       <path d="M8 1L1 8l7 7"/>
     </svg>
   </button>
   <button class="arrow" id="fs-next" aria-label="Next">
-    <svg width="9" height="16" viewBox="0 0 9 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+    <svg width="9" height="16" viewBox="0 0 9 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
       <path d="M1 1l7 7-7 7"/>
     </svg>
   </button>
@@ -669,8 +700,49 @@ var fsIdx     = 0;
 
 function $(id) { return document.getElementById(id); }
 
+var currentPage = 1;
+
 function goTo(n) {
-  $('page-track').style.transform = 'translateX(' + ((n - 1) * -100) + 'vw)';
+  var forward = n >= currentPage;
+  currentPage = n;
+  var track = $('page-track');
+  track.style.transitionTimingFunction = forward
+    ? 'cubic-bezier(.4,0,.2,1)'
+    : 'cubic-bezier(.25,.46,.45,.94)';
+  track.style.transform = 'translateX(' + ((n - 1) * -100) + 'vw)';
+  staggerPage(n);
+}
+
+function staggerPage(n) {
+  var pg = $('pg' + n);
+  if (!pg) return;
+  var items = pg.querySelectorAll('.lpill, .stile');
+  if (!items.length) return;
+  items.forEach(function(el) {
+    el.classList.remove('animate-in');
+  });
+  void pg.offsetWidth;
+  items.forEach(function(el, i) {
+    el.style.animationDelay = (i * 28) + 'ms';
+    el.classList.add('animate-in');
+  });
+}
+
+function haptic() {
+  try { navigator.vibrate && navigator.vibrate(8); } catch(e) {}
+}
+
+function playTick() {
+  try {
+    var ctx = new (window.AudioContext || window.webkitAudioContext)();
+    var osc = ctx.createOscillator();
+    var gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.frequency.value = 900;
+    gain.gain.setValueAtTime(0.07, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.045);
+    osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.045);
+  } catch(e) {}
 }
 
 function buildLengths() {
@@ -684,7 +756,7 @@ function buildLengths() {
     var b = document.createElement('button');
     b.className = cls;
     b.innerHTML = '<span class="ln">' + l.name + '</span><span class="ld">' + l.desc + '</span>';
-    b.onclick = function() { state.length = l.id; buildLengths(); syncNextBtns(); };
+    b.onclick = function() { haptic(); playTick(); state.length = l.id; buildLengths(); syncNextBtns(); };
     el.appendChild(b);
   });
 }
@@ -699,8 +771,8 @@ function buildStyles() {
     b.textContent = s.name;
     b.onclick = function() {
       var i = state.styles.indexOf(s.id);
-      if (i >= 0) state.styles.splice(i, 1);
-      else if (state.styles.length < MAX) state.styles.push(s.id);
+      if (i >= 0) { state.styles.splice(i, 1); haptic(); playTick(); }
+      else if (state.styles.length < MAX) { state.styles.push(s.id); haptic(); playTick(); }
       buildStyles(); syncNextBtns();
     };
     el.appendChild(b);
@@ -770,8 +842,8 @@ function generate() {
   styleObjs.forEach(function(s, i) {
     var sk = document.createElement('div');
     sk.className = 'skel'; sk.id = 'sk' + i;
-    sk.style.animationDelay = (i * 0.05) + 's';
-    sk.innerHTML = '<div class="skel-img"></div><div class="skel-lbl">' + s.name + '</div>';
+    var phase = -((Date.now() % 1900) / 1000);
+    sk.innerHTML = '<div class="skel-img" style="animation-delay:' + phase + 's"></div><div class="skel-lbl">' + s.name + '</div>';
     grid.appendChild(sk);
   });
 

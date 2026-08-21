@@ -220,32 +220,87 @@ body::before {
 /* ══════════════════════════════════════════════════════════════
    PAGE 2 — LENGTH
 ══════════════════════════════════════════════════════════════ */
-#lengths {
-  display: grid; grid-template-columns: repeat(4, 1fr);
-  grid-template-rows: repeat(4, 1fr); gap: 8px;
-  flex: 1; min-height: 0; align-items: stretch;
+#len-wrap {
+  flex: 1; min-height: 0;
+  display: flex; flex-direction: column; justify-content: center; gap: 32px;
 }
-.lpill {
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 3px; min-height: 0; padding: 8px 4px;
-  border-radius: var(--rs); border: 1px solid var(--border);
-  background: var(--s1);
+
+/* ── Clipper scrubber ── */
+#len-scrubber {
+  display: flex; flex-direction: column; gap: 20px;
+  padding: 0 4px;
+}
+#len-label-row {
+  display: flex; justify-content: space-between; align-items: flex-end;
+}
+#len-selected-name {
+  font-size: 22px; font-weight: 700; letter-spacing: -.3px;
+}
+#len-selected-desc {
+  font-size: 13px; font-weight: 500; color: var(--text2); letter-spacing: .3px;
+}
+#len-track-wrap {
+  position: relative; height: 44px; display: flex; align-items: center;
+}
+#len-track-line {
+  position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-50%);
+  height: 2px; background: var(--border); border-radius: 1px;
+}
+#len-track-fill {
+  position: absolute; left: 0; top: 50%; transform: translateY(-50%);
+  height: 2px; background: var(--red); border-radius: 1px;
+  transition: width .3s cubic-bezier(.4,0,.2,1);
+}
+#len-dots {
+  position: absolute; left: 0; right: 0;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.len-dot {
+  width: 36px; height: 44px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; position: relative; flex-shrink: 0;
+}
+.len-dot-inner {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--s3); border: 1.5px solid var(--border);
+  transition: background .2s, border-color .2s, transform .35s cubic-bezier(.34,1.56,.64,1);
+}
+.len-dot.on .len-dot-inner {
+  background: var(--red); border-color: var(--red);
+  transform: scale(1.5);
+}
+.len-dot-num {
+  position: absolute; bottom: -2px;
+  font-size: 9px; font-weight: 600; color: var(--text3);
+  letter-spacing: .5px;
+  transition: color .2s;
+}
+.len-dot.on .len-dot-num { color: var(--red-border); }
+
+/* ── Scissors / special options ── */
+#len-scissors {
+  display: flex; flex-direction: column; gap: 8px;
+}
+#len-scissors-label {
+  font-size: 10px; font-weight: 600; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--text3);
+  padding: 0 2px;
+}
+#len-scissors-btns { display: flex; gap: 8px; }
+.lopt {
+  flex: 1; display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 2px;
+  padding: 14px 8px; border-radius: var(--rs);
+  border: 1px solid var(--border); background: var(--s1);
   backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
   cursor: pointer; font-family: inherit; color: var(--text);
   transition: border-color .18s, background .18s, transform .45s cubic-bezier(.34,1.56,.64,1);
 }
-.lpill:active {
-  transform: scale(.94) translateY(1px);
-  transition: transform .1s ease;
-}
-.lpill .ln { font-size: 13px; font-weight: 600; line-height: 1.2; text-align: center; }
-.lpill .ld { font-size: 10px; font-weight: 500; color: var(--text2); letter-spacing: .3px; }
-.lpill.on  { border-color: var(--red); background: var(--red-tint); }
-.lpill.on .ld { color: var(--red-border); }
-.lpill.keep  { grid-column: span 4; min-height: 0; flex-direction: row; gap: 10px; }
-.lpill.keep .ln { font-size: 13px; }
-.lpill.keep .ld { font-size: 10px; }
-.lpill.sciss { grid-column: span 2; }
+.lopt:active { transform: scale(.94) translateY(1px); transition: transform .1s ease; }
+.lopt .lo-name { font-size: 13px; font-weight: 600; }
+.lopt .lo-desc { font-size: 10px; font-weight: 500; color: var(--text2); }
+.lopt.on { border-color: var(--red); background: var(--red-tint); }
+.lopt.on .lo-desc { color: var(--red-border); }
 
 /* ══════════════════════════════════════════════════════════════
    PAGE 3 — STYLE
@@ -358,7 +413,7 @@ body::before {
   from { opacity: 0; transform: translateY(12px) scale(.97); }
   to   { opacity: 1; transform: translateY(0) scale(1); }
 }
-.lpill.animate-in, .stile.animate-in {
+.lpill.animate-in, .stile.animate-in, .len-dot.animate-in, .lopt.animate-in {
   animation: enterItem .4s cubic-bezier(.34,1.3,.64,1) both;
 }
 
@@ -527,7 +582,23 @@ body::before {
   </div>
   <div class="prog-bar"><div class="prog-fill" style="width:33%"></div></div>
   <div class="pscroll">
-    <div id="lengths"></div>
+    <div id="len-wrap">
+      <div id="len-scrubber">
+        <div id="len-label-row">
+          <span id="len-selected-name">—</span>
+          <span id="len-selected-desc"></span>
+        </div>
+        <div id="len-track-wrap">
+          <div id="len-track-line"></div>
+          <div id="len-track-fill" style="width:0%"></div>
+          <div id="len-dots"></div>
+        </div>
+      </div>
+      <div id="len-scissors">
+        <div id="len-scissors-label">Scissors cut</div>
+        <div id="len-scissors-btns"></div>
+      </div>
+    </div>
   </div>
   <div class="pfooter">
     <button class="pfooter-btn off" id="len-next" onclick="goTo(3)">Next</button>
@@ -727,11 +798,9 @@ function goTo(n) {
 function staggerPage(n) {
   var pg = $('pg' + n);
   if (!pg) return;
-  var items = pg.querySelectorAll('.lpill, .stile');
+  var items = pg.querySelectorAll('.len-dot, .lopt, .stile');
   if (!items.length) return;
-  items.forEach(function(el) {
-    el.classList.remove('animate-in');
-  });
+  items.forEach(function(el) { el.classList.remove('animate-in'); });
   void pg.offsetWidth;
   items.forEach(function(el, i) {
     el.style.animationDelay = (i * 28) + 'ms';
@@ -756,19 +825,60 @@ function playTick() {
   } catch(e) {}
 }
 
+var GRADES   = LENGTHS.filter(function(l) { return l.id.startsWith('g'); });
+var SCISSORS = LENGTHS.filter(function(l) { return l.id === 'medium' || l.id === 'long' || l.id === 'keep'; });
+
 function buildLengths() {
-  var el = $('lengths');
-  el.innerHTML = '';
-  LENGTHS.forEach(function(l) {
-    var cls = 'lpill';
-    if (l.id === 'keep') cls += ' keep';
-    else if (l.id === 'medium' || l.id === 'long') cls += ' sciss';
-    if (state.length === l.id) cls += ' on';
+  /* ── scrubber dots ── */
+  var dots = $('len-dots');
+  dots.innerHTML = '';
+  GRADES.forEach(function(g, i) {
+    var dot = document.createElement('button');
+    dot.className = 'len-dot' + (state.length === g.id ? ' on' : '');
+    dot.setAttribute('aria-label', g.name);
+    dot.innerHTML = '<div class="len-dot-inner"></div><span class="len-dot-num">' + (i + 1) + '</span>';
+    dot.onclick = function() {
+      haptic(); playTick();
+      state.length = g.id;
+      buildLengths(); syncNextBtns();
+    };
+    dots.appendChild(dot);
+  });
+
+  /* ── fill line ── */
+  var activeGradeIdx = GRADES.findIndex(function(g) { return g.id === state.length; });
+  var fillPct = activeGradeIdx >= 0
+    ? (activeGradeIdx / (GRADES.length - 1)) * 100
+    : 0;
+  $('len-track-fill').style.width = fillPct + '%';
+
+  /* ── label ── */
+  var active = LENGTHS.find(function(l) { return l.id === state.length; });
+  if (active && activeGradeIdx >= 0) {
+    $('len-selected-name').textContent = active.name;
+    $('len-selected-desc').textContent = active.desc;
+    $('len-selected-name').style.color = 'var(--text)';
+  } else if (!active || activeGradeIdx < 0) {
+    /* scissors option selected — clear scrubber label */
+    $('len-selected-name').textContent = 'Clipper';
+    $('len-selected-desc').textContent = '';
+    $('len-selected-name').style.color = 'var(--text3)';
+    $('len-track-fill').style.width = '0%';
+  }
+
+  /* ── scissors buttons ── */
+  var btns = $('len-scissors-btns');
+  btns.innerHTML = '';
+  SCISSORS.forEach(function(s) {
     var b = document.createElement('button');
-    b.className = cls;
-    b.innerHTML = '<span class="ln">' + l.name + '</span><span class="ld">' + l.desc + '</span>';
-    b.onclick = function() { haptic(); playTick(); state.length = l.id; buildLengths(); syncNextBtns(); };
-    el.appendChild(b);
+    b.className = 'lopt' + (state.length === s.id ? ' on' : '');
+    b.innerHTML = '<span class="lo-name">' + s.name + '</span><span class="lo-desc">' + s.desc + '</span>';
+    b.onclick = function() {
+      haptic(); playTick();
+      state.length = s.id;
+      buildLengths(); syncNextBtns();
+    };
+    btns.appendChild(b);
   });
 }
 

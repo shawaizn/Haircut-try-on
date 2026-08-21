@@ -57,14 +57,6 @@ body { display: flex; flex-direction: column; height: 100dvh; }
 #hdr-name  { font-size: 18px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: var(--text); }
 #hdr-sub   { font-size: 10px; font-weight: 700; letter-spacing: 2.5px; text-transform: uppercase; color: var(--red); }
 
-#gear-btn {
-  width: 40px; height: 40px; border-radius: 50%;
-  background: var(--s2); border: 1px solid var(--border);
-  color: var(--text2); font-size: 17px; cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  transition: border-color .18s, color .18s, transform .1s;
-}
-#gear-btn:active { border-color: var(--red); color: var(--red); transform: scale(.91); }
 
 /* ── SCROLL ─────────────────────────────────────────────────── */
 #scroll {
@@ -293,46 +285,6 @@ body { display: flex; flex-direction: column; height: 100dvh; }
 #fs-prev { left: 8px; }
 #fs-next { right: 8px; }
 
-/* ── SETTINGS ───────────────────────────────────────────────── */
-#settings-ov {
-  display: none; position: fixed; inset: 0; z-index: 80;
-  background: rgba(0,0,0,.6); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
-  align-items: flex-end;
-}
-#settings-ov.open { display: flex; }
-#settings-panel {
-  background: #131313; border-radius: 20px 20px 0 0;
-  border-top: 1px solid var(--border);
-  padding: 0 22px 22px;
-  padding-bottom: max(22px, env(safe-area-inset-bottom));
-  width: 100%; display: flex; flex-direction: column; gap: 14px;
-}
-.sp-handle { width: 36px; height: 4px; border-radius: 2px; background: var(--s3); margin: 12px auto 10px; }
-#settings-panel h3    { font-size: 17px; font-weight: 700; }
-.sp-label { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text2); }
-#api-key-input {
-  width: 100%; padding: 14px;
-  background: var(--s2); border: 1.5px solid var(--border);
-  border-radius: var(--rs); color: var(--text);
-  font-size: 15px; font-family: 'SF Mono', 'Courier New', monospace;
-  outline: none; transition: border-color .2s;
-}
-#api-key-input:focus { border-color: var(--red); }
-.sp-row { display: flex; gap: 8px; }
-#save-btn {
-  flex: 1; padding: 14px; background: var(--red); color: #fff;
-  border: none; border-radius: var(--rs); font-size: 15px; font-weight: 700;
-  cursor: pointer; font-family: inherit; transition: opacity .15s;
-}
-#save-btn:active { opacity: .82; }
-#show-btn {
-  padding: 14px 16px; background: var(--s2);
-  border: 1.5px solid var(--border); border-radius: var(--rs);
-  color: var(--text2); cursor: pointer; font-family: inherit; font-size: 14px; font-weight: 600;
-  transition: border-color .15s;
-}
-#show-btn:active { border-color: var(--red); }
-#key-ok { font-size: 13px; color: #4caf76; text-align: center; min-height: 16px; }
 </style>
 </head>
 <body>
@@ -342,7 +294,6 @@ body { display: flex; flex-direction: column; height: 100dvh; }
     <div id="hdr-name">Razor's Edge</div>
     <div id="hdr-sub">Hair Studios</div>
   </div>
-  <button id="gear-btn">⚙︎</button>
 </div>
 
 <div id="scroll">
@@ -414,28 +365,11 @@ body { display: flex; flex-direction: column; height: 100dvh; }
   </div>
 </div>
 
-<!-- Settings -->
-<div id="settings-ov">
-  <div id="settings-panel">
-    <div class="sp-handle"></div>
-    <h3>Settings</h3>
-    <div class="sp-label">OpenAI API Key</div>
-    <div class="sp-row">
-      <input id="api-key-input" type="password" placeholder="sk-…" />
-      <button id="show-btn">Show</button>
-    </div>
-    <div class="sp-row">
-      <button id="save-btn">Save Key</button>
-    </div>
-    <div id="key-ok"></div>
-  </div>
-</div>
 
 <script>
 // ── CONFIG ────────────────────────────────────────────────────
 var MAX     = 3;
 var LENGTHS = [
-  { id:'keep',   name:'Keep Top', desc:'Sides only' },
   { id:'g1',     name:'Grade 1',  desc:'3mm'        },
   { id:'g2',     name:'Grade 2',  desc:'6mm'        },
   { id:'g3',     name:'Grade 3',  desc:'10mm'       },
@@ -446,6 +380,7 @@ var LENGTHS = [
   { id:'g8',     name:'Grade 8',  desc:'25mm'       },
   { id:'medium', name:'Medium',   desc:'Scissors'   },
   { id:'long',   name:'Long',     desc:'Scissors'   },
+  { id:'keep',   name:'Keep Top', desc:'Sides only' },
 ];
 var STYLES = [
   { id:'skin-fade',     name:'Skin Fade'     },
@@ -453,21 +388,14 @@ var STYLES = [
   { id:'mid-fade',      name:'Mid Fade'      },
   { id:'high-fade',     name:'High Fade'     },
   { id:'drop-fade',     name:'Drop Fade'     },
-  { id:'slick-back',    name:'Slick Back'    },
-  { id:'pompadour',     name:'Pompadour'     },
-  { id:'quiff',         name:'Quiff'         },
   { id:'textured-crop', name:'Textured Crop' },
-  { id:'french-crop',   name:'French Crop'   },
-  { id:'undercut',      name:'Undercut'      },
+  { id:'slick-back',    name:'Slick Back'    },
   { id:'buzz-cut',      name:'Buzz Cut'      },
-  { id:'wolf-cut',      name:'Wolf Cut'      },
-  { id:'man-bun',       name:'Man Bun'       },
   { id:'caesar-cut',    name:'Caesar Cut'    },
 ];
 
 // ── STATE ─────────────────────────────────────────────────────
 var state      = { length: null, styles: [], photo: null };
-var apiKey     = localStorage.getItem('re_openai_key') || '';
 var camStream  = null;
 var camFacing  = 'environment';
 var generating = false;
@@ -573,8 +501,6 @@ function capture() {
 // ── GENERATE ─────────────────────────────────────────────────
 function generate() {
   if (generating || !state.length || !state.styles.length || !state.photo) return;
-  if (!apiKey) { openSettings(); return; }
-
   var styleObjs = state.styles.map(function(id) {
     return STYLES.find(function(s) { return s.id === id; });
   }).filter(Boolean);
@@ -677,36 +603,18 @@ function reset() {
 
 // ── API ───────────────────────────────────────────────────────
 function callAPI(style, ok, fail) {
-  var l = LENGTHS.find(function(x) { return x.id === state.length; });
-  var topDesc = state.length === 'keep'
-    ? 'Keep the hair on top EXACTLY as it is — same length, volume and texture. Only change the sides and back.'
-    : l && l.id.startsWith('g')
-      ? 'Set the top hair length to ' + l.name + ' (' + l.desc + ' clipper).'
-      : 'Set the top hair to a ' + (l ? l.name.toLowerCase() : '') + ' scissors length.';
-
-  var prompt =
-    'HAIR EDIT ONLY — do not alter the face, eyes, nose, mouth, jaw, ears, skin tone, beard, eyebrows, expression, pose, clothing or background. ' +
-    topDesc + ' Apply a "' + style.name + '" style. Photorealistic.';
-
   var fd = new FormData();
-  fd.append('model',   'gpt-image-2');
-  fd.append('prompt',  prompt);
-  fd.append('image',   state.photo.blob, 'photo.jpg');
-  fd.append('n',       '1');
-  fd.append('size',    '1024x1024');
-  fd.append('quality', 'medium');
+  fd.append('image',  state.photo.blob, 'photo.jpg');
+  fd.append('length', state.length);
+  fd.append('style',  style.id);
 
-  fetch('https://api.openai.com/v1/images/edits', {
-    method:  'POST',
-    headers: { 'Authorization': 'Bearer ' + apiKey },
-    body:    fd
-  }).then(function(r) { return r.json(); })
-  .then(function(d) {
-    if (d.error) { fail(d.error.message); return; }
-    var b64 = d.data && d.data[0] && d.data[0].b64_json;
-    if (b64) ok('data:image/png;base64,' + b64);
-    else fail('No image returned');
-  }).catch(fail);
+  fetch('/api/generate', { method: 'POST', body: fd })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (d.error) { fail(d.error); return; }
+      if (d.image)  ok('data:image/png;base64,' + d.image);
+      else fail('No image returned');
+    }).catch(fail);
 }
 
 // ── FULLSCREEN ───────────────────────────────────────────────
@@ -723,10 +631,6 @@ function renderFs() {
   $('fs-prev').style.display = fsIdx > 0                   ? 'flex' : 'none';
   $('fs-next').style.display = fsIdx < fsItems.length - 1  ? 'flex' : 'none';
 }
-
-// ── SETTINGS ─────────────────────────────────────────────────
-function openSettings()  { $('api-key-input').value = apiKey; $('settings-ov').classList.add('open'); }
-function closeSettings() { $('settings-ov').classList.remove('open'); }
 
 // ── ERROR PLACEHOLDER ─────────────────────────────────────────
 function errSvg(name) {
@@ -753,23 +657,6 @@ $('fs-close').onclick = function() { $('fs-modal').classList.remove('open'); };
 $('fs-prev').onclick  = function() { fsIdx--; renderFs(); };
 $('fs-next').onclick  = function() { fsIdx++; renderFs(); };
 
-$('gear-btn').onclick    = openSettings;
-$('settings-ov').onclick = function(e) { if (e.target === $('settings-ov')) closeSettings(); };
-
-$('show-btn').onclick = function() {
-  var inp = $('api-key-input'), showing = inp.type === 'text';
-  inp.type = showing ? 'password' : 'text';
-  $('show-btn').textContent = showing ? 'Show' : 'Hide';
-};
-$('save-btn').onclick = function() {
-  var k = $('api-key-input').value.trim();
-  if (!k) return;
-  apiKey = k;
-  localStorage.setItem('re_openai_key', k);
-  $('key-ok').textContent = '✓ Saved';
-  setTimeout(function() { $('key-ok').textContent = ''; closeSettings(); }, 900);
-};
-
 // Swipe fullscreen
 var swX = 0;
 $('fs-modal').addEventListener('touchstart', function(e) { swX = e.touches[0].clientX; }, { passive: true });
@@ -782,7 +669,6 @@ $('fs-modal').addEventListener('touchend',   function(e) {
 // ── INIT ─────────────────────────────────────────────────────
 buildLengths();
 buildStyles();
-if (!apiKey) openSettings();
 </script>
 </body>
 </html>

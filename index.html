@@ -21,10 +21,12 @@ body { display: flex; flex-direction: column; height: 100dvh; }
 .label { font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #666; margin-bottom: 10px; }
 
 /* length pills */
-#lengths { display: flex; gap: 10px; }
-.lpill { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-height: 80px; border-radius: 12px; border: 1.5px solid #2a2a2a; background: #1c1c1c; cursor: pointer; font-family: inherit; color: #f0f0f0; transition: border-color .15s; }
-.lpill .n { font-size: 18px; font-weight: 700; }
+#lengths { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.lpill { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-height: 72px; border-radius: 12px; border: 1.5px solid #2a2a2a; background: #1c1c1c; cursor: pointer; font-family: inherit; color: #f0f0f0; transition: border-color .15s; padding: 8px 4px; }
+.lpill .n { font-size: 13px; font-weight: 700; text-align: center; line-height: 1.2; }
 .lpill .d { font-size: 11px; color: #666; }
+.lpill.keep-top { grid-column: span 4; min-height: 52px; flex-direction: row; gap: 8px; }
+.lpill.keep-top .n { font-size: 15px; }
 .lpill.on { border-color: #c9a227; background: #221e0f; }
 .lpill.on .d { color: #9a7a1a; }
 
@@ -109,7 +111,7 @@ body { display: flex; flex-direction: column; height: 100dvh; }
 <div id="scroll">
 
   <div>
-    <div class="label">Desired Length</div>
+    <div class="label">Top Length</div>
     <div id="lengths"></div>
   </div>
 
@@ -193,9 +195,13 @@ body { display: flex; flex-direction: column; height: 100dvh; }
 var SHOP    = 'The Razor';
 var MAX     = 3;
 var LENGTHS = [
-  { id: 'short',  name: 'Short',  desc: 'Clean & tight' },
-  { id: 'medium', name: 'Medium', desc: 'Versatile'     },
-  { id: 'long',   name: 'Long',   desc: 'Bold & full'   }
+  { id: 'keep', name: 'Keep Top', desc: 'Sides only',  grade: null  },
+  { id: 'g1',   name: 'Grade 1',  desc: '3mm',         grade: 1     },
+  { id: 'g2',   name: 'Grade 2',  desc: '6mm',         grade: 2     },
+  { id: 'g3',   name: 'Grade 3',  desc: '10mm',        grade: 3     },
+  { id: 'g4',   name: 'Grade 4',  desc: '13mm',        grade: 4     },
+  { id: 'g6',   name: 'Grade 6',  desc: '19mm',        grade: 6     },
+  { id: 'g8',   name: 'Grade 8',  desc: '25mm',        grade: 8     },
 ];
 var STYLES = [
   { id: 'skin-fade',     name: 'Skin Fade'     },
@@ -231,7 +237,8 @@ function buildLengths() {
   el.innerHTML = '';
   LENGTHS.forEach(function(l) {
     var btn = document.createElement('button');
-    btn.className = 'lpill' + (state.length === l.id ? ' on' : '');
+    var extra = l.id === 'keep' ? ' keep-top' : '';
+    btn.className = 'lpill' + extra + (state.length === l.id ? ' on' : '');
     btn.innerHTML = '<span class="n">' + l.name + '</span><span class="d">' + l.desc + '</span>';
     btn.onclick = function() { state.length = l.id; buildLengths(); updateBtn(); };
     el.appendChild(btn);
@@ -341,11 +348,14 @@ function generate() {
 }
 
 function callOpenAI(style, onSuccess, onError) {
+  var lengthObj = LENGTHS.find(function(l) { return l.id === state.length; });
+  var lengthDesc = state.length === 'keep'
+    ? 'Keep the hair on TOP of the head EXACTLY as it currently is — identical length, volume, texture and styling. Only modify the sides and back.'
+    : 'Set the top hair length to ' + (lengthObj ? lengthObj.name + ' (' + lengthObj.desc + ')' : state.length) + '.';
   var prompt =
-    'This is a hair-only edit. Change NOTHING except the hair on top of the head. ' +
-    'Do NOT alter the face shape, eyes, nose, mouth, jaw, ears, eyebrows, skin tone, beard, expression, pose, clothing, or background — they must be pixel-perfect identical to the source photo. ' +
-    'The only change allowed: style the hair into a ' + state.length + ' "' + style.name + '". ' +
-    'Photorealistic. Same person, same lighting, same everything — only the hair changes.';
+    'Hair edit only — do not change the face, skin tone, eyes, nose, mouth, jaw, ears, eyebrows, beard, expression, pose, clothing, or background. ' +
+    lengthDesc + ' ' +
+    'Apply a "' + style.name + '" style to the sides and back. Photorealistic result.';
   fetch('https://fal.run/fal-ai/flux-pro/kontext', {
     method: 'POST',
     headers: { 'Authorization': 'Key ' + apiKey, 'Content-Type': 'application/json' },

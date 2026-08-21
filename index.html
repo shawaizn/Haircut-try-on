@@ -5,812 +5,456 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="Razor" />
-  <meta name="theme-color" content="#0a0a0a" />
-  <title>Razor — AI Hairstyle Preview</title>
+  <title>The Razor</title>
 <style>
-:root {
-  --bg:        #0a0a0a;
-  --surface:   #141414;
-  --card:      #1c1c1c;
-  --border:    #2c2c2c;
-  --accent:    #c9a227;
-  --accent-g:  rgba(201,162,39,.18);
-  --text:      #f0f0f0;
-  --dim:       #777;
-  --ok:        #4caf76;
-  --r:         14px;
-  --trans:     .17s ease;
-}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; background: #0a0a0a; color: #f0f0f0; font-family: -apple-system, BlinkMacSystemFont, sans-serif; overflow: hidden; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { height: 100%; overscroll-behavior: none; }
-body {
-  background: var(--bg); color: var(--text);
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
-  -webkit-font-smoothing: antialiased;
-  user-select: none; -webkit-user-select: none;
-  -webkit-tap-highlight-color: transparent;
-  touch-action: manipulation;
-  display: flex; flex-direction: column; height: 100dvh; overflow: hidden;
-}
+/* layout */
+body { display: flex; flex-direction: column; height: 100dvh; }
+#header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; padding-top: max(16px, env(safe-area-inset-top)); background: #141414; border-bottom: 1px solid #2a2a2a; flex-shrink: 0; }
+#header h1 { font-size: 20px; font-weight: 700; }
+#scroll { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 20px; display: flex; flex-direction: column; gap: 24px; }
+#footer { padding: 14px 20px; padding-bottom: max(14px, env(safe-area-inset-bottom)); background: #141414; border-top: 1px solid #2a2a2a; flex-shrink: 0; }
 
-/* ── page structure ── */
-#header {
-  flex-shrink: 0;
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 0 22px;
-  height: max(60px, calc(44px + env(safe-area-inset-top)));
-  padding-top: env(safe-area-inset-top);
-  border-bottom: 1px solid var(--border);
-  background: var(--surface);
-}
-#header h1 { font-size: 22px; font-weight: 700; letter-spacing: -.4px; }
-.header-right { display: flex; align-items: center; gap: 10px; }
+/* section */
+.label { font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #666; margin-bottom: 10px; }
 
-#main {
-  flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
-  padding: 0 0 max(16px, env(safe-area-inset-bottom));
-}
+/* length pills */
+#lengths { display: flex; gap: 10px; }
+.lpill { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-height: 80px; border-radius: 12px; border: 1.5px solid #2a2a2a; background: #1c1c1c; cursor: pointer; font-family: inherit; color: #f0f0f0; transition: border-color .15s; }
+.lpill .n { font-size: 18px; font-weight: 700; }
+.lpill .d { font-size: 11px; color: #666; }
+.lpill.on { border-color: #c9a227; background: #221e0f; }
+.lpill.on .d { color: #9a7a1a; }
 
-#footer {
-  flex-shrink: 0;
-  padding: 14px 20px;
-  padding-bottom: max(14px, env(safe-area-inset-bottom));
-  border-top: 1px solid var(--border);
-  background: var(--surface);
-}
+/* style grid */
+#styles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.stile { position: relative; display: flex; align-items: center; justify-content: center; text-align: center; min-height: 64px; padding: 10px 6px; border-radius: 10px; border: 1.5px solid #2a2a2a; background: #1c1c1c; cursor: pointer; font-family: inherit; color: #f0f0f0; font-size: 13px; font-weight: 600; line-height: 1.3; transition: border-color .15s; }
+.stile.on { border-color: #c9a227; background: #221e0f; }
+.stile .ck { position: absolute; top: 5px; right: 7px; font-size: 10px; color: #c9a227; font-weight: 800; }
 
-/* ── sections ── */
-.section {
-  padding: 20px 22px 0;
-}
-.section + .section { margin-top: 4px; }
-.section-header {
-  display: flex; align-items: baseline; gap: 10px; margin-bottom: 14px;
-}
-.section-title { font-size: 13px; font-weight: 700; letter-spacing: .9px; text-transform: uppercase; color: var(--dim); }
-.section-badge {
-  font-size: 12px; font-weight: 700; padding: 3px 9px; border-radius: 20px;
-  background: var(--card); border: 1px solid var(--border); color: var(--dim);
-  transition: color var(--trans), border-color var(--trans);
-}
-.section-badge.active { color: var(--accent); border-color: var(--accent); }
+/* photo */
+#photo-area button { width: 100%; min-height: 100px; border-radius: 12px; border: 1.5px dashed #2a2a2a; background: #1c1c1c; color: #666; font-family: inherit; font-size: 14px; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; transition: border-color .15s; }
+#photo-area button:hover { border-color: #c9a227; }
+#photo-thumb { width: 100%; height: 160px; border-radius: 12px; overflow: hidden; position: relative; border: 1.5px solid #2a2a2a; display: none; }
+#photo-thumb img { width: 100%; height: 100%; object-fit: cover; }
+#photo-thumb button { position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,.7); color: #fff; border: none; border-radius: 8px; padding: 6px 12px; font-size: 13px; font-family: inherit; cursor: pointer; min-height: unset; width: unset; display: flex; }
 
-/* ── divider ── */
-.divider { height: 1px; background: var(--border); margin: 20px 22px 0; }
+/* generate button */
+#gen-btn { width: 100%; height: 60px; border-radius: 30px; border: none; background: #c9a227; color: #000; font-family: inherit; font-size: 17px; font-weight: 700; cursor: pointer; opacity: .35; transition: opacity .2s; }
+#gen-btn.ready { opacity: 1; }
 
-/* ── buttons ── */
-.btn {
-  display: inline-flex; align-items: center; justify-content: center;
-  border: none; font-family: inherit; font-weight: 600; cursor: pointer;
-  transition: opacity var(--trans), transform var(--trans), box-shadow var(--trans);
-  white-space: nowrap;
-}
-.btn:active { opacity: .78; transform: scale(.97); }
-.btn-primary {
-  background: var(--accent); color: #000;
-  box-shadow: 0 3px 16px var(--accent-g);
-  width: 100%; height: 64px; font-size: 18px; border-radius: 32px;
-}
-.btn-primary:disabled { opacity: .32; pointer-events: none; box-shadow: none; }
-.btn-outline {
-  background: transparent; color: var(--text);
-  border: 1.5px solid var(--border); border-radius: 24px;
-  padding: 0 20px; height: 44px; font-size: 15px;
-}
-.btn-icon {
-  background: rgba(255,255,255,.06); border: 1px solid var(--border);
-  border-radius: 50%; width: 42px; height: 42px; font-size: 18px; color: var(--dim);
-}
-.btn-icon:hover { color: var(--text); }
+/* settings button */
+#settings-btn { background: #1c1c1c; border: 1px solid #2a2a2a; border-radius: 50%; width: 40px; height: 40px; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 
-/* ── hair length pills ── */
-.length-row { display: flex; gap: 10px; }
-.length-pill {
-  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 4px; min-height: 72px; border-radius: var(--r);
-  border: 1.5px solid var(--border); background: var(--card);
-  cursor: pointer; font-family: inherit; color: var(--text);
-  transition: border-color var(--trans), background var(--trans), transform var(--trans);
-}
-.length-pill:active { transform: scale(.97); }
-.length-pill.selected { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 11%, var(--card)); }
-.length-pill .pill-name { font-size: 18px; font-weight: 700; }
-.length-pill .pill-sub  { font-size: 11px; color: var(--dim); }
-.length-pill.selected .pill-sub { color: color-mix(in srgb, var(--accent) 70%, var(--dim)); }
+/* results */
+#results { display: none; }
+#results-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+@media (min-width: 600px) { #results-grid { grid-template-columns: repeat(3, 1fr); } }
+.rtile { border-radius: 10px; overflow: hidden; border: 1.5px solid #2a2a2a; aspect-ratio: 3/4; display: flex; flex-direction: column; cursor: pointer; background: #1c1c1c; }
+.rtile img { flex: 1; width: 100%; object-fit: cover; min-height: 0; display: block; }
+.rtile span { padding: 8px; font-size: 12px; font-weight: 600; text-align: center; background: #141414; color: #888; flex-shrink: 0; }
 
-/* ── style grid ── */
-.style-grid {
-  display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px;
-}
-@media (min-width: 700px) { .style-grid { grid-template-columns: repeat(4, 1fr); } }
-@media (min-width: 960px) { .style-grid { grid-template-columns: repeat(5, 1fr); } }
-
-.style-tile {
-  position: relative; display: flex; align-items: center; justify-content: center;
-  text-align: center; min-height: 68px; padding: 12px 8px;
-  border-radius: var(--r); border: 1.5px solid var(--border); background: var(--card);
-  cursor: pointer; font-family: inherit; color: var(--text);
-  transition: border-color var(--trans), background var(--trans), transform var(--trans);
-  font-size: 14px; font-weight: 600; line-height: 1.3;
-}
-.style-tile:active { transform: scale(.95); }
-.style-tile.selected {
-  border-color: var(--accent);
-  background: color-mix(in srgb, var(--accent) 11%, var(--card));
-}
-.style-tile .tick {
-  position: absolute; top: 6px; right: 8px;
-  font-size: 11px; font-weight: 800; color: var(--accent);
-}
-
-/* ── photo area ── */
-.photo-area {
-  display: flex; gap: 14px; align-items: stretch;
-}
-.photo-placeholder {
-  flex: 1; min-height: 110px; max-height: 160px;
-  border-radius: var(--r); border: 1.5px dashed var(--border);
-  background: var(--card); display: flex; flex-direction: column;
-  align-items: center; justify-content: center; gap: 6px;
-  cursor: pointer; transition: border-color var(--trans);
-  font-family: inherit; color: var(--dim); font-size: 13px;
-}
-.photo-placeholder:hover { border-color: var(--accent-dim, #8a6f1a); }
-.photo-placeholder .cam-icon { font-size: 32px; }
-.photo-thumb {
-  flex: 1; min-height: 110px; max-height: 160px;
-  border-radius: var(--r); overflow: hidden; position: relative;
-  border: 1.5px solid var(--border);
-}
-.photo-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.photo-thumb .retake-btn {
-  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
-  background: rgba(0,0,0,.45); opacity: 0; transition: opacity var(--trans);
-  font-size: 13px; font-weight: 600; color: #fff; gap: 6px;
-  cursor: pointer; border: none; font-family: inherit; width: 100%;
-}
-.photo-thumb:hover .retake-btn { opacity: 1; }
-
-/* ── results ── */
-.results-grid {
-  display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;
-}
-@media (min-width: 600px) { .results-grid { grid-template-columns: repeat(3, 1fr); } }
-@media (min-width: 900px) { .results-grid { grid-template-columns: repeat(4, 1fr); } }
-
-.result-tile {
-  position: relative; border-radius: var(--r); overflow: hidden;
-  border: 1.5px solid var(--border); background: var(--card);
-  aspect-ratio: 3/4; cursor: pointer; display: flex; flex-direction: column;
-  font-family: inherit; padding: 0;
-  transition: transform var(--trans), border-color var(--trans);
-}
-.result-tile:active { transform: scale(.97); }
-.result-tile:hover  { border-color: color-mix(in srgb, var(--accent) 50%, var(--border)); }
-.result-tile.original { border-style: dashed; }
-.result-tile img { width: 100%; flex: 1; object-fit: cover; min-height: 0; display: block; }
-.result-label {
-  padding: 8px 10px; font-size: 13px; font-weight: 600;
-  background: var(--surface); text-align: center; flex-shrink: 0; color: var(--dim);
-}
-.result-tile.original .result-label { font-style: italic; }
-
-/* ── start again strip ── */
-.restart-strip {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 14px 22px 0;
-}
-.restart-strip p { font-size: 14px; color: var(--dim); }
-
-/* ── camera modal ── */
-.modal {
-  position: fixed; inset: 0; z-index: 100;
-  display: none; flex-direction: column;
-}
+/* modals */
+.modal { display: none; position: fixed; inset: 0; z-index: 50; }
 .modal.open { display: flex; }
 
-.camera-modal { background: #000; }
+/* camera modal */
+#cam-modal { background: #000; flex-direction: column; }
 #viewfinder { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-.camera-overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; }
-.guide-ring { width: min(68vw,68vh); height: min(68vw,68vh); border-radius: 50%; border: 2px dashed rgba(255,255,255,.3); }
-.camera-controls {
-  position: absolute; bottom: max(36px,env(safe-area-inset-bottom)); left: 0; right: 0;
-  display: flex; align-items: center; justify-content: space-around; padding: 0 40px;
-}
-.shutter {
-  width: 78px; height: 78px; border-radius: 50%;
-  border: 4px solid #fff; background: transparent; cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  transition: transform .12s ease;
-}
-.shutter:active { transform: scale(.9); }
-.shutter-dot { width: 60px; height: 60px; border-radius: 50%; background: #fff; }
-.cam-hint {
-  position: absolute; top: max(18px,env(safe-area-inset-top)); left: 0; right: 0;
-  text-align: center; font-size: 14px; color: rgba(255,255,255,.75);
-  text-shadow: 0 1px 4px rgba(0,0,0,.9);
-}
+#cam-controls { position: absolute; bottom: max(40px, env(safe-area-inset-bottom)); left: 0; right: 0; display: flex; align-items: center; justify-content: space-around; padding: 0 40px; }
+.icon-btn { background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.2); border-radius: 50%; width: 50px; height: 50px; color: #fff; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-family: inherit; }
+#shutter { width: 76px; height: 76px; border-radius: 50%; border: 4px solid #fff; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+#shutter div { width: 58px; height: 58px; border-radius: 50%; background: #fff; }
 
-/* ── fullscreen modal ── */
-.fullscreen-modal { background: #000; position: relative; }
-.fullscreen-modal img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
-.fs-bar {
-  position: absolute; bottom: max(20px,env(safe-area-inset-bottom));
-  left: 16px; right: 16px; display: flex; align-items: center;
-  justify-content: space-between; gap: 12px;
-  background: rgba(0,0,0,.6); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-  border-radius: 28px; padding: 10px 16px;
-}
-.fs-label { font-size: 17px; font-weight: 700; }
-.fs-nav {
-  position: absolute; top: 50%; left: 0; right: 0; transform: translateY(-50%);
-  display: flex; justify-content: space-between; padding: 0 10px; pointer-events: none;
-}
-.nav-arrow {
-  pointer-events: all; background: rgba(0,0,0,.5); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-  border: none; color: var(--text); font-size: 38px; width: 52px; height: 74px;
-  border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center;
-  line-height: 1; font-family: inherit; transition: opacity var(--trans);
-}
-.nav-arrow:active { opacity: .6; }
-
-/* ── loading overlay ── */
-.loading-modal {
-  background: rgba(0,0,0,.92); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
-  align-items: center; justify-content: center; flex-direction: column; text-align: center; padding: 32px;
-}
-.gen-ring { position: relative; width: 140px; height: 140px; }
-.gen-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
-.ring-bg { fill: none; stroke: var(--border); stroke-width: 8; }
-.ring-fg { fill: none; stroke: var(--accent); stroke-width: 8; stroke-linecap: round; transition: stroke-dashoffset .5s ease; }
-.ring-num { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 26px; font-weight: 700; color: var(--accent); }
-.chips { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-top: 24px; }
-.chip { padding: 7px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; background: var(--card); border: 1.5px solid var(--border); color: var(--dim); }
-.chip.done { border-color: var(--ok); color: var(--ok); }
-.chip.active { border-color: var(--accent); color: var(--accent); }
-
-/* ── settings panel ── */
-.overlay { position: fixed; inset: 0; z-index: 90; background: rgba(0,0,0,.55); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); display: none; align-items: flex-end; }
-.overlay.open { display: flex; }
-.settings-panel {
-  background: var(--surface); border-radius: 18px 18px 0 0; border-top: 1px solid var(--border);
-  padding: 24px 24px max(24px,env(safe-area-inset-bottom)); width: 100%; max-width: 640px; margin: 0 auto;
-}
-.spanel-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; }
-.spanel-title { font-size: 18px; font-weight: 700; }
-.field-label { font-size: 12px; letter-spacing: .8px; text-transform: uppercase; color: var(--dim); font-weight: 700; margin-bottom: 8px; }
-.key-row { display: flex; gap: 8px; }
-.key-input {
-  flex: 1; padding: 14px 16px; font-size: 15px; background: var(--card);
-  border: 1.5px solid var(--border); border-radius: 10px; color: var(--text);
-  font-family: monospace; outline: none; transition: border-color var(--trans);
-}
-.key-input:focus { border-color: var(--accent); }
-.show-btn {
-  background: var(--card); border: 1.5px solid var(--border); color: var(--dim);
-  font-size: 13px; padding: 0 14px; border-radius: 10px; cursor: pointer; font-family: inherit;
-}
-.save-key-btn { margin-top: 14px; width: 100%; height: 52px; border-radius: 10px; }
-.s-status { margin-top: 10px; font-size: 13px; text-align: center; min-height: 18px; color: var(--ok); }
-.provider-row { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
-.provider-lbl { font-size: 13px; color: var(--dim); }
-.provider-badge { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 5px 12px; font-size: 12px; font-weight: 700; color: var(--accent); }
-
-/* ── misc ── */
-.spinner { width: 52px; height: 52px; border: 4px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .85s linear infinite; }
+/* loading modal */
+#load-modal { background: rgba(0,0,0,.92); align-items: center; justify-content: center; flex-direction: column; text-align: center; padding: 32px; gap: 16px; }
+#load-modal h2 { font-size: 20px; }
+#load-modal p { color: #888; font-size: 15px; }
+.spinner { width: 56px; height: 56px; border: 4px solid #2a2a2a; border-top-color: #c9a227; border-radius: 50%; animation: spin .8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
-@keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-7px)} 75%{transform:translateX(7px)} }
-.shake { animation: shake .35s ease; }
-code { background: var(--card); padding: 1px 7px; border-radius: 4px; font-size: 13px; color: var(--accent); }
-.hidden { display: none !important; }
+
+/* fullscreen modal */
+#fs-modal { background: #000; align-items: center; justify-content: center; flex-direction: column; }
+#fs-modal img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+#fs-bar { position: absolute; bottom: max(20px, env(safe-area-inset-bottom)); left: 16px; right: 16px; display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,.65); backdrop-filter: blur(10px); border-radius: 24px; padding: 10px 14px; }
+#fs-label { font-size: 16px; font-weight: 700; }
+#fs-close { background: transparent; border: 1.5px solid #444; border-radius: 20px; color: #f0f0f0; padding: 6px 16px; font-family: inherit; font-size: 14px; cursor: pointer; }
+.arrow { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,.5); border: none; color: #fff; font-size: 36px; width: 50px; height: 72px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-family: inherit; }
+#fs-prev { left: 10px; }
+#fs-next { right: 10px; }
+
+/* settings overlay */
+#settings-overlay { display: none; position: fixed; inset: 0; z-index: 60; background: rgba(0,0,0,.6); align-items: flex-end; }
+#settings-overlay.open { display: flex; }
+#settings-panel { background: #141414; border-radius: 16px 16px 0 0; border-top: 1px solid #2a2a2a; padding: 24px; padding-bottom: max(24px, env(safe-area-inset-bottom)); width: 100%; display: flex; flex-direction: column; gap: 12px; }
+#settings-panel h3 { font-size: 17px; font-weight: 700; }
+#settings-panel input { width: 100%; padding: 14px; background: #1c1c1c; border: 1.5px solid #2a2a2a; border-radius: 10px; color: #f0f0f0; font-size: 15px; font-family: monospace; outline: none; }
+#settings-panel input:focus { border-color: #c9a227; }
+.row { display: flex; gap: 8px; }
+#save-key-btn { flex: 1; padding: 14px; background: #c9a227; color: #000; border: none; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; font-family: inherit; }
+#show-key-btn { padding: 14px 18px; background: #1c1c1c; border: 1.5px solid #2a2a2a; border-radius: 10px; color: #888; cursor: pointer; font-family: inherit; }
+#key-status { font-size: 13px; color: #4caf76; text-align: center; min-height: 18px; }
+#settings-close-btn { background: transparent; border: none; color: #888; font-size: 20px; cursor: pointer; align-self: flex-end; margin-top: -8px; }
 </style>
 </head>
 <body>
 
-<!-- ── HEADER ─────────────────────────────────────────────────── -->
 <div id="header">
-  <h1 id="shop-name">The Razor</h1>
-  <div class="header-right">
-    <button class="btn btn-icon hidden" id="restart-btn" title="Start Again">↺</button>
-    <button class="btn btn-icon" id="settings-btn" title="Settings">⚙️</button>
-  </div>
+  <h1>The Razor</h1>
+  <button id="settings-btn">⚙️</button>
 </div>
 
-<!-- ── MAIN SCROLL AREA ───────────────────────────────────────── -->
-<div id="main">
+<div id="scroll">
 
-  <!-- Hair Length -->
-  <div class="section" id="sec-length">
-    <div class="section-header">
-      <span class="section-title">Desired Length</span>
-      <span class="section-badge" id="badge-length">Not set</span>
-    </div>
-    <div class="length-row" id="length-row">
-      <!-- injected by JS -->
-    </div>
+  <div>
+    <div class="label">Desired Length</div>
+    <div id="lengths"></div>
   </div>
 
-  <div class="divider"></div>
-
-  <!-- Styles -->
-  <div class="section" id="sec-styles">
-    <div class="section-header">
-      <span class="section-title">Style</span>
-      <span class="section-badge" id="badge-styles">0 selected</span>
-    </div>
-    <div class="style-grid" id="style-grid">
-      <!-- injected by JS -->
-    </div>
+  <div>
+    <div class="label">Style — pick up to <span id="max-label">3</span></div>
+    <div id="styles"></div>
   </div>
 
-  <div class="divider"></div>
-
-  <!-- Photo -->
-  <div class="section" id="sec-photo">
-    <div class="section-header">
-      <span class="section-title">Photo</span>
-      <span class="section-badge" id="badge-photo">None</span>
-    </div>
-    <div class="photo-area" id="photo-area">
-      <button class="photo-placeholder" id="open-camera">
-        <span class="cam-icon">📷</span>
+  <div>
+    <div class="label">Photo</div>
+    <div id="photo-area">
+      <button id="cam-open-btn">
+        <span style="font-size:28px">📷</span>
         <span>Tap to take photo</span>
       </button>
-    </div>
-  </div>
-
-  <div class="divider" id="results-divider" style="display:none"></div>
-
-  <!-- Results (hidden until generated) -->
-  <div class="section hidden" id="sec-results">
-    <div class="restart-strip">
-      <div class="section-header" style="margin-bottom:0">
-        <span class="section-title">Results</span>
+      <div id="photo-thumb">
+        <img id="thumb-img" src="" alt="Your photo" />
+        <button id="retake-btn">📷 Retake</button>
       </div>
     </div>
-    <div class="results-grid" id="results-grid" style="margin-top:14px">
-      <!-- injected after generation -->
-    </div>
   </div>
 
-  <div style="height:12px"></div>
+  <div id="results">
+    <div class="label">Results</div>
+    <div id="results-grid"></div>
+  </div>
+
 </div>
 
-<!-- ── FOOTER ─────────────────────────────────────────────────── -->
 <div id="footer">
-  <button class="btn btn-primary" id="generate-btn" disabled>
-    ✨ Generate Previews
-  </button>
+  <button id="gen-btn">✨ Generate Previews</button>
 </div>
 
-<!-- ── CAMERA MODAL ───────────────────────────────────────────── -->
-<div class="modal camera-modal" id="camera-modal">
+<!-- Camera -->
+<div class="modal" id="cam-modal">
   <video id="viewfinder" autoplay playsinline muted></video>
-  <div class="camera-overlay"><div class="guide-ring"></div></div>
-  <p class="cam-hint">Centre your face in the frame</p>
-  <div class="camera-controls">
-    <button class="btn btn-icon" id="flip-btn" style="color:#fff;background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.2)">⟳</button>
-    <button class="shutter" id="shutter-btn"><div class="shutter-dot"></div></button>
-    <button class="btn btn-icon" id="cam-close" style="color:#fff;background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.2)">✕</button>
+  <div id="cam-controls">
+    <button class="icon-btn" id="flip-btn">⟳</button>
+    <button id="shutter"><div></div></button>
+    <button class="icon-btn" id="cam-close-btn">✕</button>
   </div>
 </div>
 
-<!-- ── FULLSCREEN MODAL ───────────────────────────────────────── -->
-<div class="modal fullscreen-modal" id="fullscreen-modal">
+<!-- Loading -->
+<div class="modal" id="load-modal">
+  <div class="spinner"></div>
+  <h2>Generating your looks…</h2>
+  <p id="load-label"></p>
+</div>
+
+<!-- Fullscreen -->
+<div class="modal" id="fs-modal">
   <img id="fs-img" src="" alt="" />
-  <div class="fs-nav">
-    <button class="nav-arrow hidden" id="fs-prev">‹</button>
-    <button class="nav-arrow hidden" id="fs-next">›</button>
-  </div>
-  <div class="fs-bar">
-    <span class="fs-label" id="fs-label"></span>
-    <button class="btn btn-outline" id="fs-close" style="height:38px;font-size:14px;padding:0 16px">← Back</button>
+  <button class="arrow" id="fs-prev">‹</button>
+  <button class="arrow" id="fs-next">›</button>
+  <div id="fs-bar">
+    <span id="fs-label"></span>
+    <button id="fs-close">← Back</button>
   </div>
 </div>
 
-<!-- ── LOADING MODAL ──────────────────────────────────────────── -->
-<div class="modal loading-modal" id="loading-modal">
-  <div class="gen-ring">
-    <svg viewBox="0 0 120 120">
-      <circle class="ring-bg" cx="60" cy="60" r="52"/>
-      <circle class="ring-fg" id="ring-fg" cx="60" cy="60" r="52"
-        stroke-dasharray="326.7" stroke-dashoffset="326.7"/>
-    </svg>
-    <span class="ring-num" id="ring-pct">0%</span>
-  </div>
-  <h2 style="margin-top:28px;font-size:22px">Generating your looks…</h2>
-  <p id="gen-label" style="margin-top:8px;font-size:16px;color:var(--dim)"></p>
-  <div class="chips" id="gen-chips"></div>
-</div>
-
-<!-- ── SETTINGS OVERLAY ───────────────────────────────────────── -->
-<div class="overlay" id="settings-overlay">
-  <div class="settings-panel">
-    <div class="spanel-head">
-      <span class="spanel-title">Settings</span>
-      <button class="btn btn-icon" id="settings-close" style="font-size:16px">✕</button>
+<!-- Settings -->
+<div id="settings-overlay">
+  <div id="settings-panel">
+    <button id="settings-close-btn">✕</button>
+    <h3>Settings</h3>
+    <div class="label">Gemini API Key</div>
+    <div class="row">
+      <input id="api-key-input" type="password" placeholder="AIza…" />
+      <button id="show-key-btn">Show</button>
     </div>
-    <p class="field-label">Gemini API Key</p>
-    <div class="key-row">
-      <input class="key-input" id="key-input" type="password" placeholder="AIza…" />
-      <button class="show-btn" id="show-key">Show</button>
+    <div class="row">
+      <button id="save-key-btn">Save Key</button>
     </div>
-    <button class="btn btn-primary save-key-btn" id="save-key">Save Key</button>
-    <div class="s-status" id="s-status"></div>
-    <div class="provider-row">
-      <span class="provider-lbl">AI provider</span>
-      <span class="provider-badge" id="provider-badge">Gemini</span>
-    </div>
+    <div id="key-status"></div>
   </div>
 </div>
 
 <script>
-/* ══════════════════════════════════════════════════════
-   AI PROVIDERS
-══════════════════════════════════════════════════════ */
-class GeminiProvider {
-  constructor(key) {
-    this.key   = key;
-    this.model = 'gemini-2.0-flash-preview-image-generation';
-    this.base  = 'https://generativelanguage.googleapis.com/v1beta/models';
-  }
-  async generateHairstyle(b64, mime, styleName, hint, length) {
-    const prompt =
-      `You are a professional barbershop photo retoucher. ` +
-      `Edit this portrait to show a ${length} "${styleName}" hairstyle (${hint}). ` +
-      `Keep the person's face, skin tone, eyes, nose, mouth, facial hair, and expression EXACTLY the same. ` +
-      `Change ONLY the hair. Photorealistic, high-quality result with natural lighting.`;
-    const res = await fetch(`${this.base}/${this.model}:generateContent?key=${encodeURIComponent(this.key)}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{ inlineData: { mimeType: mime, data: b64 } }, { text: prompt }] }],
-        generationConfig: { responseModalities: ['IMAGE'] }
-      })
-    });
-    if (!res.ok) { const e = await res.json().catch(()=>({})); throw new Error(e?.error?.message||`HTTP ${res.status}`); }
-    const data = await res.json();
-    const part = data.candidates?.[0]?.content?.parts?.find(p => p.inlineData?.data);
-    if (!part) { const t = data.candidates?.[0]?.content?.parts?.find(p=>p.text)?.text; throw new Error(t||'No image returned'); }
-    return `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
-  }
-}
+// ── CONFIG (edit styles here) ──────────────────────────────────
+var SHOP    = 'The Razor';
+var MAX     = 3;
+var LENGTHS = [
+  { id: 'short',  name: 'Short',  desc: 'Clean & tight' },
+  { id: 'medium', name: 'Medium', desc: 'Versatile'     },
+  { id: 'long',   name: 'Long',   desc: 'Bold & full'   }
+];
+var STYLES = [
+  { id: 'skin-fade',     name: 'Skin Fade'     },
+  { id: 'low-taper',     name: 'Low Taper'     },
+  { id: 'mid-fade',      name: 'Mid Fade'      },
+  { id: 'high-fade',     name: 'High Fade'     },
+  { id: 'drop-fade',     name: 'Drop Fade'     },
+  { id: 'slick-back',    name: 'Slick Back'    },
+  { id: 'pompadour',     name: 'Pompadour'     },
+  { id: 'quiff',         name: 'Quiff'         },
+  { id: 'textured-crop', name: 'Textured Crop' },
+  { id: 'french-crop',   name: 'French Crop'   },
+  { id: 'undercut',      name: 'Undercut'      },
+  { id: 'buzz-cut',      name: 'Buzz Cut'      },
+  { id: 'wolf-cut',      name: 'Wolf Cut'      },
+  { id: 'man-bun',       name: 'Man Bun'       },
+  { id: 'caesar-cut',    name: 'Caesar Cut'    }
+];
 
-function makeProvider(cfg) {
-  if (cfg.aiProvider === 'gemini') return new GeminiProvider(cfg.geminiApiKey);
-  throw new Error(`Unknown provider: ${cfg.aiProvider}`);
-}
+// ── STATE ──────────────────────────────────────────────────────
+var state = { length: null, styles: [], photo: null, results: [] };
+var apiKey = localStorage.getItem('razor_key') || '';
+var cameraStream = null;
+var cameraFacing = 'environment';
+var fsItems = [], fsIdx = 0;
 
-/* ══════════════════════════════════════════════════════
-   CAMERA
-══════════════════════════════════════════════════════ */
-class Camera {
-  constructor() { this.stream = null; this.facing = 'environment'; }
-  async start(el) {
-    this.stop();
-    this.stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: this.facing }, width: { ideal: 1920 }, height: { ideal: 1080 } }, audio: false });
-    el.srcObject = this.stream; await el.play();
-  }
-  flip() { this.facing = this.facing === 'user' ? 'environment' : 'user'; }
-  async capture(el) {
-    const w = el.videoWidth||1280, h = el.videoHeight||720;
-    const c = document.createElement('canvas'); c.width=w; c.height=h;
-    const ctx = c.getContext('2d');
-    if (this.facing === 'user') { ctx.translate(w,0); ctx.scale(-1,1); }
-    ctx.drawImage(el,0,0,w,h);
-    return new Promise((res,rej) => c.toBlob(blob => {
-      if (!blob) { rej(new Error('Capture failed')); return; }
-      const fr = new FileReader();
-      fr.onloadend = () => { const d=fr.result; res({ base64:d.split(',')[1], mime:'image/jpeg', dataUri:d }); };
-      fr.onerror = rej; fr.readAsDataURL(blob);
-    }, 'image/jpeg', 0.92));
-  }
-  stop() { this.stream?.getTracks().forEach(t=>t.stop()); this.stream=null; }
-}
+// ── HELPERS ────────────────────────────────────────────────────
+function $(id) { return document.getElementById(id); }
 
-/* ══════════════════════════════════════════════════════
-   APP
-══════════════════════════════════════════════════════ */
-const LS_KEY = 'razor_gemini_key';
-
-const DEFAULT_CONFIG = {
-  shopName:    'The Razor',
-  aiProvider:  'gemini',
-  geminiApiKey:'',
-  maxStyles:   3,
-  hairLengths: [
-    { id:'short',  name:'Short',  description:'Clean & tight — cropped close' },
-    { id:'medium', name:'Medium', description:'Versatile — top 3–6 inches'   },
-    { id:'long',   name:'Long',   description:'Bold length — 6+ inches on top'}
-  ],
-  styles: [
-    { id:'skin-fade',     name:'Skin Fade',     hint:'shaved to skin at sides, gradual blend'   },
-    { id:'low-taper',     name:'Low Taper',     hint:'subtle taper starting just above the ear' },
-    { id:'mid-fade',      name:'Mid Fade',      hint:'fade starting at the mid-temple level'    },
-    { id:'high-fade',     name:'High Fade',     hint:'fade riding high on the sides'            },
-    { id:'drop-fade',     name:'Drop Fade',     hint:'arc that drops behind the ear'            },
-    { id:'slick-back',    name:'Slick Back',    hint:'hair swept back, close to the head'       },
-    { id:'pompadour',     name:'Pompadour',     hint:'voluminous lift at the front, tapered sides'},
-    { id:'quiff',         name:'Quiff',         hint:'textured volume at the front, brushed back'},
-    { id:'textured-crop', name:'Textured Crop', hint:'short, choppy top with defined texture'   },
-    { id:'french-crop',   name:'French Crop',   hint:'short fringe forward, faded sides'        },
-    { id:'undercut',      name:'Undercut',      hint:'disconnected shaved sides, full top'      },
-    { id:'buzz-cut',      name:'Buzz Cut',      hint:'uniform short length all over'            },
-    { id:'caesar-cut',    name:'Caesar Cut',    hint:'short, forward-swept fringe'              },
-    { id:'man-bun',       name:'Man Bun',       hint:'hair tied back in a bun (long hair)'      },
-    { id:'wolf-cut',      name:'Wolf Cut',      hint:'shaggy layers with curtain fringe'        }
-  ]
-};
-
-const $ = id => document.getElementById(id);
-const esc = s => String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-const shake = el => { el.classList.add('shake'); el.addEventListener('animationend', ()=>el.classList.remove('shake'),{once:true}); };
-
-let cfg = null, provider = null;
-const camera = new Camera();
-
-const state = {
-  hairLength: null,
-  styles:     [],   // selected style ids
-  photo:      null, // { base64, mime, dataUri }
-  results:    [],   // [{ style, dataUri }]
-  fsIdx:      0,
-};
-
-/* ── config / boot ── */
-async function boot() {
-  // Use embedded defaults immediately — UI is interactive right away
-  cfg = { ...DEFAULT_CONFIG };
-  cfg.geminiApiKey = localStorage.getItem(LS_KEY) || '';
-
-  $('shop-name').textContent = cfg.shopName;
-  buildLengthRow();
-  buildStyleGrid();
-
-  if (!cfg.geminiApiKey) openSettings();
-  else provider = makeProvider(cfg);
-
-  // Then try loading config.json in the background (3 s timeout)
-  try {
-    const ctrl = new AbortController();
-    const t = setTimeout(() => ctrl.abort(), 3000);
-    const r = await fetch('./config.json', { signal: ctrl.signal });
-    clearTimeout(t);
-    if (r.ok) {
-      const loaded = await r.json();
-      Object.assign(cfg, loaded);
-      if (!cfg.geminiApiKey) cfg.geminiApiKey = localStorage.getItem(LS_KEY) || '';
-      $('shop-name').textContent = cfg.shopName || 'The Razor';
-      buildLengthRow();
-      buildStyleGrid();
-      if (cfg.geminiApiKey) provider = makeProvider(cfg);
-      else if (!provider) openSettings();
-    }
-  } catch { /* no server / timeout — embedded defaults already in use */ }
-}
-
-/* ── length row ── */
-function buildLengthRow() {
-  $('length-row').innerHTML = cfg.hairLengths.map(l => `
-    <button class="length-pill${state.hairLength===l.id?' selected':''}" data-id="${l.id}">
-      <span class="pill-name">${esc(l.name)}</span>
-      <span class="pill-sub">${esc(l.description)}</span>
-    </button>`).join('');
-  $('length-row').querySelectorAll('.length-pill').forEach(btn =>
-    btn.addEventListener('click', () => {
-      state.hairLength = btn.dataset.id;
-      buildLengthRow();
-      syncUI();
-    }));
-}
-
-/* ── style grid ── */
-function buildStyleGrid() {
-  $('style-grid').innerHTML = cfg.styles.map(s => {
-    const sel = state.styles.includes(s.id);
-    return `<button class="style-tile${sel?' selected':''}" data-id="${s.id}">
-      ${sel?`<span class="tick">✓</span>`:''}
-      ${esc(s.name)}
-    </button>`;
-  }).join('');
-  $('style-grid').querySelectorAll('.style-tile').forEach(btn =>
-    btn.addEventListener('click', () => {
-      const id = btn.dataset.id, idx = state.styles.indexOf(id);
-      if (idx >= 0) state.styles.splice(idx,1);
-      else if (state.styles.length >= cfg.maxStyles) { shake(btn); return; }
-      else state.styles.push(id);
-      buildStyleGrid();
-      syncUI();
-    }));
-}
-
-/* ── sync UI state ── */
-function syncUI() {
-  // length badge
-  const lb = $('badge-length');
-  if (state.hairLength) {
-    const l = cfg.hairLengths.find(x=>x.id===state.hairLength);
-    lb.textContent = l?.name ?? state.hairLength;
-    lb.classList.add('active');
-  } else {
-    lb.textContent = 'Not set'; lb.classList.remove('active');
-  }
-  // styles badge
-  const sb = $('badge-styles');
-  sb.textContent = `${state.styles.length} of ${cfg.maxStyles}`;
-  sb.classList.toggle('active', state.styles.length > 0);
-  // photo badge
-  const pb = $('badge-photo');
-  pb.textContent = state.photo ? 'Ready ✓' : 'None';
-  pb.classList.toggle('active', !!state.photo);
-  // generate button
-  const ready = state.hairLength && state.styles.length > 0 && state.photo;
-  $('generate-btn').disabled = !ready;
-  // restart button visibility
-  $('restart-btn').classList.toggle('hidden', state.results.length === 0);
-}
-
-/* ── photo area ── */
-function renderPhotoArea() {
-  const area = $('photo-area');
-  if (state.photo) {
-    area.innerHTML = `
-      <div class="photo-thumb">
-        <img src="${state.photo.dataUri}" alt="Your photo" />
-        <button class="retake-btn" id="retake-btn">📷 Retake</button>
-      </div>`;
-    $('retake-btn').addEventListener('click', openCamera);
-  } else {
-    area.innerHTML = `<button class="photo-placeholder" id="open-camera"><span class="cam-icon">📷</span><span>Tap to take photo</span></button>`;
-    $('open-camera').addEventListener('click', openCamera);
-  }
-}
-
-/* ── results section ── */
-function renderResults() {
-  const sec = $('sec-results');
-  const div = $('results-divider');
-  if (state.results.length === 0) { sec.classList.add('hidden'); div.style.display='none'; return; }
-  sec.classList.remove('hidden'); div.style.display='';
-  const allItems = [{ style: { id:'__orig', name:'Original' }, dataUri: state.photo.dataUri, orig: true }, ...state.results];
-  $('results-grid').innerHTML = allItems.map((r,i) => `
-    <button class="result-tile${r.orig?' original':''}" data-idx="${i}">
-      <img src="${r.dataUri}" alt="${esc(r.style.name)}" loading="lazy" />
-      <div class="result-label">${esc(r.style.name)}</div>
-    </button>`).join('');
-  $('results-grid').querySelectorAll('.result-tile').forEach(t =>
-    t.addEventListener('click', () => openFullscreen(+t.dataset.idx, allItems)));
-  // scroll results into view
-  setTimeout(() => sec.scrollIntoView({ behavior:'smooth', block:'start' }), 100);
-}
-
-/* ── camera helpers ── */
-function openCamera() {
-  $('camera-modal').classList.add('open');
-  camera.start($('viewfinder')).catch(err => {
-    camera.stop(); $('camera-modal').classList.remove('open');
-    alert(`Camera error: ${err.message}`);
+// ── BUILD LENGTH PILLS ─────────────────────────────────────────
+function buildLengths() {
+  var el = $('lengths');
+  el.innerHTML = '';
+  LENGTHS.forEach(function(l) {
+    var btn = document.createElement('button');
+    btn.className = 'lpill' + (state.length === l.id ? ' on' : '');
+    btn.innerHTML = '<span class="n">' + l.name + '</span><span class="d">' + l.desc + '</span>';
+    btn.onclick = function() { state.length = l.id; buildLengths(); updateBtn(); };
+    el.appendChild(btn);
   });
 }
 
-/* ── fullscreen ── */
-let fsItems = [];
-function openFullscreen(idx, items) {
-  fsItems = items;
-  showFsSlide(idx);
-  $('fullscreen-modal').classList.add('open');
-}
-function showFsSlide(idx) {
-  state.fsIdx = idx;
-  const item = fsItems[idx];
-  $('fs-img').src   = item.dataUri;
-  $('fs-img').alt   = item.style.name;
-  $('fs-label').textContent = item.style.name;
-  $('fs-prev').classList.toggle('hidden', idx <= 0);
-  $('fs-next').classList.toggle('hidden', idx >= fsItems.length-1);
-}
-/* ── helpers ── */
-function errPlaceholder(name, msg) {
-  const s=`<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400"><rect width="400" height="400" fill="#1c1c1c"/><text x="200" y="185" text-anchor="middle" font-family="sans-serif" font-size="18" fill="#c9a227">${esc(name)}</text><text x="200" y="218" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#666">Generation failed</text><text x="200" y="244" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#444">${esc(msg.slice(0,55))}</text></svg>`;
-  return `data:image/svg+xml;base64,${btoa(s)}`;
+// ── BUILD STYLE GRID ───────────────────────────────────────────
+function buildStyles() {
+  var el = $('styles');
+  el.innerHTML = '';
+  STYLES.forEach(function(s) {
+    var on = state.styles.indexOf(s.id) >= 0;
+    var btn = document.createElement('button');
+    btn.className = 'stile' + (on ? ' on' : '');
+    btn.innerHTML = (on ? '<span class="ck">✓</span>' : '') + s.name;
+    btn.onclick = function() {
+      var idx = state.styles.indexOf(s.id);
+      if (idx >= 0) { state.styles.splice(idx, 1); }
+      else if (state.styles.length < MAX) { state.styles.push(s.id); }
+      buildStyles(); updateBtn();
+    };
+    el.appendChild(btn);
+  });
 }
 
-function openSettings() { $('key-input').value = cfg?.geminiApiKey||localStorage.getItem(LS_KEY)||''; $('settings-overlay').classList.add('open'); }
+// ── GENERATE BUTTON STATE ──────────────────────────────────────
+function updateBtn() {
+  var ready = state.length && state.styles.length > 0 && state.photo;
+  $('gen-btn').className = ready ? 'ready' : '';
+}
+
+// ── CAMERA ─────────────────────────────────────────────────────
+function openCamera() {
+  $('cam-modal').classList.add('open');
+  navigator.mediaDevices.getUserMedia({
+    video: { facingMode: { ideal: cameraFacing }, width: { ideal: 1920 }, height: { ideal: 1080 } },
+    audio: false
+  }).then(function(stream) {
+    cameraStream = stream;
+    $('viewfinder').srcObject = stream;
+    $('viewfinder').play();
+  }).catch(function(err) {
+    closeCamera();
+    alert('Camera error: ' + err.message);
+  });
+}
+
+function closeCamera() {
+  if (cameraStream) { cameraStream.getTracks().forEach(function(t) { t.stop(); }); cameraStream = null; }
+  $('cam-modal').classList.remove('open');
+}
+
+function capture() {
+  var video = $('viewfinder');
+  var w = video.videoWidth || 1280, h = video.videoHeight || 720;
+  var canvas = document.createElement('canvas');
+  canvas.width = w; canvas.height = h;
+  var ctx = canvas.getContext('2d');
+  if (cameraFacing === 'user') { ctx.translate(w, 0); ctx.scale(-1, 1); }
+  ctx.drawImage(video, 0, 0, w, h);
+  canvas.toBlob(function(blob) {
+    var reader = new FileReader();
+    reader.onloadend = function() {
+      var dataUri = reader.result;
+      state.photo = { dataUri: dataUri, base64: dataUri.split(',')[1], mime: 'image/jpeg' };
+      closeCamera();
+      $('thumb-img').src = dataUri;
+      $('cam-open-btn').style.display = 'none';
+      $('photo-thumb').style.display = 'block';
+      updateBtn();
+    };
+    reader.readAsDataURL(blob);
+  }, 'image/jpeg', 0.92);
+}
+
+// ── GENERATE ───────────────────────────────────────────────────
+function generate() {
+  if (!state.length || state.styles.length === 0 || !state.photo) return;
+  if (!apiKey) { openSettings(); return; }
+
+  var styleObjs = state.styles.map(function(id) {
+    return STYLES.find(function(s) { return s.id === id; });
+  }).filter(Boolean);
+
+  state.results = [];
+  $('load-modal').classList.add('open');
+  $('results').style.display = 'none';
+
+  var i = 0;
+  function next() {
+    if (i >= styleObjs.length) {
+      $('load-modal').classList.remove('open');
+      showResults();
+      return;
+    }
+    var style = styleObjs[i];
+    $('load-label').textContent = 'Creating: ' + style.name + ' (' + (i + 1) + ' of ' + styleObjs.length + ')';
+    callGemini(style, function(dataUri) {
+      state.results.push({ style: style, dataUri: dataUri });
+      i++; next();
+    }, function(err) {
+      state.results.push({ style: style, dataUri: errorSvg(style.name) });
+      i++; next();
+    });
+  }
+  next();
+}
+
+function callGemini(style, onSuccess, onError) {
+  var prompt = 'Edit this portrait to show a ' + state.length + ' "' + style.name + '" hairstyle. ' +
+    'Keep the face, skin tone, and expression EXACTLY the same. Change ONLY the hair. Photorealistic result.';
+  fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-preview-image-generation:generateContent?key=' + encodeURIComponent(apiKey), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      contents: [{ parts: [
+        { inlineData: { mimeType: state.photo.mime, data: state.photo.base64 } },
+        { text: prompt }
+      ]}],
+      generationConfig: { responseModalities: ['IMAGE'] }
+    })
+  }).then(function(res) { return res.json(); })
+  .then(function(data) {
+    var part = data.candidates && data.candidates[0] && data.candidates[0].content &&
+      data.candidates[0].content.parts && data.candidates[0].content.parts.find(function(p) { return p.inlineData && p.inlineData.data; });
+    if (part) {
+      onSuccess('data:' + part.inlineData.mimeType + ';base64,' + part.inlineData.data);
+    } else {
+      onError('No image returned');
+    }
+  }).catch(onError);
+}
+
+// ── RESULTS ────────────────────────────────────────────────────
+function showResults() {
+  var grid = $('results-grid');
+  grid.innerHTML = '';
+  var items = [{ style: { name: 'Original' }, dataUri: state.photo.dataUri }].concat(state.results);
+  fsItems = items;
+
+  items.forEach(function(item, idx) {
+    var tile = document.createElement('div');
+    tile.className = 'rtile';
+    tile.innerHTML = '<img src="' + item.dataUri + '" loading="lazy" /><span>' + item.style.name + '</span>';
+    tile.onclick = function() { openFullscreen(idx); };
+    grid.appendChild(tile);
+  });
+
+  $('results').style.display = 'block';
+  setTimeout(function() { $('results').scrollIntoView({ behavior: 'smooth' }); }, 100);
+}
+
+// ── FULLSCREEN ─────────────────────────────────────────────────
+function openFullscreen(idx) {
+  fsIdx = idx;
+  updateFs();
+  $('fs-modal').classList.add('open');
+}
+function updateFs() {
+  var item = fsItems[fsIdx];
+  $('fs-img').src = item.dataUri;
+  $('fs-label').textContent = item.style.name;
+  $('fs-prev').style.display = fsIdx > 0 ? 'flex' : 'none';
+  $('fs-next').style.display = fsIdx < fsItems.length - 1 ? 'flex' : 'none';
+}
+
+// ── SETTINGS ───────────────────────────────────────────────────
+function openSettings() { $('api-key-input').value = apiKey; $('settings-overlay').classList.add('open'); }
 function closeSettings() { $('settings-overlay').classList.remove('open'); }
 
-/* ── wire everything up after DOM is ready ── */
-document.addEventListener('DOMContentLoaded', () => {
+// ── SVG ERROR PLACEHOLDER ──────────────────────────────────────
+function errorSvg(name) {
+  return 'data:image/svg+xml;base64,' + btoa('<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400"><rect width="400" height="400" fill="#1c1c1c"/><text x="200" y="200" text-anchor="middle" font-family="sans-serif" font-size="16" fill="#c9a227">' + name + ' — failed</text></svg>');
+}
 
-  /* fullscreen */
-  $('fs-close').addEventListener('click', () => $('fullscreen-modal').classList.remove('open'));
-  $('fs-prev').addEventListener('click', () => showFsSlide(state.fsIdx-1));
-  $('fs-next').addEventListener('click', () => showFsSlide(state.fsIdx+1));
+// ── WIRE UP EVENTS ─────────────────────────────────────────────
+$('cam-open-btn').onclick  = openCamera;
+$('retake-btn').onclick    = openCamera;
+$('cam-close-btn').onclick = closeCamera;
+$('flip-btn').onclick      = function() {
+  cameraFacing = cameraFacing === 'user' ? 'environment' : 'user';
+  closeCamera(); openCamera();
+};
+$('shutter').onclick       = capture;
+$('gen-btn').onclick       = generate;
 
-  /* swipe in fullscreen */
-  let touchX = 0;
-  $('fullscreen-modal').addEventListener('touchstart', e => { touchX = e.touches[0].clientX; }, {passive:true});
-  $('fullscreen-modal').addEventListener('touchend', e => {
-    const dx = e.changedTouches[0].clientX - touchX;
-    if (Math.abs(dx) < 50) return;
-    if (dx < 0 && state.fsIdx < fsItems.length-1) showFsSlide(state.fsIdx+1);
-    if (dx > 0 && state.fsIdx > 0) showFsSlide(state.fsIdx-1);
-  });
+$('fs-close').onclick = function() { $('fs-modal').classList.remove('open'); };
+$('fs-prev').onclick  = function() { fsIdx--; updateFs(); };
+$('fs-next').onclick  = function() { fsIdx++; updateFs(); };
 
-  /* camera */
-  $('cam-close').addEventListener('click', () => { camera.stop(); $('camera-modal').classList.remove('open'); });
-  $('flip-btn').addEventListener('click', () => { camera.flip(); camera.start($('viewfinder')).catch(()=>{}); });
-  $('shutter-btn').addEventListener('click', async () => {
-    try {
-      state.photo = await camera.capture($('viewfinder'));
-      camera.stop(); $('camera-modal').classList.remove('open');
-      renderPhotoArea(); syncUI();
-    } catch(err) { alert(err.message); }
-  });
+$('settings-btn').onclick       = openSettings;
+$('settings-close-btn').onclick = closeSettings;
+$('settings-overlay').onclick   = function(e) { if (e.target === $('settings-overlay')) closeSettings(); };
+$('show-key-btn').onclick       = function() {
+  var inp = $('api-key-input');
+  var showing = inp.type === 'text';
+  inp.type = showing ? 'password' : 'text';
+  $('show-key-btn').textContent = showing ? 'Show' : 'Hide';
+};
+$('save-key-btn').onclick = function() {
+  var key = $('api-key-input').value.trim();
+  if (!key) return;
+  apiKey = key;
+  localStorage.setItem('razor_key', key);
+  $('key-status').textContent = '✓ Saved';
+  setTimeout(function() { $('key-status').textContent = ''; closeSettings(); }, 1000);
+};
 
-  /* generate */
-  $('generate-btn').addEventListener('click', async () => {
-    const styleObjs = state.styles.map(id => cfg.styles.find(s=>s.id===id)).filter(Boolean);
-    const total = styleObjs.length;
-    state.results = [];
-    $('loading-modal').classList.add('open');
-    const C = 2*Math.PI*52;
-    const setProgress = i => {
-      const pct = total ? Math.round(i/total*100) : 0;
-      $('ring-fg').setAttribute('stroke-dashoffset', C*(1-pct/100));
-      $('ring-pct').textContent = `${pct}%`;
-      $('gen-label').innerHTML = i < total ? `Creating <strong>${esc(styleObjs[i]?.name??'')}</strong>` : 'Finishing…';
-      $('gen-chips').innerHTML = styleObjs.map((s,j) => `<span class="chip${j<i?' done':j===i?' active':''}">${j<i?'✓ ':''}${esc(s.name)}</span>`).join('');
-    };
-    for (let i=0; i<styleObjs.length; i++) {
-      setProgress(i);
-      const style = styleObjs[i];
-      try {
-        const dataUri = await provider.generateHairstyle(state.photo.base64, state.photo.mime, style.name, style.hint||style.name, state.hairLength);
-        state.results.push({ style, dataUri });
-      } catch(err) {
-        state.results.push({ style, dataUri: errPlaceholder(style.name, err.message) });
-      }
-    }
-    setProgress(total);
-    await new Promise(r=>setTimeout(r,350));
-    $('loading-modal').classList.remove('open');
-    renderResults(); syncUI();
-  });
-
-  /* restart */
-  $('restart-btn').addEventListener('click', () => {
-    state.hairLength = null; state.styles = []; state.photo = null; state.results = [];
-    buildLengthRow(); buildStyleGrid(); renderPhotoArea(); renderResults(); syncUI();
-    $('main').scrollTo({ top:0, behavior:'smooth' });
-  });
-
-  /* settings */
-  $('settings-btn').addEventListener('click', openSettings);
-  $('settings-close').addEventListener('click', closeSettings);
-  $('settings-overlay').addEventListener('click', e => { if (e.target===$('settings-overlay')) closeSettings(); });
-  $('show-key').addEventListener('click', () => {
-    const ki = $('key-input'), show = ki.type==='password'; ki.type = show?'text':'password'; $('show-key').textContent = show?'Hide':'Show';
-  });
-  $('save-key').addEventListener('click', () => {
-    const key = $('key-input').value.trim();
-    if (!key) { shake($('key-input')); return; }
-    localStorage.setItem(LS_KEY, key);
-    if (cfg) cfg.geminiApiKey = key;
-    try {
-      provider = makeProvider(cfg);
-      $('provider-badge').textContent = cfg.aiProvider[0].toUpperCase()+cfg.aiProvider.slice(1);
-      $('s-status').textContent = '✓ Saved'; $('s-status').style.color='var(--ok)';
-      setTimeout(() => { $('s-status').textContent=''; closeSettings(); }, 1100);
-    } catch(err) { $('s-status').textContent=`Error: ${err.message}`; $('s-status').style.color='#e05252'; }
-  });
-
-  /* boot */
-  renderPhotoArea();
-  syncUI();
-  boot();
+// ── SWIPE FULLSCREEN ───────────────────────────────────────────
+var swipeX = 0;
+$('fs-modal').addEventListener('touchstart', function(e) { swipeX = e.touches[0].clientX; }, { passive: true });
+$('fs-modal').addEventListener('touchend', function(e) {
+  var dx = e.changedTouches[0].clientX - swipeX;
+  if (dx < -50 && fsIdx < fsItems.length - 1) { fsIdx++; updateFs(); }
+  if (dx >  50 && fsIdx > 0)                  { fsIdx--; updateFs(); }
 });
+
+// ── INIT ───────────────────────────────────────────────────────
+document.querySelector('h1').textContent = SHOP;
+$('max-label').textContent = MAX;
+buildLengths();
+buildStyles();
+if (!apiKey) openSettings();
 </script>
 </body>
 </html>

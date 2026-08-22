@@ -298,105 +298,41 @@ body::before {
   grid-auto-rows: 1fr; gap: 8px;
   flex: 1; min-height: 0;
 }
-#style-hint {
-  flex-shrink: 0; text-align: center; font-size: 12px;
-  color: var(--text2); margin-top: 12px; font-weight: 500;
+#style-hint { flex-shrink: 0; }
+.stile-lbl { font-size: clamp(13px, 2vw, 17px); font-weight: 600; line-height: 1.2; }
+.stile-variants { display: flex; gap: 4px; flex-wrap: wrap; justify-content: center; margin-top: 6px; }
+.sv {
+  font-size: 10px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase;
+  padding: 3px 9px; border-radius: 10px;
+  border: 1px solid var(--border); background: transparent;
+  color: var(--text2); cursor: pointer; font-family: inherit;
+  transition: border-color .15s, background .15s, color .15s;
 }
-/* ── Photo tile ── */
+.sv.on { border-color: var(--red); background: var(--red-tint); color: var(--text); }
 .stile {
-  position: relative; overflow: hidden;
-  border-radius: var(--rs); border: 1.5px solid var(--border);
-  cursor: pointer; font-family: inherit; min-height: 0;
+  position: relative;
+  display: flex; align-items: center; justify-content: center;
+  text-align: center; min-height: 0; padding: 12px 8px;
+  border-radius: var(--rs); border: 1px solid var(--border);
   background: var(--s1);
-  transition: border-color .18s, transform .35s cubic-bezier(.34,1.56,.64,1);
-  display: flex; flex-direction: column; justify-content: flex-end;
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  cursor: pointer; font-family: inherit;
+  color: var(--text); font-size: clamp(15px, 2.2vw, 20px); font-weight: 600; line-height: 1.35;
+  transition: border-color .18s, background .18s, transform .45s cubic-bezier(.34,1.56,.64,1);
 }
-.stile:active { transform: scale(.95); transition: transform .1s ease; }
-.stile-bg {
-  position: absolute; inset: 0;
-  background-size: cover; background-position: top center;
-  transition: transform .3s ease;
+.stile:active {
+  transform: scale(.94) translateY(1px);
+  transition: transform .1s ease;
 }
-.stile:active .stile-bg { transform: scale(1.04); }
-.stile-overlay {
-  position: absolute; inset: 0;
-  background: linear-gradient(to top, rgba(0,0,0,.88) 0%, rgba(0,0,0,.35) 50%, rgba(0,0,0,.08) 100%);
-}
-.stile-foot {
-  position: relative; z-index: 1;
-  padding: 8px 8px 10px;
-}
-.stile-name {
-  font-size: clamp(11px, 1.7vw, 15px); font-weight: 700;
-  color: #fff; line-height: 1.2; letter-spacing: .2px;
-}
-.stile-chevron {
-  font-size: 9px; color: rgba(255,255,255,.45); margin-top: 2px;
-  letter-spacing: .5px; text-transform: uppercase; font-weight: 600;
-}
-.stile.on { border-color: var(--red); }
+.stile.on { border-color: var(--red); background: var(--red-tint); }
 .stile.on::after {
-  content: ''; position: absolute; top: 7px; right: 7px; z-index: 2;
-  width: 7px; height: 7px; border-radius: 50%;
-  background: var(--red); box-shadow: 0 0 8px rgba(200,21,26,.9);
+  content: ''; position: absolute; top: 7px; right: 7px;
+  width: 5px; height: 5px; border-radius: 50%; background: var(--red);
 }
-/* ── Variant bottom sheet ── */
-#variant-sheet {
-  display: none; position: fixed; inset: 0; z-index: 60;
-  align-items: flex-end;
+#style-hint {
+  text-align: center; font-size: 12px; color: var(--text2);
+  margin-top: 18px; font-weight: 500;
 }
-#variant-sheet.open { display: flex; }
-#vs-bg {
-  position: absolute; inset: 0;
-  background: rgba(0,0,0,.55);
-  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
-}
-#vs-body {
-  position: relative; z-index: 1; width: 100%;
-  background: rgba(14,12,13,.97);
-  border-top: 1px solid var(--border);
-  border-radius: 20px 20px 0 0;
-  padding: 20px 20px;
-  padding-bottom: max(24px, env(safe-area-inset-bottom));
-}
-#vs-title {
-  font-size: 10px; font-weight: 700; letter-spacing: 2.5px;
-  text-transform: uppercase; color: var(--text2);
-  text-align: center; margin-bottom: 14px;
-}
-#vs-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 14px; }
-.vcard {
-  position: relative; border-radius: var(--rs); overflow: hidden;
-  aspect-ratio: 4/3; cursor: pointer;
-  border: 1.5px solid var(--border);
-  background: var(--s1);
-  transition: border-color .15s, transform .1s;
-}
-.vcard:active { transform: scale(.97); }
-.vcard.on { border-color: var(--red); }
-.vcard.on::after {
-  content: ''; position: absolute; top: 7px; right: 7px; z-index: 2;
-  width: 7px; height: 7px; border-radius: 50%;
-  background: var(--red); box-shadow: 0 0 8px rgba(200,21,26,.9);
-}
-.vcard-bg { position: absolute; inset: 0; background-size: cover; background-position: top center; }
-.vcard-overlay {
-  position: absolute; inset: 0;
-  background: linear-gradient(to top, rgba(0,0,0,.82) 0%, rgba(0,0,0,.15) 60%, transparent 100%);
-}
-.vcard-name {
-  position: absolute; bottom: 8px; left: 0; right: 0;
-  text-align: center; font-size: 12px; font-weight: 700; color: #fff;
-  z-index: 1;
-}
-#vs-close {
-  width: 100%; height: 46px; border-radius: 23px;
-  background: var(--s2); border: 1px solid var(--border);
-  color: var(--text2); font-family: inherit; font-size: 14px;
-  font-weight: 600; cursor: pointer;
-  transition: background .12s, color .12s;
-}
-#vs-close:active { background: var(--s3); color: var(--text); }
 
 /* ══════════════════════════════════════════════════════════════
    PAGE 4 — PHOTO
@@ -780,16 +716,6 @@ body::before {
   </div>
 </div>
 
-<!-- ══ VARIANT SHEET ══════════════════════════════════════════ -->
-<div id="variant-sheet">
-  <div id="vs-bg"></div>
-  <div id="vs-body">
-    <div id="vs-title"></div>
-    <div id="vs-grid"></div>
-    <button id="vs-close">Done</button>
-  </div>
-</div>
-
 <!-- ══ FULLSCREEN OVERLAY ════════════════════════════════════ -->
 <div id="fs-modal">
   <img id="fs-img" src="" alt="" />
@@ -825,29 +751,22 @@ var LENGTHS = [
   { id:'long',   name:'Long',     desc:'Scissors'   },
   { id:'keep',   name:'Keep Top', desc:'Sides only' },
 ];
-function purl(id) {
-  return 'https://images.unsplash.com/photo-' + id + '?auto=format&fit=crop&w=600&q=75';
-}
 var STYLES = [
-  { id:'fade', name:'Fade',
-    photo: purl('1503951914875-452162b0f3f1'),
-    variants:[
-      { id:'low-fade',  label:'Low Fade',  photo: purl('1503951914875-452162b0f3f1') },
-      { id:'mid-fade',  label:'Mid Fade',  photo: purl('1534297230950-9c16dd9c1785') },
-      { id:'high-fade', label:'High Fade', photo: purl('1621605815971-fbc98d665033') },
-      { id:'skin-fade', label:'Skin Fade', photo: purl('1622015663319-e97e697503ee') },
-    ]},
-  { id:'taper', name:'Taper',
-    photo: purl('1596815064285-45ed8a9c0463'),
-    variants:[
-      { id:'low-taper', label:'Low Taper', photo: purl('1596815064285-45ed8a9c0463') },
-      { id:'drop-fade', label:'Drop Fade', photo: purl('1570158268183-d296b2892211') },
-    ]},
-  { id:'textured-crop',  name:'Textured Crop',    photo: purl('1519345182560-3f2917c472ef') },
-  { id:'slick-back',     name:'Slick Back',       photo: purl('1560250097-0b93528c311a') },
-  { id:'buzz-cut',       name:'Buzz Cut',         photo: purl('1504703395950-b89145a5425b') },
-  { id:'buzz-skin-fade', name:'Buzz + Skin Fade', photo: purl('1503951914875-452162b0f3f1') },
-  { id:'caesar-cut',     name:'Caesar Cut',       photo: purl('1507003211169-0a1dd7228f2d') },
+  { id:'fade', name:'Fade', variants:[
+    { id:'low-fade',  label:'Low'  },
+    { id:'mid-fade',  label:'Mid'  },
+    { id:'high-fade', label:'High' },
+    { id:'skin-fade', label:'Skin' },
+  ]},
+  { id:'taper', name:'Taper', variants:[
+    { id:'low-taper', label:'Low'  },
+    { id:'drop-fade', label:'Drop' },
+  ]},
+  { id:'textured-crop',  name:'Textured Crop'    },
+  { id:'slick-back',     name:'Slick Back'       },
+  { id:'buzz-cut',       name:'Buzz Cut'         },
+  { id:'buzz-skin-fade', name:'Buzz + Skin Fade' },
+  { id:'caesar-cut',     name:'Caesar Cut'       },
 ];
 
 var state     = { length: null, styles: [], photo: null };
@@ -938,37 +857,44 @@ function buildLengths() {
   });
 }
 
-function makeTileEl(tag, s, isOn) {
-  var el = document.createElement(tag);
-  el.className = 'stile' + (isOn ? ' on' : '');
-  var selectedVariant = s.variants
-    ? s.variants.find(function(v) { return state.styles.indexOf(v.id) >= 0; })
-    : null;
-  var photo = (selectedVariant && selectedVariant.photo) || s.photo || '';
-  el.innerHTML =
-    '<div class="stile-bg" style="background-image:url(\'' + photo + '\')"></div>' +
-    '<div class="stile-overlay"></div>' +
-    '<div class="stile-foot">' +
-      '<div class="stile-name">' + s.name + '</div>' +
-      (s.variants
-        ? '<div class="stile-chevron">' + (selectedVariant ? selectedVariant.label : 'Tap to choose') + '</div>'
-        : '') +
-    '</div>';
-  return el;
-}
-
 function buildStyles() {
   var el = $('styles');
   el.innerHTML = '';
   STYLES.forEach(function(s) {
     if (s.variants) {
       var anyOn = s.variants.some(function(v) { return state.styles.indexOf(v.id) >= 0; });
-      var div = makeTileEl('div', s, anyOn);
-      div.onclick = function() { haptic(); openVariantSheet(s); };
+      var div = document.createElement('div');
+      div.className = 'stile' + (anyOn ? ' on' : '');
+      var html = '<span class="stile-lbl">' + s.name + '</span><div class="stile-variants">';
+      s.variants.forEach(function(v) {
+        var von = state.styles.indexOf(v.id) >= 0;
+        html += '<button class="sv' + (von ? ' on' : '') + '" data-vid="' + v.id + '">' + v.label + '</button>';
+      });
+      html += '</div>';
+      div.innerHTML = html;
+      div.querySelectorAll('.sv').forEach(function(btn) {
+        btn.onclick = function(e) {
+          e.stopPropagation();
+          var vid = btn.getAttribute('data-vid');
+          var idx = state.styles.indexOf(vid);
+          if (idx >= 0) {
+            state.styles.splice(idx, 1); haptic(); playTick();
+          } else {
+            s.variants.forEach(function(v) {
+              var i2 = state.styles.indexOf(v.id);
+              if (i2 >= 0) state.styles.splice(i2, 1);
+            });
+            if (state.styles.length < MAX) { state.styles.push(vid); haptic(); playTick(); }
+          }
+          buildStyles(); syncNextBtns();
+        };
+      });
       el.appendChild(div);
     } else {
       var on = state.styles.indexOf(s.id) >= 0;
-      var b = makeTileEl('button', s, on);
+      var b  = document.createElement('button');
+      b.className = 'stile' + (on ? ' on' : '');
+      b.textContent = s.name;
       b.onclick = function() {
         var i = state.styles.indexOf(s.id);
         if (i >= 0) { state.styles.splice(i, 1); haptic(); playTick(); }
@@ -981,36 +907,6 @@ function buildStyles() {
   var n = state.styles.length;
   $('style-hint').textContent = n > 0 ? n + ' of ' + MAX + ' selected' : 'Select up to 3';
 }
-
-function openVariantSheet(s) {
-  $('vs-title').textContent = s.name;
-  var grid = $('vs-grid');
-  grid.innerHTML = '';
-  s.variants.forEach(function(v) {
-    var on = state.styles.indexOf(v.id) >= 0;
-    var card = document.createElement('div');
-    card.className = 'vcard' + (on ? ' on' : '');
-    card.innerHTML =
-      '<div class="vcard-bg" style="background-image:url(\'' + v.photo + '\')"></div>' +
-      '<div class="vcard-overlay"></div>' +
-      '<div class="vcard-name">' + v.label + '</div>';
-    card.onclick = function() {
-      s.variants.forEach(function(v2) {
-        var i2 = state.styles.indexOf(v2.id);
-        if (i2 >= 0) state.styles.splice(i2, 1);
-      });
-      var idx = state.styles.indexOf(v.id);
-      if (idx < 0 && state.styles.length < MAX) { state.styles.push(v.id); haptic(); playTick(); }
-      buildStyles(); syncNextBtns();
-      openVariantSheet(s);
-    };
-    grid.appendChild(card);
-  });
-  $('variant-sheet').classList.add('open');
-}
-
-$('vs-bg').onclick = function() { $('variant-sheet').classList.remove('open'); };
-$('vs-close').onclick = function() { $('variant-sheet').classList.remove('open'); };
 
 function syncNextBtns() {
   $('len-next').className = 'pfooter-btn ' + (state.length            ? 'on' : 'off');

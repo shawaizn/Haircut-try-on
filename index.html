@@ -299,14 +299,25 @@ body::before {
   flex: 1; min-height: 0;
 }
 #style-hint { flex-shrink: 0; }
-.stile-lbl { font-size: clamp(13px, 2vw, 17px); font-weight: 600; line-height: 1.2; }
-.stile-variants { display: flex; gap: 4px; flex-wrap: wrap; justify-content: center; margin-top: 6px; }
+.stile-lbl {
+  font-size: clamp(13px, 2vw, 17px); font-weight: 700; line-height: 1;
+  color: var(--text); letter-spacing: .3px; flex-shrink: 0;
+}
+.stile-variants {
+  display: grid; gap: 4px; width: 100%;
+  flex: 1; min-height: 0;
+}
+.stile-variants.cols-2 { grid-template-columns: repeat(2, 1fr); grid-template-rows: 1fr; }
+.stile-variants.cols-4 { grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, 1fr); }
 .sv {
-  font-size: 10px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase;
-  padding: 3px 9px; border-radius: 10px;
-  border: 1px solid var(--border); background: transparent;
-  color: var(--text2); cursor: pointer; font-family: inherit;
+  font-size: clamp(9px, 1.4vw, 12px); font-weight: 700; letter-spacing: .4px;
+  text-transform: uppercase; text-align: center;
+  border-radius: 6px; border: 1px solid var(--border);
+  background: var(--s2); color: var(--text2);
+  cursor: pointer; font-family: inherit;
+  display: flex; align-items: center; justify-content: center;
   transition: border-color .15s, background .15s, color .15s;
+  min-height: 0; padding: 0;
 }
 .sv.on { border-color: var(--red); background: var(--red-tint); color: var(--text); }
 .stile {
@@ -319,6 +330,10 @@ body::before {
   cursor: pointer; font-family: inherit;
   color: var(--text); font-size: clamp(15px, 2.2vw, 20px); font-weight: 600; line-height: 1.35;
   transition: border-color .18s, background .18s, transform .45s cubic-bezier(.34,1.56,.64,1);
+}
+.stile.has-variants {
+  flex-direction: column; align-items: center; justify-content: flex-start;
+  gap: 8px; padding: 10px 8px 8px; cursor: default;
 }
 .stile:active {
   transform: scale(.94) translateY(1px);
@@ -866,8 +881,9 @@ function buildStyles() {
     if (s.variants) {
       var anyOn = s.variants.some(function(v) { return state.styles.indexOf(v.id) >= 0; });
       var div = document.createElement('div');
-      div.className = 'stile' + (anyOn ? ' on' : '');
-      var html = '<span class="stile-lbl">' + s.name + '</span><div class="stile-variants">';
+      var colsCls = s.variants.length === 4 ? 'cols-4' : 'cols-2';
+      div.className = 'stile has-variants' + (anyOn ? ' on' : '');
+      var html = '<span class="stile-lbl">' + s.name + '</span><div class="stile-variants ' + colsCls + '">';
       s.variants.forEach(function(v) {
         var von = state.styles.indexOf(v.id) >= 0;
         html += '<button class="sv' + (von ? ' on' : '') + '" data-vid="' + v.id + '">' + v.label + '</button>';

@@ -300,14 +300,20 @@ body::before {
 }
 #style-hint { flex-shrink: 0; }
 .stile-lbl {
-  font-size: clamp(13px, 2vw, 17px); font-weight: 700; line-height: 1;
-  color: var(--text); letter-spacing: .3px; flex-shrink: 0;
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  z-index: 2; pointer-events: none; white-space: nowrap;
+  background: rgba(10,8,9,.88);
+  border: 1px solid var(--border);
+  border-radius: 20px; padding: 5px 12px;
+  font-size: 9px; font-weight: 700; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--text2);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
 }
 .stile-variants {
-  display: grid; gap: 4px; width: 100%;
+  display: grid; gap: 3px; width: 100%;
   flex: 1; min-height: 0;
 }
-.stile-variants.cols-2 { grid-template-columns: repeat(2, 1fr); grid-template-rows: 1fr; }
+.stile-variants.cols-2 { grid-template-columns: repeat(2, 1fr); }
 .stile-variants.cols-4 { grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, 1fr); }
 .sv {
   font-size: clamp(9px, 1.4vw, 12px); font-weight: 700; letter-spacing: .4px;
@@ -332,8 +338,7 @@ body::before {
   transition: border-color .18s, background .18s, transform .45s cubic-bezier(.34,1.56,.64,1);
 }
 .stile.has-variants {
-  flex-direction: column; align-items: center; justify-content: flex-start;
-  gap: 8px; padding: 10px 8px 8px; cursor: default;
+  padding: 4px; cursor: default; align-items: stretch;
 }
 .stile:active {
   transform: scale(.94) translateY(1px);
@@ -883,12 +888,12 @@ function buildStyles() {
       var div = document.createElement('div');
       var colsCls = s.variants.length === 4 ? 'cols-4' : 'cols-2';
       div.className = 'stile has-variants' + (anyOn ? ' on' : '');
-      var html = '<span class="stile-lbl">' + s.name + '</span><div class="stile-variants ' + colsCls + '">';
+      var html = '<div class="stile-variants ' + colsCls + '">';
       s.variants.forEach(function(v) {
         var von = state.styles.indexOf(v.id) >= 0;
         html += '<button class="sv' + (von ? ' on' : '') + '" data-vid="' + v.id + '">' + v.label + '</button>';
       });
-      html += '</div>';
+      html += '</div><span class="stile-lbl">' + s.name + '</span>';
       div.innerHTML = html;
       div.querySelectorAll('.sv').forEach(function(btn) {
         btn.onclick = function(e) {

@@ -295,10 +295,20 @@ body::before {
 ══════════════════════════════════════════════════════════════ */
 #styles {
   display: grid; grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: repeat(3, 1fr); gap: 8px;
-  flex: 1; min-height: 0; align-items: stretch;
+  grid-auto-rows: 1fr; gap: 8px;
+  flex: 1; min-height: 0;
 }
 #style-hint { flex-shrink: 0; }
+.stile-lbl { font-size: clamp(13px, 2vw, 17px); font-weight: 600; line-height: 1.2; }
+.stile-variants { display: flex; gap: 4px; flex-wrap: wrap; justify-content: center; margin-top: 6px; }
+.sv {
+  font-size: 10px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase;
+  padding: 3px 9px; border-radius: 10px;
+  border: 1px solid var(--border); background: transparent;
+  color: var(--text2); cursor: pointer; font-family: inherit;
+  transition: border-color .15s, background .15s, color .15s;
+}
+.sv.on { border-color: var(--red); background: var(--red-tint); color: var(--text); }
 .stile {
   position: relative;
   display: flex; align-items: center; justify-content: center;
@@ -742,15 +752,21 @@ var LENGTHS = [
   { id:'keep',   name:'Keep Top', desc:'Sides only' },
 ];
 var STYLES = [
-  { id:'skin-fade',     name:'Skin Fade'     },
-  { id:'low-taper',     name:'Low Taper'     },
-  { id:'mid-fade',      name:'Mid Fade'      },
-  { id:'high-fade',     name:'High Fade'     },
-  { id:'drop-fade',     name:'Drop Fade'     },
-  { id:'textured-crop', name:'Textured Crop' },
-  { id:'slick-back',    name:'Slick Back'    },
-  { id:'buzz-cut',      name:'Buzz Cut'      },
-  { id:'caesar-cut',    name:'Caesar Cut'    },
+  { id:'fade', name:'Fade', variants:[
+    { id:'low-fade',  label:'Low'  },
+    { id:'mid-fade',  label:'Mid'  },
+    { id:'high-fade', label:'High' },
+    { id:'skin-fade', label:'Skin' },
+  ]},
+  { id:'taper', name:'Taper', variants:[
+    { id:'low-taper', label:'Low'  },
+    { id:'drop-fade', label:'Drop' },
+  ]},
+  { id:'textured-crop',  name:'Textured Crop'    },
+  { id:'slick-back',     name:'Slick Back'       },
+  { id:'buzz-cut',       name:'Buzz Cut'         },
+  { id:'buzz-skin-fade', name:'Buzz + Skin Fade' },
+  { id:'caesar-cut',     name:'Caesar Cut'       },
 ];
 
 var state     = { length: null, styles: [], photo: null };
@@ -845,17 +861,48 @@ function buildStyles() {
   var el = $('styles');
   el.innerHTML = '';
   STYLES.forEach(function(s) {
-    var on = state.styles.indexOf(s.id) >= 0;
-    var b  = document.createElement('button');
-    b.className = 'stile' + (on ? ' on' : '');
-    b.textContent = s.name;
-    b.onclick = function() {
-      var i = state.styles.indexOf(s.id);
-      if (i >= 0) { state.styles.splice(i, 1); haptic(); playTick(); }
-      else if (state.styles.length < MAX) { state.styles.push(s.id); haptic(); playTick(); }
-      buildStyles(); syncNextBtns();
-    };
-    el.appendChild(b);
+    if (s.variants) {
+      var anyOn = s.variants.some(function(v) { return state.styles.indexOf(v.id) >= 0; });
+      var div = document.createElement('div');
+      div.className = 'stile' + (anyOn ? ' on' : '');
+      var html = '<span class="stile-lbl">' + s.name + '</span><div class="stile-variants">';
+      s.variants.forEach(function(v) {
+        var von = state.styles.indexOf(v.id) >= 0;
+        html += '<button class="sv' + (von ? ' on' : '') + '" data-vid="' + v.id + '">' + v.label + '</button>';
+      });
+      html += '</div>';
+      div.innerHTML = html;
+      div.querySelectorAll('.sv').forEach(function(btn) {
+        btn.onclick = function(e) {
+          e.stopPropagation();
+          var vid = btn.getAttribute('data-vid');
+          var idx = state.styles.indexOf(vid);
+          if (idx >= 0) {
+            state.styles.splice(idx, 1); haptic(); playTick();
+          } else {
+            s.variants.forEach(function(v) {
+              var i2 = state.styles.indexOf(v.id);
+              if (i2 >= 0) state.styles.splice(i2, 1);
+            });
+            if (state.styles.length < MAX) { state.styles.push(vid); haptic(); playTick(); }
+          }
+          buildStyles(); syncNextBtns();
+        };
+      });
+      el.appendChild(div);
+    } else {
+      var on = state.styles.indexOf(s.id) >= 0;
+      var b  = document.createElement('button');
+      b.className = 'stile' + (on ? ' on' : '');
+      b.textContent = s.name;
+      b.onclick = function() {
+        var i = state.styles.indexOf(s.id);
+        if (i >= 0) { state.styles.splice(i, 1); haptic(); playTick(); }
+        else if (state.styles.length < MAX) { state.styles.push(s.id); haptic(); playTick(); }
+        buildStyles(); syncNextBtns();
+      };
+      el.appendChild(b);
+    }
   });
   var n = state.styles.length;
   $('style-hint').textContent = n > 0 ? n + ' of ' + MAX + ' selected' : 'Select up to 3';
@@ -911,7 +958,17 @@ function generate() {
   if (!apiKey) { openSettings(); return; }
 
   var styleObjs = state.styles.map(function(id) {
-    return STYLES.find(function(s) { return s.id === id; });
+    for (var i = 0; i < STYLES.length; i++) {
+      var s = STYLES[i];
+      if (s.id === id) return { id: id, name: s.name };
+      if (s.variants) {
+        for (var j = 0; j < s.variants.length; j++) {
+          if (s.variants[j].id === id)
+            return { id: id, name: s.name + ' — ' + s.variants[j].label };
+        }
+      }
+    }
+    return null;
   }).filter(Boolean);
 
   generating = true;

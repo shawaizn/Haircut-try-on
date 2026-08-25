@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login — Haircut Try-On</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #0a0a0a;
+    color: #fff;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .card {
+    background: #111;
+    border: 1px solid #222;
+    border-radius: 16px;
+    padding: 48px 40px;
+    width: 100%;
+    max-width: 420px;
+  }
+  .logo {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+  .logo-mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    background: #C9A84C;
+    border-radius: 14px;
+    margin-bottom: 12px;
+  }
+  .logo-mark svg { width: 30px; height: 30px; fill: #000; }
+  .logo h1 { font-size: 20px; font-weight: 700; color: #fff; }
+  .logo p { font-size: 14px; color: #888; margin-top: 4px; }
+  label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: #888;
+    margin-bottom: 6px;
+  }
+  input {
+    width: 100%;
+    background: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-size: 16px;
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+    outline: none;
+    transition: border-color 0.2s;
+    margin-bottom: 20px;
+  }
+  input:focus { border-color: #C9A84C; }
+  .btn {
+    width: 100%;
+    background: #C9A84C;
+    color: #000;
+    border: none;
+    border-radius: 8px;
+    padding: 14px;
+    font-size: 16px;
+    font-weight: 700;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  .btn:hover { opacity: 0.9; }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .error {
+    background: #2a1010;
+    border: 1px solid #5a2020;
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-size: 14px;
+    color: #ff6b6b;
+    margin-bottom: 20px;
+    display: none;
+  }
+  .back-link {
+    text-align: center;
+    margin-top: 24px;
+    font-size: 14px;
+    color: #555;
+  }
+  .back-link a { color: #C9A84C; text-decoration: none; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">
+    <div class="logo-mark">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2C8.13 2 5 5.13 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.87-3.13-7-7-7zm2 14H10v-1h4v1zm0-3H10v-1h4v1zm-1-4.07V11h-2V8.93C9.48 8.44 9 7.52 9 6.5 9 4.57 10.57 3 12.5 3S16 4.57 16 6.5c0 1.02-.48 1.94-1 2.43z"/>
+      </svg>
+    </div>
+    <h1>Haircut Try-On</h1>
+    <p>Barber login</p>
+  </div>
+
+  <div class="error" id="error-msg"></div>
+
+  <label for="email">Email address</label>
+  <input type="email" id="email" placeholder="you@example.com" autocomplete="email">
+
+  <label for="password">Password</label>
+  <input type="password" id="password" placeholder="Your password" autocomplete="current-password">
+
+  <button class="btn" id="login-btn" onclick="login()">Log in</button>
+
+  <div class="back-link">
+    <a href="index.html">← Back to homepage</a>
+  </div>
+</div>
+
+<script>
+  // ─── CONFIG — replace with your Supabase project values ───────────────────
+  const SUPABASE_URL = 'YOUR_SUPABASE_URL'
+  const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY'
+  // ──────────────────────────────────────────────────────────────────────────
+
+  const { createClient } = supabase
+  const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+
+  // Redirect to dashboard if already logged in
+  sb.auth.getSession().then(({ data: { session } }) => {
+    if (session) window.location.href = 'dashboard.html'
+  })
+
+  async function login() {
+    const email = document.getElementById('email').value.trim()
+    const password = document.getElementById('password').value
+    const btn = document.getElementById('login-btn')
+    const errEl = document.getElementById('error-msg')
+
+    errEl.style.display = 'none'
+
+    if (!email || !password) {
+      errEl.textContent = 'Please enter your email and password.'
+      errEl.style.display = 'block'
+      return
+    }
+
+    btn.disabled = true
+    btn.textContent = 'Logging in…'
+
+    const { error } = await sb.auth.signInWithPassword({ email, password })
+
+    if (error) {
+      errEl.textContent = 'Incorrect email or password. Please try again.'
+      errEl.style.display = 'block'
+      btn.disabled = false
+      btn.textContent = 'Log in'
+      return
+    }
+
+    window.location.href = 'dashboard.html'
+  }
+
+  document.getElementById('password').addEventListener('keydown', e => {
+    if (e.key === 'Enter') login()
+  })
+</script>
+</body>
+</html>

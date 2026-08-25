@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard — Haircut Try-On</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #0a0a0a;
+    color: #fff;
+    min-height: 100vh;
+  }
+  /* ── Header ── */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 24px;
+    border-bottom: 1px solid #1a1a1a;
+    background: #0a0a0a;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .header-left { display: flex; align-items: center; gap: 12px; }
+  .logo-mark {
+    width: 36px; height: 36px;
+    background: #C9A84C;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .logo-mark svg { width: 20px; height: 20px; fill: #000; }
+  .brand { font-size: 16px; font-weight: 700; }
+  .tier-badge {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 100px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .tier-trial   { background: #1a1a1a; color: #888; border: 1px solid #333; }
+  .tier-starter { background: #1a2a1a; color: #4ade80; border: 1px solid #2d5a2d; }
+  .tier-standard { background: #1a1f2a; color: #C9A84C; border: 1px solid #3a3020; }
+  .tier-pro    { background: #2a1a2a; color: #c084fc; border: 1px solid #5a3a5a; }
+  .logout-btn {
+    background: none;
+    border: 1px solid #333;
+    color: #888;
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .logout-btn:hover { border-color: #555; color: #fff; }
+  /* ── Main ── */
+  main {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 32px 24px 80px;
+  }
+  /* ── Cards ── */
+  .card {
+    background: #111;
+    border: 1px solid #222;
+    border-radius: 16px;
+    padding: 28px;
+    margin-bottom: 16px;
+  }
+  .card-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #555;
+    margin-bottom: 16px;
+  }
+  /* ── Credit card ── */
+  .credit-number {
+    font-size: 64px;
+    font-weight: 800;
+    color: #C9A84C;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .credit-label { font-size: 16px; color: #888; margin-bottom: 20px; }
+  .credit-bar-bg {
+    background: #1a1a1a;
+    border-radius: 100px;
+    height: 8px;
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+  .credit-bar-fill {
+    height: 100%;
+    border-radius: 100px;
+    background: #C9A84C;
+    transition: width 0.6s ease;
+  }
+  .credit-bar-fill.low { background: #f59e0b; }
+  .credit-bar-fill.critical { background: #ef4444; }
+  .credit-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: #555;
+  }
+  /* ── Open tool ── */
+  .open-tool-btn {
+    display: block;
+    width: 100%;
+    background: #C9A84C;
+    color: #000;
+    border: none;
+    border-radius: 12px;
+    padding: 20px;
+    font-size: 20px;
+    font-weight: 800;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    transition: opacity 0.2s, transform 0.1s;
+    margin-top: 20px;
+    letter-spacing: -0.01em;
+  }
+  .open-tool-btn:hover { opacity: 0.9; }
+  .open-tool-btn:active { transform: scale(0.98); }
+  .tool-hint {
+    font-size: 14px;
+    color: #555;
+    text-align: center;
+    margin-top: 12px;
+    line-height: 1.5;
+  }
+  /* ── Upgrade ── */
+  .upgrade-card {
+    background: linear-gradient(135deg, #1a1500 0%, #111 100%);
+    border: 1px solid #3a2d10;
+  }
+  .upgrade-heading { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
+  .upgrade-sub { font-size: 14px; color: #888; margin-bottom: 20px; }
+  .upgrade-info {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+  .upgrade-price { font-size: 28px; font-weight: 800; color: #C9A84C; }
+  .upgrade-credits { font-size: 14px; color: #888; }
+  .upgrade-btn {
+    display: inline-block;
+    background: transparent;
+    border: 1px solid #C9A84C;
+    color: #C9A84C;
+    border-radius: 8px;
+    padding: 12px 24px;
+    font-size: 15px;
+    font-weight: 700;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.2s, color 0.2s;
+  }
+  .upgrade-btn:hover { background: #C9A84C; color: #000; }
+  /* ── Account details ── */
+  .detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 0;
+    border-bottom: 1px solid #1a1a1a;
+    font-size: 14px;
+  }
+  .detail-row:last-child { border-bottom: none; }
+  .detail-key { color: #555; }
+  .detail-val { color: #fff; font-weight: 500; }
+  .cancel-link {
+    color: #ef4444;
+    font-size: 14px;
+    text-decoration: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    padding: 0;
+  }
+  .cancel-link:hover { text-decoration: underline; }
+  /* ── Loading / Error ── */
+  .loading-screen {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+    color: #555;
+    font-size: 15px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <div class="logo-mark">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2C8.13 2 5 5.13 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.87-3.13-7-7-7zm2 14H10v-1h4v1zm0-3H10v-1h4v1zm-1-4.07V11h-2V8.93C9.48 8.44 9 7.52 9 6.5 9 4.57 10.57 3 12.5 3S16 4.57 16 6.5c0 1.02-.48 1.94-1 2.43z"/>
+      </svg>
+    </div>
+    <span class="brand">My Account</span>
+    <span class="tier-badge tier-starter" id="tier-badge">—</span>
+  </div>
+  <button class="logout-btn" onclick="logout()">Log out</button>
+</header>
+
+<main id="main-content">
+  <div class="loading-screen">Loading your account…</div>
+</main>
+
+<script>
+  // ─── CONFIG — replace with your Supabase project values ───────────────────
+  const SUPABASE_URL = 'YOUR_SUPABASE_URL'
+  const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY'
+  const STRIPE_CUSTOMER_PORTAL_URL = 'YOUR_STRIPE_CUSTOMER_PORTAL_URL'
+  // ──────────────────────────────────────────────────────────────────────────
+
+  const NEXT_TIER = {
+    trial:    { name: 'Starter',  price: '£29',  credits: 100, id: 'starter'  },
+    starter:  { name: 'Standard', price: '£59',  credits: 300, id: 'standard' },
+    standard: { name: 'Pro',      price: '£99',  credits: 700, id: 'pro'      },
+  }
+
+  const { createClient } = supabase
+  const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+
+  let barber = null
+
+  async function init() {
+    const { data: { session } } = await sb.auth.getSession()
+    if (!session) {
+      window.location.href = 'login.html'
+      return
+    }
+
+    const { data, error } = await sb.from('barbers').select('*').eq('id', session.user.id).single()
+
+    if (error || !data) {
+      window.location.href = 'login.html'
+      return
+    }
+
+    if (data.account_status !== 'active') {
+      window.location.href = 'index.html?msg=inactive'
+      return
+    }
+
+    barber = data
+    render()
+  }
+
+  function render() {
+    // Tier badge
+    const badge = document.getElementById('tier-badge')
+    badge.textContent = barber.tier.charAt(0).toUpperCase() + barber.tier.slice(1)
+    badge.className = `tier-badge tier-${barber.tier}`
+
+    const pct = Math.min(100, Math.round((barber.credits_remaining / barber.monthly_credit_allowance) * 100))
+    const fillClass = pct <= 10 ? 'critical' : pct <= 25 ? 'low' : ''
+
+    const nextBilling = new Date(barber.billing_cycle_start)
+    nextBilling.setMonth(nextBilling.getMonth() + 1)
+    const nextBillingStr = nextBilling.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
+
+    const upgrade = NEXT_TIER[barber.tier]
+
+    document.getElementById('main-content').innerHTML = `
+      <!-- Credit balance -->
+      <div class="card">
+        <div class="card-label">Credit Balance</div>
+        <div class="credit-number">${barber.credits_remaining}</div>
+        <div class="credit-label">credits remaining</div>
+        <div class="credit-bar-bg">
+          <div class="credit-bar-fill ${fillClass}" style="width:${pct}%"></div>
+        </div>
+        <div class="credit-meta">
+          <span>${barber.monthly_credit_allowance} credits/month</span>
+          <span>Renews ${nextBillingStr}</span>
+        </div>
+      </div>
+
+      <!-- Open tool -->
+      <div class="card">
+        <div class="card-label">Your Try-On Tool</div>
+        <a href="tool.html" class="open-tool-btn">Open Tool →</a>
+        <p class="tool-hint">Tap Open Tool then hand your device to your customer. They'll choose their style and you'll see exactly what they want.</p>
+      </div>
+
+      ${upgrade ? `
+      <!-- Upgrade -->
+      <div class="card upgrade-card">
+        <div class="card-label">Upgrade</div>
+        <div class="upgrade-heading">More cuts, more credits</div>
+        <div class="upgrade-sub">Switch to ${upgrade.name} and get ${upgrade.credits} credits per month.</div>
+        <div class="upgrade-info">
+          <span class="upgrade-price">${upgrade.price}/mo</span>
+          <span class="upgrade-credits">${upgrade.credits} credits</span>
+        </div>
+        <a href="${STRIPE_CUSTOMER_PORTAL_URL}" class="upgrade-btn">Upgrade to ${upgrade.name}</a>
+      </div>
+      ` : ''}
+
+      <!-- Account details -->
+      <div class="card">
+        <div class="card-label">Account Details</div>
+        <div class="detail-row">
+          <span class="detail-key">Email</span>
+          <span class="detail-val">${barber.email}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-key">Plan</span>
+          <span class="detail-val">${barber.tier.charAt(0).toUpperCase() + barber.tier.slice(1)}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-key">Next billing</span>
+          <span class="detail-val">${nextBillingStr}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-key">Subscription</span>
+          <a href="${STRIPE_CUSTOMER_PORTAL_URL}" class="cancel-link">Manage / Cancel</a>
+        </div>
+      </div>
+    `
+  }
+
+  async function logout() {
+    await sb.auth.signOut()
+    window.location.href = 'index.html'
+  }
+
+  init()
+</script>
+</body>
+</html>

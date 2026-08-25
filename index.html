@@ -1,1177 +1,867 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <title>Razor's Edge</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Haircut Try-On — The AI haircut tool for barbers</title>
+<meta name="description" content="Show your customers exactly what they're getting before you pick up the scissors. The AI haircut try-on tool for barbers.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
-*, *::before, *::after {
-  box-sizing: border-box; margin: 0; padding: 0;
-  -webkit-tap-highlight-color: transparent;
-}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
-  --red:        #c8151a;
-  --red-tint:   rgba(200,21,26,.1);
-  --red-border: rgba(200,21,26,.55);
-  --bg:         #0a0809;
-  --s1:         rgba(255,255,255,.055);
-  --s2:         rgba(255,255,255,.09);
-  --s3:         rgba(255,255,255,.14);
-  --border:     rgba(255,255,255,.11);
-  --border-s:   rgba(255,255,255,.06);
-  --text:       #edeae7;
-  --text2:      #7a7676;
-  --text3:      #3e3c3c;
-  --r:          14px;
-  --rs:         10px;
+  --gold: #C9A84C;
+  --gold-dim: rgba(201,168,76,.15);
+  --bg: #0a0a0a;
+  --card: #111;
+  --border: #222;
+  --text: #ffffff;
+  --text2: #888888;
+  --text3: #444;
 }
-html, body {
-  height: 100%; overflow: hidden;
-  background: var(--bg); color: var(--text);
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--text);
   -webkit-font-smoothing: antialiased;
-  user-select: none; -webkit-user-select: none;
-  touch-action: manipulation;
-}
-/* depth background — radial so blur has something to work against */
-body::after {
-  content: '';
-  position: fixed; inset: 0; z-index: 0; pointer-events: none;
-  background:
-    radial-gradient(ellipse 80% 60% at 50% 30%, rgba(200,21,26,.07) 0%, transparent 70%),
-    radial-gradient(ellipse 100% 80% at 20% 80%, rgba(255,255,255,.025) 0%, transparent 60%);
-}
-/* grain texture */
-body::before {
-  content: '';
-  position: fixed; inset: 0; z-index: 9998; pointer-events: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-size: 180px 180px;
-  opacity: .055;
+  overflow-x: hidden;
 }
 
-/* ── PAGE TRACK ─────────────────────────────────────────────── */
-#page-track {
+/* ── NAV ── */
+nav {
   display: flex;
-  width: 500vw;
-  height: 100dvh;
-  transition: transform .42s cubic-bezier(.4,0,.2,1);
-  will-change: transform;
-  position: relative; z-index: 1;
-}
-.page {
-  flex: 0 0 100vw; width: 100vw; height: 100dvh;
-  display: flex; flex-direction: column;
-  overflow: hidden; position: relative;
-}
-
-/* ── SHARED HEADER ──────────────────────────────────────────── */
-.ph {
-  flex-shrink: 0; position: relative;
-  display: flex; align-items: center;
-  padding: 0 20px;
-  padding-top: max(14px, env(safe-area-inset-top));
-  height: calc(70px + max(0px, env(safe-area-inset-top)));
-  background: rgba(10,8,9,.72);
-  backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 40px;
   border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  background: rgba(10,10,10,.9);
+  backdrop-filter: blur(20px);
+  z-index: 100;
 }
-/* Three-column header: [side] [strip] [side] */
-.ph-side {
-  width: 46px; flex-shrink: 0;
+.nav-logo { display: flex; align-items: center; gap: 10px; font-size: 16px; font-weight: 700; }
+.nav-logo-mark {
+  width: 32px; height: 32px;
+  background: var(--gold);
+  border-radius: 8px;
   display: flex; align-items: center; justify-content: center;
 }
-.ph-center {
-  flex: 1; display: flex; flex-direction: column;
-  align-items: center; justify-content: center; gap: 2px;
+.nav-logo-mark svg { width: 18px; height: 18px; fill: #000; }
+.nav-right { display: flex; align-items: center; gap: 16px; }
+.nav-login {
+  font-size: 14px; font-weight: 500; color: var(--text2);
+  text-decoration: none; transition: color .2s;
 }
-.ph-wordmark {
-  font-size: 12px; font-weight: 700; letter-spacing: 3.5px;
-  text-transform: uppercase; color: var(--text);
-  text-align: center; line-height: 1;
+.nav-login:hover { color: var(--text); }
+.nav-cta {
+  background: var(--gold);
+  color: #000;
+  padding: 8px 20px;
+  border-radius: 100px;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: opacity .2s;
 }
-.ph-wordmark-sub {
-  font-size: 9px; font-weight: 500; letter-spacing: 2.5px;
-  text-transform: uppercase; color: var(--text2);
-  text-align: center; line-height: 1;
+.nav-cta:hover { opacity: .85; }
+
+/* ── SECTIONS ── */
+section { padding: 100px 40px; max-width: 1100px; margin: 0 auto; }
+@media (max-width: 768px) {
+  nav { padding: 16px 20px; }
+  section { padding: 70px 20px; }
 }
 
-.icon-btn {
-  width: 38px; height: 38px; border-radius: 50%;
-  background: var(--s2); border: 1px solid var(--border);
-  color: var(--text2); cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  transition: border-color .13s, color .13s, transform .08s;
+/* ── HERO ── */
+#hero { text-align: center; padding-top: 120px; padding-bottom: 100px; }
+.hero-badge {
+  display: inline-block;
+  background: var(--gold-dim);
+  border: 1px solid rgba(201,168,76,.3);
+  color: var(--gold);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  padding: 6px 14px;
+  border-radius: 100px;
+  margin-bottom: 28px;
 }
-.icon-btn:active { border-color: var(--red); color: var(--text); transform: scale(.91); }
+.hero-h1 {
+  font-size: clamp(32px, 5vw, 62px);
+  font-weight: 900;
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  max-width: 840px;
+  margin: 0 auto 24px;
+}
+.hero-h1 em { font-style: normal; color: var(--gold); }
+.hero-sub {
+  font-size: clamp(16px, 2vw, 20px);
+  color: var(--text2);
+  line-height: 1.6;
+  max-width: 560px;
+  margin: 0 auto 48px;
+}
+.hero-cta {
+  display: inline-block;
+  background: var(--gold);
+  color: #000;
+  font-size: 18px;
+  font-weight: 800;
+  padding: 18px 44px;
+  border-radius: 100px;
+  text-decoration: none;
+  transition: opacity .2s, transform .15s;
+  box-shadow: 0 0 60px rgba(201,168,76,.25);
+}
+.hero-cta:hover { opacity: .9; transform: scale(1.02); }
 
-.prog-bar { height: 2px; background: var(--s3); flex-shrink: 0; position: relative; }
-.prog-fill {
-  position: absolute; inset: 0 auto 0 0;
-  background: var(--red);
-  transition: width .42s cubic-bezier(.4,0,.2,1);
+/* ── PROBLEM ── */
+#problem { text-align: center; border-top: 1px solid var(--border); }
+.section-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 20px;
 }
-
-/* ── SCROLL AREA ────────────────────────────────────────────── */
-.pscroll {
-  flex: 1; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch;
-  padding: 20px 24px 88px;
-  display: flex; flex-direction: column;
-  touch-action: pan-y;
+.section-h2 {
+  font-size: clamp(28px, 4vw, 46px);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  margin-bottom: 60px;
 }
-
-/* ── FOOTER ─────────────────────────────────────────────────── */
-.pfooter {
-  position: absolute; bottom: 0; left: 0; right: 0;
-  padding: 14px 20px;
-  padding-bottom: max(20px, env(safe-area-inset-bottom));
-  background: linear-gradient(to top, var(--bg) 64%, transparent);
+.three-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
 }
-.pfooter-btn {
-  width: 100%; height: 56px; border-radius: 28px;
-  border: none; font-family: inherit;
-  font-size: 15px; font-weight: 700; letter-spacing: .4px;
-  cursor: not-allowed;
-  transition: background .22s, color .22s, border-color .22s, opacity .1s, transform .09s;
-}
-.pfooter-btn.off   { background: var(--s3); color: var(--text3); }
-.pfooter-btn.on    { background: var(--red); color: #fff; cursor: pointer; }
-.pfooter-btn.on { transition: background .22s, color .22s, transform .45s cubic-bezier(.34,1.56,.64,1), opacity .1s; }
-.pfooter-btn.on:active { transform: scale(.97) translateY(1px); opacity: .9; transition: transform .1s ease, opacity .1s; }
-.pfooter-btn.ghost {
-  background: transparent; color: var(--text2); cursor: pointer;
+@media (max-width: 700px) { .three-grid { grid-template-columns: 1fr; gap: 12px; } }
+.problem-card {
+  background: var(--card);
   border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 32px 28px;
+  text-align: left;
 }
-.pfooter-btn.ghost:active { border-color: var(--red-border); color: var(--text); }
-.pfooter-btn.muted { background: var(--s2); color: var(--text2); cursor: default; }
+.problem-icon { font-size: 28px; margin-bottom: 16px; }
+.problem-h3 { font-size: 18px; font-weight: 700; margin-bottom: 10px; }
+.problem-p  { font-size: 15px; color: var(--text2); line-height: 1.55; }
 
-/* ══════════════════════════════════════════════════════════════
-   PAGE 1 — INTRO
-══════════════════════════════════════════════════════════════ */
-#pg1 .ph { border-bottom: none; background: transparent; }
-
-#intro-body {
-  flex: 1; display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  padding: 0 28px;
-  padding-bottom: max(120px, calc(100px + env(safe-area-inset-bottom)));
-  gap: 0;
+/* ── SOLUTION ── */
+#solution { text-align: center; border-top: 1px solid var(--border); }
+.solution-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 32px 28px;
+  text-align: left;
+  position: relative;
+  overflow: hidden;
 }
-
-#intro-logo-wrap {
-  position: relative; margin-bottom: 40px;
+.solution-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--gold);
 }
-#intro-logo {
-  width: min(280px, 72vw);
-  height: min(280px, 72vw);
+.solution-num {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 12px;
+}
+.solution-h3 { font-size: 20px; font-weight: 700; margin-bottom: 10px; }
+.solution-p  { font-size: 15px; color: var(--text2); line-height: 1.55; }
+
+/* ── DEMO ── */
+#demo {
+  border-top: 1px solid var(--border);
+  text-align: center;
+}
+#demo .section-h2 { margin-bottom: 12px; }
+.demo-sub { font-size: 17px; color: var(--text2); margin-bottom: 48px; }
+
+.demo-box {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 40px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+@media (max-width: 600px) { .demo-box { padding: 24px; } }
+
+/* Demo states */
+.demo-state { display: none; }
+.demo-state.active { display: block; }
+
+/* Style selector */
+.demo-style-label { font-size: 13px; color: var(--text2); margin-bottom: 12px; font-weight: 500; }
+.demo-styles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 28px;
+}
+.demo-style-btn {
+  padding: 8px 16px;
+  border-radius: 100px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text2);
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all .2s;
+}
+.demo-style-btn.on {
+  border-color: var(--gold);
+  background: var(--gold-dim);
+  color: var(--gold);
+}
+.demo-photo-opts {
+  display: flex;
+  gap: 12px;
+}
+@media (max-width: 480px) { .demo-photo-opts { flex-direction: column; } }
+.demo-photo-btn {
+  flex: 1;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  transition: border-color .2s, background .2s;
+}
+.demo-photo-btn:hover { border-color: var(--gold); background: var(--gold-dim); }
+.demo-photo-btn svg { opacity: .7; }
+.demo-photo-btn span.sub { font-size: 12px; font-weight: 400; color: var(--text2); }
+
+/* Generate btn */
+.demo-generate-btn {
+  width: 100%;
+  background: var(--gold);
+  color: #000;
+  border: none;
+  border-radius: 12px;
+  padding: 18px;
+  font-size: 17px;
+  font-weight: 800;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  transition: opacity .2s;
+  margin-top: 24px;
+}
+.demo-generate-btn:hover { opacity: .9; }
+.demo-generate-btn:disabled { opacity: .5; cursor: not-allowed; }
+
+/* Loading state */
+.demo-loading {
+  padding: 40px 0;
+  color: var(--text2);
+  font-size: 16px;
+}
+.demo-spinner {
+  width: 40px; height: 40px;
+  border: 2px solid var(--border);
+  border-top-color: var(--gold);
   border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 20px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Result state */
+.demo-result-img {
+  width: 100%;
+  aspect-ratio: 1;
   object-fit: cover;
-  display: block;
-  box-shadow:
-    0 0 0 2px rgba(200,21,26,.6),
-    0 0 48px rgba(200,21,26,.22),
-    0 28px 56px rgba(0,0,0,.75);
+  border-radius: 12px;
+  margin-bottom: 24px;
 }
-/* text fallback when razors%20logo.jpg not found */
-#intro-logo-text {
-  display: none;
-  width: min(280px, 72vw); height: min(280px, 72vw);
-  border-radius: 50%;
-  background: var(--s1);
-  border: 2px solid var(--red);
-  flex-direction: column; align-items: center; justify-content: center; gap: 4px;
-  box-shadow: 0 0 48px rgba(200,21,26,.18), 0 28px 56px rgba(0,0,0,.75);
+.demo-result-msg {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 8px;
 }
-#ilt-name {
-  font-size: clamp(22px, 7vw, 32px); font-weight: 900;
-  letter-spacing: 2px; text-transform: uppercase;
-  background: linear-gradient(135deg, #fff 40%, rgba(255,255,255,.55));
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-  text-align: center; line-height: 1.1; padding: 0 12px;
+.demo-result-sub { font-size: 15px; color: var(--text2); margin-bottom: 24px; }
+.demo-cta-btn {
+  display: inline-block;
+  background: var(--gold);
+  color: #000;
+  font-size: 16px;
+  font-weight: 700;
+  padding: 14px 32px;
+  border-radius: 100px;
+  text-decoration: none;
+  transition: opacity .2s;
 }
-#ilt-divider {
-  width: 40px; height: 2px; background: var(--red); margin: 2px 0;
-}
-#ilt-sub {
-  font-size: clamp(10px, 3vw, 13px); font-weight: 700;
-  letter-spacing: 3px; text-transform: uppercase; color: var(--red);
+.demo-cta-btn:hover { opacity: .9; }
+
+/* Used/empty states */
+.demo-used-state, .demo-empty-state {
+  padding: 40px 20px;
+  color: var(--text2);
+  font-size: 15px;
+  line-height: 1.5;
 }
 
-#intro-tagline {
-  font-size: 17px; font-weight: 300; color: var(--text2);
-  text-align: center; line-height: 1.55; letter-spacing: .1px;
-  margin-bottom: 40px;
-}
-#intro-tagline strong { font-weight: 600; color: var(--text); }
+/* Hidden file input */
+#demo-file-input { display: none; }
 
-#intro-start {
-  width: 100%; max-width: 340px; height: 56px; border-radius: 28px; border: none;
-  background: var(--red); color: #fff; font-family: inherit;
-  font-size: 16px; font-weight: 700; letter-spacing: .4px;
-  cursor: pointer; transition: opacity .12s, transform .09s;
-}
-#intro-start:active { opacity: .88; transform: scale(.98); }
-
-/* ══════════════════════════════════════════════════════════════
-   PAGE 2 — LENGTH
-══════════════════════════════════════════════════════════════ */
-#len-wrap {
-  flex: 1; min-height: 0;
-  display: flex; flex-direction: column; gap: 0;
-}
-
-/* ── Section header ── */
-.len-section-hd {
-  font-size: 13px; font-weight: 600; letter-spacing: 2px;
-  text-transform: uppercase; color: var(--text3);
-  margin-bottom: 10px; flex-shrink: 0;
-}
-
-/* ── Clipper grade grid ── */
-#len-clipper {
-  display: flex; flex-direction: column;
-  flex: 2; min-height: 0;
-  padding-bottom: 16px;
-  border-bottom: 1px solid var(--border-s);
-  margin-bottom: 16px;
-}
-#len-grade-grid {
+/* ── PRICING ── */
+#pricing { border-top: 1px solid var(--border); text-align: center; }
+.pricing-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  grid-template-rows: repeat(2, 1fr);
-  gap: 8px; flex: 1; min-height: 0;
-  align-items: stretch;
+  gap: 16px;
+  margin-bottom: 24px;
 }
-.lgrade {
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  gap: 4px; min-height: 0;
-  border-radius: var(--rs); border: 1px solid var(--border);
-  background: var(--s1);
-  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-  cursor: pointer; font-family: inherit;
-  transition: border-color .18s, background .18s, transform .45s cubic-bezier(.34,1.56,.64,1);
-}
-.lgrade:active { transform: scale(.93) translateY(1px); transition: transform .1s ease; }
-.lgrade .lg-num {
-  font-size: clamp(32px, 5vw, 56px); font-weight: 700; line-height: 1;
-  color: var(--text2);
-  transition: color .18s;
-}
-.lgrade .lg-mm {
-  font-size: clamp(14px, 2vw, 18px); font-weight: 500; color: var(--text3);
-  letter-spacing: .3px;
-  transition: color .18s;
-}
-.lgrade.on { border-color: var(--red); background: var(--red-tint); }
-.lgrade.on .lg-num { color: var(--text); }
-.lgrade.on .lg-mm  { color: var(--red-border); }
-
-/* ── Scissors / special options ── */
-#len-scissors { display: flex; flex-direction: column; flex: 1; min-height: 0; gap: 10px; }
-#len-scissors-btns { display: flex; gap: 8px; flex: 1; min-height: 0; }
-.lopt {
-  flex: 1; display: flex; flex-direction: column; align-items: center;
-  justify-content: center; gap: 4px;
-  padding: 16px 8px; border-radius: var(--rs);
-  border: 1px solid var(--border); background: var(--s1);
-  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-  cursor: pointer; font-family: inherit; color: var(--text);
-  transition: border-color .18s, background .18s, transform .45s cubic-bezier(.34,1.56,.64,1);
-}
-.lopt:active { transform: scale(.94) translateY(1px); transition: transform .1s ease; }
-.lopt .lo-name { font-size: clamp(17px, 2.5vw, 22px); font-weight: 600; }
-.lopt .lo-desc { font-size: clamp(13px, 1.8vw, 17px); font-weight: 500; color: var(--text2); }
-.lopt.on { border-color: var(--red); background: var(--red-tint); }
-.lopt.on .lo-desc { color: var(--red-border); }
-
-/* ══════════════════════════════════════════════════════════════
-   PAGE 3 — STYLE
-══════════════════════════════════════════════════════════════ */
-#styles {
-  display: grid; grid-template-columns: repeat(3, 1fr);
-  grid-auto-rows: 1fr; gap: 8px;
-  flex: 1; min-height: 0;
-}
-#style-hint { flex-shrink: 0; }
-.stile-lbl {
-  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-  z-index: 2; pointer-events: none; white-space: nowrap;
-  background: rgba(10,8,9,.88);
+@media (max-width: 900px) { .pricing-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 500px) { .pricing-grid { grid-template-columns: 1fr; } }
+.pricing-card {
+  background: var(--card);
   border: 1px solid var(--border);
-  border-radius: 20px; padding: 7px 16px;
-  font-size: clamp(15px, 2.2vw, 20px); font-weight: 600; letter-spacing: .2px;
-  color: var(--text);
-  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-}
-.stile-variants {
-  display: grid; gap: 3px; width: 100%;
-  flex: 1; min-height: 0;
-}
-.stile-variants.cols-2 { grid-template-columns: repeat(2, 1fr); }
-.stile-variants.cols-4 { grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, 1fr); }
-.sv {
-  font-size: clamp(15px, 2.2vw, 20px); font-weight: 600; letter-spacing: .2px;
-  text-align: center;
-  border-radius: 6px; border: 1px solid var(--border);
-  background: var(--s2); color: var(--text);
-  cursor: pointer; font-family: inherit;
-  display: flex; align-items: center; justify-content: center;
-  transition: border-color .15s, background .15s, color .15s;
-  min-height: 0; padding: 0;
-}
-.sv.on { border-color: var(--red); background: var(--red-tint); color: var(--text); }
-.stile {
+  border-radius: 20px;
+  padding: 28px 24px;
+  text-align: left;
   position: relative;
+  display: flex;
+  flex-direction: column;
+}
+.pricing-card.popular {
+  border-color: var(--gold);
+  background: linear-gradient(135deg, #1a1500 0%, var(--card) 60%);
+}
+.popular-badge {
+  position: absolute;
+  top: -12px; left: 50%; transform: translateX(-50%);
+  background: var(--gold);
+  color: #000;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  padding: 4px 14px;
+  border-radius: 100px;
+  white-space: nowrap;
+}
+.pricing-tier {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--text2);
+  margin-bottom: 12px;
+}
+.pricing-price {
+  font-size: 36px;
+  font-weight: 900;
+  line-height: 1;
+  margin-bottom: 4px;
+  letter-spacing: -0.02em;
+}
+.pricing-price span { font-size: 20px; font-weight: 600; }
+.pricing-period { font-size: 13px; color: var(--text2); margin-bottom: 16px; }
+.pricing-credits {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--gold);
+  margin-bottom: 20px;
+}
+.pricing-desc { font-size: 13px; color: var(--text2); line-height: 1.5; margin-bottom: 24px; flex: 1; }
+.pricing-btn {
+  display: block;
+  text-align: center;
+  padding: 12px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: 'Inter', sans-serif;
+  text-decoration: none;
+  cursor: pointer;
+  border: none;
+  transition: opacity .2s;
+}
+.pricing-btn-primary { background: var(--gold); color: #000; }
+.pricing-btn-secondary {
+  background: transparent;
+  color: var(--text2);
+  border: 1px solid var(--border);
+}
+.pricing-btn:hover { opacity: .85; }
+.pricing-footnote { font-size: 14px; color: var(--text2); margin-top: 8px; }
+
+/* ── FAQ ── */
+#faq { border-top: 1px solid var(--border); }
+#faq .section-h2 { text-align: center; margin-bottom: 48px; }
+.faq-item {
+  border-bottom: 1px solid var(--border);
+  padding: 24px 0;
+}
+.faq-item:last-child { border-bottom: none; }
+.faq-q { font-size: 17px; font-weight: 600; margin-bottom: 10px; }
+.faq-a { font-size: 15px; color: var(--text2); line-height: 1.6; }
+
+/* ── FOOTER ── */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--text2);
+  font-size: 14px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.footer-logo { display: flex; align-items: center; gap: 8px; font-weight: 600; color: var(--text); }
+.footer-logo-mark {
+  width: 24px; height: 24px;
+  background: var(--gold);
+  border-radius: 6px;
   display: flex; align-items: center; justify-content: center;
-  text-align: center; min-height: 0; padding: 12px 8px;
-  border-radius: var(--rs); border: 1px solid var(--border);
-  background: var(--s1);
-  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-  cursor: pointer; font-family: inherit;
-  color: var(--text); font-size: clamp(15px, 2.2vw, 20px); font-weight: 600; line-height: 1.35;
-  transition: border-color .18s, background .18s, transform .45s cubic-bezier(.34,1.56,.64,1);
 }
-.stile.has-variants {
-  padding: 4px; cursor: default; align-items: stretch;
-}
-.stile:active {
-  transform: scale(.94) translateY(1px);
-  transition: transform .1s ease;
-}
-.stile.on { border-color: var(--red); background: var(--red-tint); }
-.stile.on::after {
-  content: ''; position: absolute; top: 7px; right: 7px;
-  width: 5px; height: 5px; border-radius: 50%; background: var(--red);
-}
-#style-hint {
-  text-align: center; font-size: 12px; color: var(--text2);
-  margin-top: 18px; font-weight: 500;
-}
+.footer-logo-mark svg { width: 14px; height: 14px; fill: #000; }
+footer a { color: var(--text2); text-decoration: none; }
+footer a:hover { color: var(--text); }
+@media (max-width: 600px) { footer { padding: 28px 20px; } }
 
-/* ══════════════════════════════════════════════════════════════
-   PAGE 4 — PHOTO
-══════════════════════════════════════════════════════════════ */
-#cam-open-btn {
-  width: 100%; flex: 1; min-height: 0;
-  border-radius: var(--r); border: 1px dashed var(--border);
-  background: var(--s1); color: var(--text2);
-  font-family: inherit; font-size: 14px; font-weight: 500; cursor: pointer;
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 11px;
-  transition: border-color .18s, color .15s, transform .08s;
+/* ── INACTIVE MSG ── */
+#inactive-banner {
+  display: none;
+  background: #2a1010;
+  border: 1px solid #5a2020;
+  border-radius: 10px;
+  padding: 16px 20px;
+  font-size: 14px;
+  color: #ff8888;
+  text-align: center;
+  margin: 20px 40px;
 }
-#cam-open-btn:active { transform: scale(.985); border-color: var(--red); color: var(--text); }
-#cam-open-btn svg { opacity: .45; transition: opacity .15s; }
-#cam-open-btn:active svg { opacity: 1; }
-#photo-thumb {
-  display: none; border-radius: var(--r); overflow: hidden;
-  position: relative; flex: 1; min-height: 0; border: 1px solid var(--border);
-}
-#thumb-img { width: 100%; height: 100%; object-fit: cover; display: block; }
-#retake-btn {
-  position: absolute; bottom: 12px; right: 12px;
-  background: rgba(0,0,0,.7); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-  color: rgba(255,255,255,.9); border: 1px solid rgba(255,255,255,.12); border-radius: 18px;
-  padding: 8px 18px; font-size: 13px; font-family: inherit; font-weight: 600; cursor: pointer;
-  transition: transform .08s;
-}
-#retake-btn:active { transform: scale(.94); }
-
-/* ══════════════════════════════════════════════════════════════
-   PAGE 5 — RESULTS
-══════════════════════════════════════════════════════════════ */
-#results-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
-@media (min-width: 600px) { #results-grid { grid-template-columns: repeat(3, 1fr); } }
-.rtile {
-  border-radius: var(--rs); overflow: hidden;
-  border: 1px solid var(--border); aspect-ratio: 3/4;
-  display: flex; flex-direction: column;
-  cursor: pointer; background: var(--s1);
-  transition: transform .12s;
-  animation: fadeUp .3s ease both;
-}
-.rtile:active { transform: scale(.97); }
-.rtile img { flex: 1; width: 100%; object-fit: cover; min-height: 0; display: block; }
-.rtile .rl {
-  padding: 8px 6px; font-size: 10px; font-weight: 700; text-align: center;
-  background: var(--s1); color: var(--text2);
-  letter-spacing: 1.5px; text-transform: uppercase; flex-shrink: 0;
-}
-.skel {
-  border-radius: var(--rs); border: 1px solid var(--border); aspect-ratio: 3/4;
-  display: flex; flex-direction: column; background: var(--s1);
-  animation: fadeUp .25s ease both;
-}
-.skel-img {
-  flex: 1;
-  background: linear-gradient(90deg, var(--s1) 0%, var(--s2) 40%, var(--s3) 50%, var(--s2) 60%, var(--s1) 100%);
-  background-size: 300% 100%;
-  animation: shimmer 1.9s ease infinite;
-}
-.skel-lbl {
-  height: 32px; background: var(--s2);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 10px; font-weight: 700; color: var(--text3);
-  letter-spacing: 1.5px; text-transform: uppercase;
-}
-@keyframes shimmer {
-  0%   { background-position:  130% 0; }
-  100% { background-position: -130% 0; }
-}
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-@keyframes enterItem {
-  from { opacity: 0; transform: translateY(12px) scale(.97); }
-  to   { opacity: 1; transform: translateY(0) scale(1); }
-}
-.lpill.animate-in, .stile.animate-in, .lgrade.animate-in, .lopt.animate-in {
-  animation: enterItem .4s cubic-bezier(.34,1.3,.64,1) both;
-}
-
-/* ══════════════════════════════════════════════════════════════
-   OVERLAYS
-══════════════════════════════════════════════════════════════ */
-#settings-ov {
-  display: none; position: fixed; inset: 0; z-index: 80;
-  background: rgba(0,0,0,.55);
-  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
-  align-items: flex-end;
-}
-#settings-ov.open { display: flex; }
-#settings-panel {
-  width: 100%; background: #121212;
-  border-radius: 18px 18px 0 0; border-top: 1px solid var(--border);
-  padding: 0 24px 24px;
-  padding-bottom: max(24px, env(safe-area-inset-bottom));
-  display: flex; flex-direction: column; gap: 16px;
-}
-.sp-handle { width: 34px; height: 4px; border-radius: 2px; background: var(--s3); margin: 14px auto 6px; }
-#settings-panel h3 { font-size: 16px; font-weight: 700; }
-.sp-label { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text2); }
-#api-key-input {
-  width: 100%; padding: 14px;
-  background: var(--s2); border: 1.5px solid var(--border); border-radius: var(--rs);
-  color: var(--text); font-family: 'SF Mono', 'Courier New', monospace; font-size: 14px;
-  outline: none; transition: border-color .18s;
-}
-#api-key-input:focus { border-color: var(--red); }
-.sp-row { display: flex; gap: 8px; }
-#save-key-btn {
-  flex: 1; height: 50px; background: var(--red); color: #fff; border: none;
-  border-radius: var(--rs); font-size: 15px; font-weight: 700;
-  cursor: pointer; font-family: inherit; transition: opacity .12s;
-}
-#save-key-btn:active { opacity: .8; }
-#show-key-btn {
-  height: 50px; padding: 0 18px; background: var(--s2);
-  border: 1.5px solid var(--border); border-radius: var(--rs);
-  color: var(--text2); cursor: pointer; font-family: inherit; font-size: 14px; font-weight: 600;
-}
-#show-key-btn:active { border-color: var(--red); color: var(--text); }
-#key-status { font-size: 13px; color: #4caf76; text-align: center; min-height: 14px; }
-
-#cam-modal {
-  display: none; position: fixed; inset: 0; z-index: 50;
-  background: #000; flex-direction: column;
-}
-#cam-modal.open { display: flex; }
-#viewfinder { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-#cam-controls {
-  position: absolute; bottom: max(52px, env(safe-area-inset-bottom));
-  left: 0; right: 0;
-  display: flex; align-items: center; justify-content: space-around; padding: 0 32px;
-}
-.ci-btn {
-  width: 50px; height: 50px; border-radius: 50%;
-  background: rgba(0,0,0,.4); border: 1px solid rgba(255,255,255,.16);
-  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-  color: #fff; cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  transition: transform .1s, opacity .1s;
-}
-.ci-btn:active { transform: scale(.9); opacity: .8; }
-#shutter {
-  width: 78px; height: 78px; border-radius: 50%;
-  border: 3.5px solid rgba(255,255,255,.85); background: transparent;
-  cursor: pointer; display: flex; align-items: center; justify-content: center;
-  transition: transform .1s;
-}
-#shutter:active { transform: scale(.93); }
-#shutter-ring {
-  width: 60px; height: 60px; border-radius: 50%;
-  background: rgba(255,255,255,.85); transition: transform .1s;
-}
-#shutter:active #shutter-ring { transform: scale(.9); }
-
-#fs-modal {
-  display: none; position: fixed; inset: 0; z-index: 70;
-  background: #000; align-items: center; justify-content: center;
-}
-#fs-modal.open { display: flex; }
-#fs-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
-#fs-bar {
-  position: absolute; bottom: max(20px, env(safe-area-inset-bottom)); left: 14px; right: 14px;
-  display: flex; align-items: center; justify-content: space-between;
-  background: rgba(8,8,8,.82); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255,255,255,.06); border-radius: 26px; padding: 12px 16px;
-}
-#fs-label { font-size: 13px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text); }
-#fs-close {
-  background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.1);
-  border-radius: 16px; color: var(--text); padding: 7px 16px;
-  font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer;
-  transition: background .12s;
-}
-#fs-close:active { background: rgba(255,255,255,.16); }
-.arrow {
-  position: absolute; top: 50%; transform: translateY(-50%);
-  background: rgba(0,0,0,.42); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-  border: none; color: #fff;
-  width: 42px; height: 76px; border-radius: 7px;
-  cursor: pointer; display: flex; align-items: center; justify-content: center;
-  transition: opacity .1s;
-}
-.arrow:active { opacity: .6; transform: translateY(-50%) scale(.94); }
-#fs-prev { left: 8px; }
-#fs-next { right: 8px; }
+#inactive-banner.show { display: block; }
 </style>
 </head>
 <body>
 
-<div id="page-track">
+<!-- Inactive account banner (shown via URL param) -->
+<div id="inactive-banner">Your account is no longer active. Choose a plan below to get started again.</div>
 
-<!-- ══ PAGE 1: INTRO ═══════════════════════════════════════════ -->
-<div class="page" id="pg1">
-  <!-- minimal header — just settings access -->
-  <div class="ph" style="border-bottom:none;">
-    <div class="ph-side"></div>
-    <div class="ph-center"></div>
-    <div class="ph-side">
-      <button class="icon-btn" id="settings-btn-intro" aria-label="Settings">
-        <svg width="16" height="13" viewBox="0 0 16 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
-          <line x1="0" y1="1.5" x2="16" y2="1.5"/>
-          <line x1="0" y1="6.5" x2="16" y2="6.5"/>
-          <line x1="0" y1="11.5" x2="16" y2="11.5"/>
-          <circle cx="11" cy="1.5"  r="2.1" fill="#09080a" stroke="currentColor" stroke-width="1.5"/>
-          <circle cx="5"  cy="6.5"  r="2.1" fill="#09080a" stroke="currentColor" stroke-width="1.5"/>
-          <circle cx="11" cy="11.5" r="2.1" fill="#09080a" stroke="currentColor" stroke-width="1.5"/>
-        </svg>
-      </button>
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">
+    <div class="nav-logo-mark">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2C8.13 2 5 5.13 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.87-3.13-7-7-7zm2 14H10v-1h4v1zm0-3H10v-1h4v1zm-1-4.07V11h-2V8.93C9.48 8.44 9 7.52 9 6.5 9 4.57 10.57 3 12.5 3S16 4.57 16 6.5c0 1.02-.48 1.94-1 2.43z"/>
+      </svg>
+    </div>
+    Haircut Try-On
+  </div>
+  <div class="nav-right">
+    <a href="login.html" class="nav-login">Log in</a>
+    <a href="#pricing" class="nav-cta">Start for £1</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-badge">AI Haircut Try-On for Barbers</div>
+  <h1 class="hero-h1">Show your customers <em>exactly</em> what they're getting.<br>Before you pick up the scissors.</h1>
+  <p class="hero-sub">The AI haircut try-on tool for barbers. Your customers choose their style. You deliver it perfectly. Every time.</p>
+  <a href="#pricing" class="hero-cta">Start for £1 →</a>
+</section>
+
+<!-- PROBLEM -->
+<section id="problem">
+  <div class="section-label">The problem</div>
+  <h2 class="section-h2">Why haircuts go wrong</h2>
+  <div class="three-grid">
+    <div class="problem-card">
+      <div class="problem-icon">🗣️</div>
+      <div class="problem-h3">Customers can't describe what they want</div>
+      <p class="problem-p">They say "short on the sides" and mean something completely different every time.</p>
+    </div>
+    <div class="problem-card">
+      <div class="problem-icon">🤔</div>
+      <div class="problem-h3">Barbers can't visualise it</div>
+      <p class="problem-p">Even the best barber can't read minds. Without a shared reference point, mistakes happen.</p>
+    </div>
+    <div class="problem-card">
+      <div class="problem-icon">💸</div>
+      <div class="problem-h3">Bad cuts cost you customers</div>
+      <p class="problem-p">One wrong cut sends a customer to your competitor. And they tell their friends.</p>
     </div>
   </div>
+</section>
 
-  <div id="intro-body">
-    <div id="intro-logo-wrap">
-      <img id="intro-logo" src="razors%20logo.jpg" alt="Razor's Edge Hair Studios"
-           onerror="this.style.display='none';document.getElementById('intro-logo-text').style.display='flex'" />
-      <!-- fallback shown when razors%20logo.jpg is missing -->
-      <div id="intro-logo-text">
-        <div id="ilt-name">Razor's Edge</div>
-        <div id="ilt-divider"></div>
-        <div id="ilt-sub">Hair Studios</div>
+<!-- SOLUTION -->
+<section id="solution">
+  <div class="section-label">The solution</div>
+  <h2 class="section-h2">Haircut Try-On solves all three</h2>
+  <div class="three-grid">
+    <div class="solution-card">
+      <div class="solution-num">01 — Money</div>
+      <div class="solution-h3">The tool pays for itself</div>
+      <p class="solution-p">Charge £1 more per cut as a "style preview" fee. After 30 customers, the tool has paid for itself. Everything after is pure profit.</p>
+    </div>
+    <div class="solution-card">
+      <div class="solution-num">02 — Time</div>
+      <div class="solution-h3">Faster cuts, more customers</div>
+      <p class="solution-p">Your customer arrives knowing exactly what they want. No back and forth. No uncertainty. More cuts in the same time.</p>
+    </div>
+    <div class="solution-card">
+      <div class="solution-num">03 — Quality</div>
+      <div class="solution-h3">No more misunderstandings</div>
+      <p class="solution-p">They see the result before you start. You see the result before you start. Everyone is aligned before you touch the scissors.</p>
+    </div>
+  </div>
+</section>
+
+<!-- DEMO -->
+<section id="demo">
+  <div class="section-label">Try it now</div>
+  <h2 class="section-h2">Try it yourself. Right now.</h2>
+  <p class="demo-sub">See exactly how your customers will experience it.</p>
+
+  <div class="demo-box">
+
+    <!-- State: photo selection -->
+    <div class="demo-state active" id="demo-pick">
+      <div class="demo-style-label">Style (pre-selected — change if you like)</div>
+      <div class="demo-styles" id="demo-style-picker"></div>
+      <div class="demo-style-label" style="margin-top:4px;">Choose a photo to try it on</div>
+      <div class="demo-photo-opts">
+        <button class="demo-photo-btn" id="demo-sample-btn">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="8" r="4"/>
+            <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+          </svg>
+          Use sample photo
+          <span class="sub">Pre-loaded male photo</span>
+        </button>
+        <button class="demo-photo-btn" id="demo-upload-btn">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/>
+            <circle cx="12" cy="13" r="4"/>
+          </svg>
+          Use your photo
+          <span class="sub">Upload or take a photo</span>
+        </button>
+      </div>
+      <input type="file" id="demo-file-input" accept="image/*" capture="user">
+    </div>
+
+    <!-- State: preview before generate -->
+    <div class="demo-state" id="demo-preview">
+      <img id="demo-preview-img" src="" alt="" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:12px;margin-bottom:16px;">
+      <div class="demo-style-label">Style: <strong id="demo-selected-style-label" style="color:#fff"></strong></div>
+      <button class="demo-generate-btn" id="demo-generate-btn">Generate My Haircut</button>
+    </div>
+
+    <!-- State: loading -->
+    <div class="demo-state" id="demo-loading">
+      <div class="demo-loading">
+        <div class="demo-spinner"></div>
+        Creating your look…
       </div>
     </div>
-    <div id="intro-tagline">
-      See your new look<br><strong>before the first cut.</strong>
-    </div>
-    <button id="intro-start">Get Started</button>
-  </div>
-</div>
 
-<!-- ══ PAGE 2: LENGTH ══════════════════════════════════════════ -->
-<div class="page" id="pg2">
-  <div class="ph">
-    <div class="ph-side">
-      <button class="icon-btn" onclick="goTo(1)" aria-label="Back">
-        <svg width="9" height="15" viewBox="0 0 9 15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M8 1L1 7.5L8 14"/>
-        </svg>
-      </button>
+    <!-- State: result -->
+    <div class="demo-state" id="demo-result">
+      <img class="demo-result-img" id="demo-result-img" src="" alt="">
+      <div class="demo-result-msg">Ready to offer this to your customers?</div>
+      <div class="demo-result-sub">Start a free trial for £1 and get 20 credits to use in your shop today.</div>
+      <a href="#pricing" class="demo-cta-btn">Get started for £1 →</a>
     </div>
-    <div class="ph-center"><span class="ph-wordmark">Razor's Edge</span><span class="ph-wordmark-sub">Length</span></div>
-    <div class="ph-side"></div>
-  </div>
-  <div class="prog-bar"><div class="prog-fill" style="width:33%"></div></div>
-  <div class="pscroll">
-    <div id="len-wrap">
-      <div id="len-clipper">
-        <div class="len-section-hd">Clipper grade</div>
-        <div id="len-grade-grid"></div>
-      </div>
-      <div id="len-scissors">
-        <div class="len-section-hd">Scissors cut</div>
-        <div id="len-scissors-btns"></div>
+
+    <!-- State: already used -->
+    <div class="demo-state" id="demo-used">
+      <div class="demo-used-state">
+        <div id="demo-used-result-wrap"></div>
+        <div class="demo-result-msg" style="margin-top:16px;">Ready to offer this to your customers?</div>
+        <div class="demo-result-sub">Start a trial for £1 and bring this tool to your shop today.</div>
+        <a href="#pricing" class="demo-cta-btn">Get started for £1 →</a>
       </div>
     </div>
-  </div>
-  <div class="pfooter">
-    <button class="pfooter-btn off" id="len-next" onclick="goTo(3)">Next</button>
-  </div>
-</div>
 
-<!-- ══ PAGE 3: STYLE ═══════════════════════════════════════════ -->
-<div class="page" id="pg3">
-  <div class="ph">
-    <div class="ph-side">
-      <button class="icon-btn" onclick="goTo(2)" aria-label="Back">
-        <svg width="9" height="15" viewBox="0 0 9 15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M8 1L1 7.5L8 14"/>
-        </svg>
-      </button>
+    <!-- State: pool empty -->
+    <div class="demo-state" id="demo-empty">
+      <div class="demo-empty-state">
+        <div style="font-size:32px;margin-bottom:12px;">✂️</div>
+        <div style="font-size:17px;font-weight:600;color:#fff;margin-bottom:8px;">Demo temporarily unavailable</div>
+        <p>Sign up to get started — your first 20 AI try-ons are included with the £1 trial.</p>
+        <br>
+        <a href="#pricing" class="demo-cta-btn">Get started for £1 →</a>
+      </div>
     </div>
-    <div class="ph-center"><span class="ph-wordmark">Razor's Edge</span><span class="ph-wordmark-sub">Style</span></div>
-    <div class="ph-side"></div>
-  </div>
-  <div class="prog-bar"><div class="prog-fill" style="width:67%"></div></div>
-  <div class="pscroll">
-    <div id="styles"></div>
-    <div id="style-hint">Select up to 3</div>
-  </div>
-  <div class="pfooter">
-    <button class="pfooter-btn off" id="sty-next" onclick="goTo(4)">Next</button>
-  </div>
-</div>
 
-<!-- ══ PAGE 4: PHOTO ════════════════════════════════════════════ -->
-<div class="page" id="pg4">
-  <div class="ph">
-    <div class="ph-side">
-      <button class="icon-btn" onclick="goTo(3)" aria-label="Back">
-        <svg width="9" height="15" viewBox="0 0 9 15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M8 1L1 7.5L8 14"/>
-        </svg>
-      </button>
-    </div>
-    <div class="ph-center"><span class="ph-wordmark">Razor's Edge</span><span class="ph-wordmark-sub">Hair Studios</span></div>
-    <div class="ph-side"></div>
   </div>
-  <div class="prog-bar"><div class="prog-fill" style="width:100%"></div></div>
-  <div class="pscroll">
-    <button id="cam-open-btn">
-      <svg width="28" height="24" viewBox="0 0 28 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M27 20a2 2 0 01-2 2H3a2 2 0 01-2-2V9a2 2 0 012-2h4l2.5-4h9L21 7h4a2 2 0 012 2z"/>
-        <circle cx="14" cy="14" r="4.5"/>
+</section>
+
+<!-- PRICING -->
+<section id="pricing">
+  <div class="section-label">Pricing</div>
+  <h2 class="section-h2">Simple pricing. No surprises.</h2>
+  <div class="pricing-grid">
+
+    <div class="pricing-card">
+      <div class="pricing-tier">Trial</div>
+      <div class="pricing-price"><span>£</span>1</div>
+      <div class="pricing-period">first month only</div>
+      <div class="pricing-credits">20 credits</div>
+      <div class="pricing-desc">Try before you commit. No automatic upgrade. After one month your account closes and you choose if you'd like to continue.</div>
+      <a href="YOUR_STRIPE_TRIAL_URL" class="pricing-btn pricing-btn-secondary">Get Started</a>
+    </div>
+
+    <div class="pricing-card">
+      <div class="pricing-tier">Starter</div>
+      <div class="pricing-price"><span>£</span>29</div>
+      <div class="pricing-period">per month</div>
+      <div class="pricing-credits">100 credits/month</div>
+      <div class="pricing-desc">For quieter shops. 100 AI try-ons every month, credits roll over.</div>
+      <a href="YOUR_STRIPE_STARTER_URL" class="pricing-btn pricing-btn-secondary">Get Started</a>
+    </div>
+
+    <div class="pricing-card popular">
+      <div class="popular-badge">Most Popular</div>
+      <div class="pricing-tier">Standard</div>
+      <div class="pricing-price"><span>£</span>59</div>
+      <div class="pricing-period">per month</div>
+      <div class="pricing-credits">300 credits/month</div>
+      <div class="pricing-desc">For a regular barbershop. 300 try-ons per month — that's 10 a day with room to spare.</div>
+      <a href="YOUR_STRIPE_STANDARD_URL" class="pricing-btn pricing-btn-primary">Get Started</a>
+    </div>
+
+    <div class="pricing-card">
+      <div class="pricing-tier">Pro</div>
+      <div class="pricing-price"><span>£</span>99</div>
+      <div class="pricing-period">per month</div>
+      <div class="pricing-credits">700 credits/month</div>
+      <div class="pricing-desc">For busy multi-chair shops. 700 monthly credits across your whole team.</div>
+      <a href="YOUR_STRIPE_PRO_URL" class="pricing-btn pricing-btn-secondary">Get Started</a>
+    </div>
+
+  </div>
+  <p class="pricing-footnote">Credits roll over every month. Run out? Upgrade anytime in one click.</p>
+</section>
+
+<!-- FAQ -->
+<section id="faq">
+  <h2 class="section-h2">Frequently asked questions</h2>
+  <div class="faq-item">
+    <div class="faq-q">What is a credit?</div>
+    <div class="faq-a">One credit = one AI image generation. Each time a customer tries on a hairstyle, it uses one credit.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q">What happens when I run out of credits?</div>
+    <div class="faq-a">The tool pauses until your credits renew next month or you upgrade your plan. Your customers see a polite message asking them to speak to you.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q">Do unused credits roll over?</div>
+    <div class="faq-a">Yes. Every month your new credits are added to whatever you have remaining. They never reset to zero.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q">Can my customers use it on their phones?</div>
+    <div class="faq-a">Yes. It works on any device with a browser — phone, tablet, or iPad. No app download required.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q">What if I want to cancel?</div>
+    <div class="faq-a">Cancel anytime from your account page. Your account stays active until the end of your billing period then closes automatically. No questions asked.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q">How do my customers use it?</div>
+    <div class="faq-a">You open the tool on your phone, tablet or iPad in your shop. Customers use it before their cut — they choose their style and see the AI result. You see exactly what they want before touching their hair.</div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">
+    <div class="footer-logo-mark">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2C8.13 2 5 5.13 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.87-3.13-7-7-7zm2 14H10v-1h4v1zm0-3H10v-1h4v1zm-1-4.07V11h-2V8.93C9.48 8.44 9 7.52 9 6.5 9 4.57 10.57 3 12.5 3S16 4.57 16 6.5c0 1.02-.48 1.94-1 2.43z"/>
       </svg>
-      <span>Take a photo</span>
-    </button>
-    <div id="photo-thumb">
-      <img id="thumb-img" src="" alt="" />
-      <button id="retake-btn">Retake</button>
     </div>
+    Haircut Try-On
   </div>
-  <div class="pfooter">
-    <button class="pfooter-btn off" id="gen-btn">Generate Previews</button>
-  </div>
-</div>
-
-<!-- ══ PAGE 5: RESULTS ══════════════════════════════════════════ -->
-<div class="page" id="pg5">
-  <div class="ph">
-    <div class="ph-side"></div>
-    <div class="ph-center"><span class="ph-wordmark">Razor's Edge</span><span class="ph-wordmark-sub">Hair Studios</span></div>
-    <div class="ph-side">
-      <button class="icon-btn" id="settings-btn-results" aria-label="Settings">
-        <svg width="16" height="13" viewBox="0 0 16 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
-          <line x1="0" y1="1.5" x2="16" y2="1.5"/>
-          <line x1="0" y1="6.5" x2="16" y2="6.5"/>
-          <line x1="0" y1="11.5" x2="16" y2="11.5"/>
-          <circle cx="11" cy="1.5"  r="2.1" fill="#09080a" stroke="currentColor" stroke-width="1.5"/>
-          <circle cx="5"  cy="6.5"  r="2.1" fill="#09080a" stroke="currentColor" stroke-width="1.5"/>
-          <circle cx="11" cy="11.5" r="2.1" fill="#09080a" stroke="currentColor" stroke-width="1.5"/>
-        </svg>
-      </button>
-    </div>
-  </div>
-  <div class="pscroll">
-    <div id="results-grid"></div>
-  </div>
-  <div class="pfooter">
-    <button class="pfooter-btn muted" id="results-btn">Generating…</button>
-  </div>
-</div>
-
-</div><!-- /page-track -->
-
-<!-- ══ SETTINGS OVERLAY ═══════════════════════════════════════ -->
-<div id="settings-ov">
-  <div id="settings-panel">
-    <div class="sp-handle"></div>
-    <h3>Settings</h3>
-    <div class="sp-label">OpenAI API Key</div>
-    <div class="sp-row">
-      <input id="api-key-input" type="password" placeholder="sk-…" autocomplete="off" />
-      <button id="show-key-btn">Show</button>
-    </div>
-    <div class="sp-row">
-      <button id="save-key-btn">Save Key</button>
-    </div>
-    <div id="key-status"></div>
-  </div>
-</div>
-
-<!-- ══ CAMERA OVERLAY ═════════════════════════════════════════ -->
-<div id="cam-modal">
-  <video id="viewfinder" autoplay playsinline muted></video>
-  <div id="cam-controls">
-    <button class="ci-btn" id="flip-btn" aria-label="Flip camera">
-      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M17 10A7 7 0 103 10"/>
-        <path d="M3 6v4H7"/>
-      </svg>
-    </button>
-    <button id="shutter"><div id="shutter-ring"></div></button>
-    <button class="ci-btn" id="cam-close-btn" aria-label="Close">
-      <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
-        <line x1="1" y1="1" x2="12" y2="12"/>
-        <line x1="12" y1="1" x2="1" y2="12"/>
-      </svg>
-    </button>
-  </div>
-</div>
-
-<!-- ══ FULLSCREEN OVERLAY ════════════════════════════════════ -->
-<div id="fs-modal">
-  <img id="fs-img" src="" alt="" />
-  <button class="arrow" id="fs-prev" aria-label="Previous">
-    <svg width="9" height="16" viewBox="0 0 9 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M8 1L1 8l7 7"/>
-    </svg>
-  </button>
-  <button class="arrow" id="fs-next" aria-label="Next">
-    <svg width="9" height="16" viewBox="0 0 9 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M1 1l7 7-7 7"/>
-    </svg>
-  </button>
-  <div id="fs-bar">
-    <span id="fs-label"></span>
-    <button id="fs-close">Close</button>
-  </div>
-</div>
+  <div>Made by <a href="#">Energise AI</a></div>
+  <div><a href="login.html">Barber login</a></div>
+</footer>
 
 <script>
+// ─── CONFIG ────────────────────────────────────────────────────────────────
+var SUPABASE_URL      = 'YOUR_SUPABASE_URL'
+var SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY'
 
-var MAX = 3;
-var LENGTHS = [
-  { id:'g1',     name:'Grade 1',  desc:'3mm'        },
-  { id:'g2',     name:'Grade 2',  desc:'6mm'        },
-  { id:'g3',     name:'Grade 3',  desc:'10mm'       },
-  { id:'g4',     name:'Grade 4',  desc:'13mm'       },
-  { id:'g5',     name:'Grade 5',  desc:'16mm'       },
-  { id:'g6',     name:'Grade 6',  desc:'19mm'       },
-  { id:'g7',     name:'Grade 7',  desc:'22mm'       },
-  { id:'g8',     name:'Grade 8',  desc:'25mm'       },
-  { id:'medium', name:'Medium',   desc:'Scissors'   },
-  { id:'long',   name:'Long',     desc:'Scissors'   },
-  { id:'keep',   name:'Keep Top', desc:'Sides only' },
+// Sample photo URL — replace with an actual royalty-free male face photo
+// Must be a direct image URL accessible from the browser
+// e.g. var SAMPLE_PHOTO_URL = 'https://yourdomain.com/sample-face.jpg'
+var SAMPLE_PHOTO_URL  = '' // Set this to enable the "Use sample photo" option
+// ───────────────────────────────────────────────────────────────────────────
+
+var DEMO_STYLES = [
+  'Taper Low', 'Skin Fade', 'Textured Crop', 'Buzz Cut', 'Box Fade', 'Comb Over'
 ];
-var STYLES = [
-  { id:'box-fade',    name:'Box Fade'    },
-  { id:'taper', name:'Taper', variants:[
-    { id:'low-taper', label:'Low'  },
-    { id:'drop-fade', label:'Drop' },
-  ]},
-  { id:'textured-crop',  name:'Textured Crop'    },
-  { id:'slick-back',     name:'Slick Back'       },
-  { id:'buzz-cut',   name:'Buzz Cut'   },
-  { id:'comb-over',  name:'Comb Over'  },
-  { id:'edgar',      name:'Edgar'      },
-  { id:'fade', name:'Fade', variants:[
-    { id:'low-fade',  label:'Low'  },
-    { id:'mid-fade',  label:'Mid'  },
-    { id:'high-fade', label:'High' },
-    { id:'skin-fade', label:'Skin' },
-  ]},
-  { id:'burst-fade',  name:'Burst Fade'  },
-];
+var selectedDemoStyle = 'Taper Low';
+var demoPhotoBase64 = null;
 
-var state     = { length: null, styles: [], photo: null };
-var apiKey    = localStorage.getItem('re_key') || '';
-var camStream = null;
-var camFacing = 'environment';
-var generating = false;
-var fsItems   = [];
-var fsIdx     = 0;
-
-function $(id) { return document.getElementById(id); }
-
-var currentPage = 1;
-
-function goTo(n) {
-  var forward = n >= currentPage;
-  currentPage = n;
-  var track = $('page-track');
-  track.style.transitionTimingFunction = forward
-    ? 'cubic-bezier(.4,0,.2,1)'
-    : 'cubic-bezier(.25,.46,.45,.94)';
-  track.style.transform = 'translateX(' + ((n - 1) * -100) + 'vw)';
-  staggerPage(n);
+// Show inactive banner if redirected from dashboard
+if (new URLSearchParams(window.location.search).get('msg') === 'inactive') {
+  document.getElementById('inactive-banner').classList.add('show');
 }
 
-function staggerPage(n) {
-  var pg = $('pg' + n);
-  if (!pg) return;
-  var items = pg.querySelectorAll('.lgrade, .lopt, .stile');
-  if (!items.length) return;
-  items.forEach(function(el) { el.classList.remove('animate-in'); });
-  void pg.offsetWidth;
-  items.forEach(function(el, i) {
-    el.style.animationDelay = (i * 28) + 'ms';
-    el.classList.add('animate-in');
-  });
-}
-
-function haptic() {
-  try { navigator.vibrate && navigator.vibrate(8); } catch(e) {}
-}
-
-function playTick() {
-  try {
-    var ctx = new (window.AudioContext || window.webkitAudioContext)();
-    var osc = ctx.createOscillator();
-    var gain = ctx.createGain();
-    osc.connect(gain); gain.connect(ctx.destination);
-    osc.frequency.value = 900;
-    gain.gain.setValueAtTime(0.35, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.045);
-    osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.045);
-  } catch(e) {}
-}
-
-var GRADES   = LENGTHS.filter(function(l) { return l.id.startsWith('g'); });
-var SCISSORS = LENGTHS.filter(function(l) { return l.id === 'medium' || l.id === 'long' || l.id === 'keep'; });
-
-function buildLengths() {
-  /* ── clipper grade grid ── */
-  var grid = $('len-grade-grid');
-  grid.innerHTML = '';
-  GRADES.forEach(function(g, i) {
-    var b = document.createElement('button');
-    b.className = 'lgrade' + (state.length === g.id ? ' on' : '');
-    b.innerHTML = '<span class="lg-num">' + (i + 1) + '</span><span class="lg-mm">' + g.desc + '</span>';
-    b.onclick = function() {
-      haptic(); playTick();
-      state.length = g.id;
-      buildLengths(); syncNextBtns();
-    };
-    grid.appendChild(b);
-  });
-
-  /* ── scissors buttons ── */
-  var btns = $('len-scissors-btns');
-  btns.innerHTML = '';
-  SCISSORS.forEach(function(s) {
-    var b = document.createElement('button');
-    b.className = 'lopt' + (state.length === s.id ? ' on' : '');
-    b.innerHTML = '<span class="lo-name">' + s.name + '</span><span class="lo-desc">' + s.desc + '</span>';
-    b.onclick = function() {
-      haptic(); playTick();
-      state.length = s.id;
-      buildLengths(); syncNextBtns();
-    };
-    btns.appendChild(b);
-  });
-}
-
-function buildStyles() {
-  var el = $('styles');
-  el.innerHTML = '';
-  STYLES.forEach(function(s) {
-    if (s.variants) {
-      var anyOn = s.variants.some(function(v) { return state.styles.indexOf(v.id) >= 0; });
-      var div = document.createElement('div');
-      var colsCls = s.variants.length === 4 ? 'cols-4' : 'cols-2';
-      div.className = 'stile has-variants' + (anyOn ? ' on' : '');
-      var html = '<div class="stile-variants ' + colsCls + '">';
-      s.variants.forEach(function(v) {
-        var von = state.styles.indexOf(v.id) >= 0;
-        html += '<button class="sv' + (von ? ' on' : '') + '" data-vid="' + v.id + '">' + v.label + '</button>';
-      });
-      html += '</div><span class="stile-lbl">' + s.name + '</span>';
-      div.innerHTML = html;
-      div.querySelectorAll('.sv').forEach(function(btn) {
-        btn.onclick = function(e) {
-          e.stopPropagation();
-          var vid = btn.getAttribute('data-vid');
-          var idx = state.styles.indexOf(vid);
-          if (idx >= 0) {
-            state.styles.splice(idx, 1); haptic(); playTick();
-          } else {
-            s.variants.forEach(function(v) {
-              var i2 = state.styles.indexOf(v.id);
-              if (i2 >= 0) state.styles.splice(i2, 1);
-            });
-            if (state.styles.length < MAX) { state.styles.push(vid); haptic(); playTick(); }
-          }
-          buildStyles(); syncNextBtns();
-        };
-      });
-      el.appendChild(div);
-    } else {
-      var on = state.styles.indexOf(s.id) >= 0;
-      var b  = document.createElement('button');
-      b.className = 'stile' + (on ? ' on' : '');
-      b.textContent = s.name;
-      b.onclick = function() {
-        var i = state.styles.indexOf(s.id);
-        if (i >= 0) { state.styles.splice(i, 1); haptic(); playTick(); }
-        else if (state.styles.length < MAX) { state.styles.push(s.id); haptic(); playTick(); }
-        buildStyles(); syncNextBtns();
-      };
-      el.appendChild(b);
-    }
-  });
-  var n = state.styles.length;
-  $('style-hint').textContent = n > 0 ? n + ' of ' + MAX + ' selected' : 'Select up to 3';
-}
-
-function syncNextBtns() {
-  $('len-next').className = 'pfooter-btn ' + (state.length            ? 'on' : 'off');
-  $('sty-next').className = 'pfooter-btn ' + (state.styles.length > 0 ? 'on' : 'off');
-  $('gen-btn').className  = 'pfooter-btn ' + (state.photo             ? 'on' : 'off');
-}
-
-function openCamera() {
-  $('cam-modal').classList.add('open');
-  navigator.mediaDevices.getUserMedia({
-    video: { facingMode: { ideal: camFacing }, width: { ideal: 1920 }, height: { ideal: 1080 } },
-    audio: false
-  }).then(function(s) {
-    camStream = s;
-    $('viewfinder').srcObject = s;
-    $('viewfinder').play();
-  }).catch(function(e) { closeCamera(); alert('Camera error: ' + e.message); });
-}
-
-function closeCamera() {
-  if (camStream) { camStream.getTracks().forEach(function(t) { t.stop(); }); camStream = null; }
-  $('cam-modal').classList.remove('open');
-}
-
-function capture() {
-  var v = $('viewfinder');
-  var w = v.videoWidth || 1280, h = v.videoHeight || 720;
-  var c = document.createElement('canvas');
-  c.width = w; c.height = h;
-  var ctx = c.getContext('2d');
-  if (camFacing === 'user') { ctx.translate(w, 0); ctx.scale(-1, 1); }
-  ctx.drawImage(v, 0, 0, w, h);
-  c.toBlob(function(blob) {
-    var reader = new FileReader();
-    reader.onloadend = function() {
-      state.photo = { dataUri: reader.result, blob: blob };
-      closeCamera();
-      $('thumb-img').src = reader.result;
-      $('cam-open-btn').style.display = 'none';
-      $('photo-thumb').style.display  = 'block';
-      syncNextBtns();
-    };
-    reader.readAsDataURL(blob);
-  }, 'image/jpeg', 0.92);
-}
-
-function generate() {
-  if (generating || !state.length || !state.styles.length || !state.photo) return;
-  if (!apiKey) { openSettings(); return; }
-
-  var styleObjs = state.styles.map(function(id) {
-    for (var i = 0; i < STYLES.length; i++) {
-      var s = STYLES[i];
-      if (s.id === id) return { id: id, name: s.name };
-      if (s.variants) {
-        for (var j = 0; j < s.variants.length; j++) {
-          if (s.variants[j].id === id)
-            return { id: id, name: s.name + ' — ' + s.variants[j].label };
-        }
-      }
-    }
-    return null;
-  }).filter(Boolean);
-
-  generating = true;
-  var done = 0, total = styleObjs.length;
-  var grid = $('results-grid');
-  grid.innerHTML = '';
-  grid.appendChild(makeTile(state.photo.dataUri, 'Original'));
-  styleObjs.forEach(function(s, i) {
-    var sk = document.createElement('div');
-    sk.className = 'skel'; sk.id = 'sk' + i;
-    var phase = -((Date.now() % 1900) / 1000);
-    sk.innerHTML = '<div class="skel-img" style="animation-delay:' + phase + 's"></div><div class="skel-lbl">' + s.name + '</div>';
-    grid.appendChild(sk);
-  });
-
-  var rBtn = $('results-btn');
-  rBtn.className = 'pfooter-btn muted';
-  rBtn.textContent = 'Generating…';
-  rBtn.onclick = null;
-  goTo(5);
-
-  styleObjs.forEach(function(style, idx) {
-    callAPI(style, function(uri) {
-      swapSkel(idx, style, uri); done++;
-      if (done < total) rBtn.textContent = done + ' of ' + total + ' done';
-      else finishGenerate();
-    }, function() {
-      swapSkel(idx, style, errSvg(style.name)); done++;
-      if (done < total) rBtn.textContent = done + ' of ' + total + ' done';
-      else finishGenerate();
+// Build demo style picker
+var picker = document.getElementById('demo-style-picker');
+DEMO_STYLES.forEach(function(style) {
+  var btn = document.createElement('button');
+  btn.className = 'demo-style-btn' + (style === selectedDemoStyle ? ' on' : '');
+  btn.textContent = style;
+  btn.onclick = function() {
+    selectedDemoStyle = style;
+    picker.querySelectorAll('.demo-style-btn').forEach(function(b) {
+      b.classList.toggle('on', b.textContent === style);
     });
-  });
-}
-
-function swapSkel(idx, style, uri) {
-  var sk = $('sk' + idx);
-  if (sk) sk.parentNode.replaceChild(makeTile(uri, style.name), sk);
-}
-
-function makeTile(uri, label) {
-  var tile = document.createElement('div');
-  tile.className = 'rtile';
-  tile.innerHTML = '<img src="' + uri + '" loading="lazy" /><div class="rl">' + label + '</div>';
-  tile.onclick = function() {
-    fsItems = [];
-    $('results-grid').querySelectorAll('.rtile').forEach(function(t) {
-      var img = t.querySelector('img'), lbl = t.querySelector('.rl');
-      if (img && lbl) fsItems.push({ uri: img.src, label: lbl.textContent });
-    });
-    var pos = Array.from($('results-grid').querySelectorAll('.rtile')).indexOf(tile);
-    openFs(pos >= 0 ? pos : 0);
   };
-  return tile;
-}
-
-function finishGenerate() {
-  generating = false;
-  var rBtn = $('results-btn');
-  rBtn.className = 'pfooter-btn ghost';
-  rBtn.textContent = 'New Customer';
-  rBtn.onclick = resetAll;
-}
-
-function resetAll() {
-  state = { length: null, styles: [], photo: null };
-  generating = false;
-  $('results-grid').innerHTML     = '';
-  $('cam-open-btn').style.display = '';
-  $('photo-thumb').style.display  = 'none';
-  $('thumb-img').src              = '';
-  var rBtn = $('results-btn');
-  rBtn.className = 'pfooter-btn muted';
-  rBtn.textContent = 'Generating…';
-  rBtn.onclick = null;
-  buildLengths(); buildStyles(); syncNextBtns();
-  goTo(1);
-}
-
-function callAPI(style, ok, fail) {
-  var l = LENGTHS.find(function(x) { return x.id === state.length; });
-  var topDesc = state.length === 'keep'
-    ? 'Keep the hair on top EXACTLY as it is — same length, volume and texture. Only change the sides and back.'
-    : l && l.id.startsWith('g')
-      ? 'Set the top hair length to ' + l.name + ' (' + l.desc + ' clipper).'
-      : 'Set the top hair to a ' + (l ? l.name.toLowerCase() : '') + ' scissors length.';
-
-  var prompt =
-    'HAIR EDIT ONLY — do not alter the face, eyes, nose, mouth, jaw, ears, skin tone, ' +
-    'beard, eyebrows, expression, pose, clothing or background. ' +
-    topDesc + ' Apply a "' + style.name + '" hairstyle. Photorealistic, high quality.';
-
-  var fd = new FormData();
-  fd.append('model',   'gpt-image-2');
-  fd.append('prompt',  prompt);
-  fd.append('image',   state.photo.blob, 'photo.jpg');
-  fd.append('n',       '1');
-  fd.append('size',    '1024x1024');
-  fd.append('quality', 'medium');
-
-  fetch('https://api.openai.com/v1/images/edits', {
-    method: 'POST',
-    headers: { 'Authorization': 'Bearer ' + apiKey },
-    body: fd
-  }).then(function(r) { return r.json(); })
-  .then(function(d) {
-    if (d.error) { fail(d.error.message); return; }
-    var b64 = d.data && d.data[0] && d.data[0].b64_json;
-    if (b64) ok('data:image/png;base64,' + b64);
-    else fail('No image returned');
-  }).catch(fail);
-}
-
-function openSettings() {
-  $('api-key-input').value = apiKey;
-  $('key-status').textContent = '';
-  $('settings-ov').classList.add('open');
-}
-function closeSettings() { $('settings-ov').classList.remove('open'); }
-
-function openFs(idx) { fsIdx = idx; renderFs(); $('fs-modal').classList.add('open'); }
-function renderFs() {
-  var item = fsItems[fsIdx];
-  if (!item) return;
-  $('fs-img').src = item.uri;
-  $('fs-label').textContent = item.label;
-  $('fs-prev').style.display = fsIdx > 0                  ? 'flex' : 'none';
-  $('fs-next').style.display = fsIdx < fsItems.length - 1 ? 'flex' : 'none';
-}
-
-function errSvg(name) {
-  return 'data:image/svg+xml;base64,' + btoa(
-    '<svg xmlns="http://www.w3.org/2000/svg" width="400" height="534">' +
-    '<rect width="400" height="534" fill="#0f0f0f"/>' +
-    '<text x="200" y="267" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#353230">' +
-    name + ' — failed</text></svg>'
-  );
-}
-
-$('intro-start').onclick          = function() { goTo(2); };
-$('settings-btn-intro').onclick   = openSettings;
-$('settings-btn-results').onclick = openSettings;
-$('gen-btn').onclick              = function() { if (state.photo) generate(); };
-$('cam-open-btn').onclick         = openCamera;
-$('retake-btn').onclick           = openCamera;
-$('cam-close-btn').onclick        = closeCamera;
-$('shutter').onclick              = capture;
-$('flip-btn').onclick = function() {
-  camFacing = camFacing === 'user' ? 'environment' : 'user';
-  closeCamera(); openCamera();
-};
-$('fs-close').onclick = function() { $('fs-modal').classList.remove('open'); };
-$('fs-prev').onclick  = function() { fsIdx--; renderFs(); };
-$('fs-next').onclick  = function() { fsIdx++; renderFs(); };
-$('settings-ov').onclick = function(e) { if (e.target === $('settings-ov')) closeSettings(); };
-$('show-key-btn').onclick = function() {
-  var inp = $('api-key-input'), vis = inp.type === 'text';
-  inp.type = vis ? 'password' : 'text';
-  $('show-key-btn').textContent = vis ? 'Show' : 'Hide';
-};
-$('save-key-btn').onclick = function() {
-  var k = $('api-key-input').value.trim();
-  if (!k) return;
-  apiKey = k;
-  localStorage.setItem('re_key', k);
-  $('key-status').textContent = 'Saved';
-  setTimeout(function() { closeSettings(); $('key-status').textContent = ''; }, 700);
-};
-var swX = 0;
-$('fs-modal').addEventListener('touchstart', function(e) { swX = e.touches[0].clientX; }, { passive: true });
-$('fs-modal').addEventListener('touchend', function(e) {
-  var dx = e.changedTouches[0].clientX - swX;
-  if (dx < -50 && fsIdx < fsItems.length - 1) { fsIdx++; renderFs(); }
-  if (dx >  50 && fsIdx > 0)                  { fsIdx--; renderFs(); }
+  picker.appendChild(btn);
 });
 
-buildLengths();
-buildStyles();
-syncNextBtns();
-if (!apiKey) openSettings();
+function showDemoState(id) {
+  document.querySelectorAll('.demo-state').forEach(function(el) {
+    el.classList.toggle('active', el.id === id);
+  });
+}
 
+// Check localStorage for prior demo use
+function checkDemoUsed() {
+  var stored = null;
+  try { stored = localStorage.getItem('hto_demo'); } catch(e) {}
+  if (stored) {
+    try {
+      var data = JSON.parse(stored);
+      if (data.image) {
+        document.getElementById('demo-used-result-wrap').innerHTML =
+          '<img src="' + data.image + '" class="demo-result-img" style="margin-bottom:0">';
+      }
+    } catch(e) {}
+    showDemoState('demo-used');
+    return true;
+  }
+  return false;
+}
+
+// If already used, show result immediately
+if (!checkDemoUsed()) {
+  // Hide sample photo option if no sample URL configured
+  if (!SAMPLE_PHOTO_URL) {
+    document.getElementById('demo-sample-btn').style.display = 'none';
+  }
+  showDemoState('demo-pick');
+}
+
+// Sample photo button
+document.getElementById('demo-sample-btn').onclick = async function() {
+  if (!SAMPLE_PHOTO_URL) return;
+  try {
+    var res = await fetch(SAMPLE_PHOTO_URL);
+    var blob = await res.blob();
+    var reader = new FileReader();
+    reader.onloadend = function() {
+      demoPhotoBase64 = reader.result;
+      document.getElementById('demo-preview-img').src = reader.result;
+      document.getElementById('demo-selected-style-label').textContent = selectedDemoStyle;
+      showDemoState('demo-preview');
+    };
+    reader.readAsDataURL(blob);
+  } catch(e) {
+    alert('Could not load sample photo. Please upload your own.');
+  }
+};
+
+// Upload photo button
+document.getElementById('demo-upload-btn').onclick = function() {
+  document.getElementById('demo-file-input').click();
+};
+
+document.getElementById('demo-file-input').onchange = function(e) {
+  var file = e.target.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onloadend = function() {
+    demoPhotoBase64 = reader.result;
+    document.getElementById('demo-preview-img').src = reader.result;
+    document.getElementById('demo-selected-style-label').textContent = selectedDemoStyle;
+    showDemoState('demo-preview');
+  };
+  reader.readAsDataURL(file);
+};
+
+// Generate button
+document.getElementById('demo-generate-btn').onclick = async function() {
+  if (!demoPhotoBase64) return;
+  showDemoState('demo-loading');
+
+  try {
+    var res = await fetch(SUPABASE_URL + '/functions/v1/demo-generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        imageBase64: demoPhotoBase64,
+        style: selectedDemoStyle,
+      }),
+    });
+
+    var data = await res.json();
+
+    if (res.status === 429 && data.error === 'already_used') {
+      // Server confirmed already used (IP match)
+      checkDemoUsed() || showDemoState('demo-used');
+      return;
+    }
+
+    if (res.status === 503 && data.error === 'pool_empty') {
+      showDemoState('demo-empty');
+      return;
+    }
+
+    if (!res.ok || !data.image) {
+      showDemoState('demo-pick');
+      alert('Something went wrong. Please try again.');
+      return;
+    }
+
+    // Show result
+    document.getElementById('demo-result-img').src = data.image;
+    showDemoState('demo-result');
+
+    // Store in localStorage so returning visitors see their result
+    try {
+      localStorage.setItem('hto_demo', JSON.stringify({ image: data.image }));
+    } catch(e) {}
+
+  } catch(e) {
+    showDemoState('demo-pick');
+    alert('Network error. Please try again.');
+  }
+};
 </script>
 </body>
 </html>
